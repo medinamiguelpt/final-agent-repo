@@ -4,20 +4,20 @@ Comprehensive Test Suite — Kostas, Greek Barber Festival
 Creates and attaches tests to ElevenLabs. Does NOT run them.
 
 Categories:
-  1. Language Detection (tool)         — 7 tests
+  1. Language Detection (llm)          — 7 tests
   2. Language Register & Locking (llm) — 7 tests
   3. Greeting Logic (llm)              — 3 tests
   4. Booking Flow (llm)                — 8 tests
-  5. Schedule & Availability (llm)     — 6 tests
-  6. Services & Pricing (llm)          — 5 tests
+  5. Schedule & Availability (llm)     — 8 tests
+  6. Services & Pricing (llm)          — 8 tests
   7. Shop Info (llm)                   — 5 tests
   8. Persona & Tone (llm)             — 7 tests
   9. Forbidden Words (llm)             — 3 tests
  10. End Call Tool (tool)              — 5 tests
  11. Contextual Upsell (llm)          — 4 tests
- 12. Edge Cases & Security (llm)       — 5 tests
- 13. Full Conversation Simulations     — 5 tests
-                                 Total: ~70 tests
+ 12. Edge Cases & Security (llm)       — 7 tests
+ 13. Full Conversation Simulations     — 7 tests
+                                 Total: ~79 tests
 """
 
 import json
@@ -25,8 +25,8 @@ import urllib.request
 import urllib.error
 import sys
 
-API_KEY = "ac2fc94f2c69421aa0628d390cb856702138e764b8c147fd7df2976966a4dce9"
-AGENT_ID = "agent_5001kjkkjvs6e7fs5t5fkjh1hhwc"
+API_KEY = "sk_950a5da921fbd38e234aa044e1ce44773da076ee273f9058"
+AGENT_ID = "agent_8701kn7p69jaf0frvsvwd6g2sq4e"
 BASE = "https://api.elevenlabs.io/v1/convai"
 
 
@@ -35,7 +35,7 @@ def chat(*messages):
     history = []
     t = 0
     for role, content in messages:
-        history.append({"role": role, "content": content, "time_in_call_secs": t})
+        history.append({"role": role, "message": content, "time_in_call_secs": t})
         t += 5
     return history
 
@@ -54,11 +54,18 @@ def api_post(path, payload):
         return e.code, e.read().decode()
 
 
+DEFAULT_TIME = "Wednesday 10:30"  # A known open day+time so agent never thinks shop is closed
+
 created_ids = []
 failed = 0
 
 
 def create_test(name, payload):
+    # Auto-add system__time if not explicitly set, so tests aren't affected by real clock
+    if "dynamic_variables" not in payload:
+        payload["dynamic_variables"] = {"system__time": DEFAULT_TIME}
+    elif "system__time" not in payload.get("dynamic_variables", {}):
+        payload["dynamic_variables"]["system__time"] = DEFAULT_TIME
     global failed
     code, body = api_post("agent-testing/create", payload)
     if code == 200:
@@ -76,43 +83,62 @@ print("════════════════════════�
 print(" CREATING TESTS — Kostas, Greek Barber Festival")
 print("═══════════════════════════════════════════════════════════\n")
 
-# ── 1. LANGUAGE DETECTION (tool) ─────────────────────────────
-print("▸ 1. LANGUAGE DETECTION (tool)")
+# ── 1. LANGUAGE DETECTION (llm — system tool doesn't fire in text tests) ──
+print("▸ 1. LANGUAGE DETECTION (llm)")
 
 lang_cases = [
     ("1.1 Lang detect — Greek",
      "Γεια σας! Greek Barber Festival. Πώς μπορώ να σας εξυπηρετήσω;",
-     "Καλημέρα, θα ήθελα ένα ραντεβού"),
+     "Καλημέρα, θα ήθελα ένα ραντεβού",
+     "Respond entirely in Greek. Must NOT contain any English words (except 'Greek Barber Festival'). Ask about preferred time in Greek.",
+     [{"response": "Τι ώρα σας βολεύει;", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
     ("1.2 Lang detect — English",
      "Hello! Greek Barber Festival. How can I help you?",
-     "Hi, I would like to book a haircut"),
+     "Hi, I would like to book a haircut",
+     "Respond entirely in English. Must NOT contain any Greek words. Ask about preferred time in English.",
+     [{"response": "What time works for you?", "type": "success"}],
+     [{"response": "Τι ώρα σας βολεύει;", "type": "failure"}]),
     ("1.3 Lang detect — Spanish",
      "¡Hola! Greek Barber Festival. ¿Cómo puedo ayudarle?",
-     "Buenos días, quiero reservar un corte de pelo"),
+     "Buenos días, quiero reservar un corte de pelo",
+     "Respond entirely in Spanish (formal usted). Must NOT contain English or Greek. Ask about preferred time in Spanish.",
+     [{"response": "¿A qué hora le conviene?", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
     ("1.4 Lang detect — Portuguese",
      "Olá! Greek Barber Festival. Como posso ajudá-lo?",
-     "Bom dia, gostaria de marcar um corte de cabelo"),
+     "Bom dia, gostaria de marcar um corte de cabelo",
+     "Respond entirely in Portuguese (formal). Must NOT contain English or Greek. Ask about preferred time in Portuguese.",
+     [{"response": "A que horas lhe convém?", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
     ("1.5 Lang detect — French",
      "Bonjour ! Greek Barber Festival. Comment puis-je vous aider ?",
-     "Bonjour, je voudrais prendre rendez-vous pour une coupe"),
+     "Bonjour, je voudrais prendre rendez-vous pour une coupe",
+     "Respond entirely in French (formal vous). Must NOT contain English or Greek. Ask about preferred time in French.",
+     [{"response": "À quelle heure vous conviendrait-il ?", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
     ("1.6 Lang detect — German",
      "Hallo! Greek Barber Festival. Wie kann ich Ihnen behilflich sein?",
-     "Guten Tag, ich möchte einen Termin für einen Haarschnitt"),
+     "Guten Tag, ich möchte einen Termin für einen Haarschnitt",
+     "Respond entirely in German (formal Sie). Must NOT contain English or Greek. Ask about preferred time in German.",
+     [{"response": "Wann passt es Ihnen?", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
     ("1.7 Lang detect — Arabic",
      "!أهلاً Greek Barber Festival. كيف يمكنني مساعدتك؟",
-     "مرحبا، أريد حجز موعد لقص الشعر"),
+     "مرحبا، أريد حجز موعد لقص الشعر",
+     "Respond entirely in Arabic (formal). Must NOT contain English or Greek. Ask about preferred time in Arabic.",
+     [{"response": "في أي وقت يناسبكم؟", "type": "success"}],
+     [{"response": "What time works for you?", "type": "failure"}]),
 ]
 
-for name, agent_msg, user_msg in lang_cases:
+for name, agent_msg, user_msg, condition, success_ex, failure_ex in lang_cases:
     create_test(name, {
-        "type": "tool",
+        "type": "llm",
         "name": name,
         "chat_history": chat(("agent", agent_msg), ("user", user_msg)),
-        "dynamic_variables": {},
-        "tool_call_parameters": {
-            "parameters": [],
-            "referenced_tool": {"id": "language_detection", "type": "system"},
-        },
+        "success_condition": condition,
+        "success_examples": success_ex,
+        "failure_examples": failure_ex,
     })
 
 # ── 2. LANGUAGE REGISTER & LOCKING ──────────────────────────
@@ -220,9 +246,12 @@ create_test("3.1 Morning greeting (09:30)", {
         ("user", "Γεια σας, θέλω ραντεβού"),
     ),
     "dynamic_variables": {"system__time": "09:30"},
-    "success_condition": "If using a time-based greeting, must be morning (Καλημέρα) since time is 09:30. Short, ask time.",
+    "success_condition": "Must include Καλημέρα (good morning) since time is 09:30. Response must be in Greek, short, and ask about time or service.",
     "success_examples": [{"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "success"}],
-    "failure_examples": [{"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "failure"}],
+    "failure_examples": [
+        {"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Τι ώρα σας βολεύει;", "type": "failure"},
+    ],
 })
 
 create_test("3.2 Afternoon greeting (14:00)", {
@@ -246,9 +275,12 @@ create_test("3.3 Evening greeting (19:00)", {
         ("user", "Γεια, θέλω ραντεβού"),
     ),
     "dynamic_variables": {"system__time": "19:00"},
-    "success_condition": "If using a time-based greeting, must be evening (Καλησπέρα) since time is 19:00.",
+    "success_condition": "Must include Καλησπέρα (good evening) since time is 19:00. Response must be in Greek, short, and ask about time or service.",
     "success_examples": [{"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "success"}],
-    "failure_examples": [{"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "failure"}],
+    "failure_examples": [
+        {"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Τι ώρα σας βολεύει;", "type": "failure"},
+    ],
 })
 
 # ── 4. BOOKING FLOW ─────────────────────────────────────────
@@ -292,7 +324,7 @@ create_test("4.3 Final confirmation with barber name", {
         ("user", "Alex"),
     ),
     "success_condition": "Final confirmation must include: client name (Alex), service (haircut), a barber name (Nikos/Giorgos/Eleni/Petros), and time (3). Then suggest a complementary add-on (NOT another haircut).",
-    "success_examples": [{"response": "Alex, booked for a haircut with Nikos at 3. Would you like to add a beard trim or hot towel shave?", "type": "success"}],
+    "success_examples": [{"response": "Alex, booked for a haircut with Nikos at 3. Would you like to add a beard trim or a full shave?", "type": "success"}],
     "failure_examples": [{"response": "You are booked for 3. See you then!", "type": "failure"}],
 })
 
@@ -305,8 +337,8 @@ create_test("4.4 Upsell is mandatory after confirmation", {
         ("agent", "12 works. What is your name?"),
         ("user", "Marco"),
     ),
-    "success_condition": "After confirming booking with name, service, time, and barber, the agent MUST suggest an add-on. The add-on must complement the service (for a haircut: beard trim, hot towel, scalp massage — NOT another haircut).",
-    "success_examples": [{"response": "Marco, booked for a haircut with Eleni at 12. Would you like to add a beard trim or hot towel shave?", "type": "success"}],
+    "success_condition": "After confirming booking with name, service, time, and barber, the agent MUST suggest an add-on. The add-on must complement the service (for a haircut: beard trim, full shave — NOT another haircut).",
+    "success_examples": [{"response": "Marco, booked for a haircut with Eleni at 12. Would you like to add a beard trim or a full shave?", "type": "success"}],
     "failure_examples": [{"response": "Marco, booked for a haircut with Eleni at 12. See you then!", "type": "failure"}],
 })
 
@@ -332,12 +364,16 @@ create_test("4.6 Decline upsell → goodbye", {
         ("user", "Haircut at 10:30"),
         ("agent", "10:30 works. What is your name?"),
         ("user", "Maria"),
-        ("agent", "Maria, booked for a haircut with Giorgos at 10:30. Would you like to add a beard trim or hot towel shave?"),
+        ("agent", "Maria, booked for a haircut with Giorgos at 10:30. Would you like to add a beard trim or a full shave?"),
         ("user", "No thanks, that is all"),
     ),
-    "success_condition": "Brief goodbye. Short, no filler.",
+    "success_condition": "Brief goodbye, maximum 5-6 words. No filler words like Wonderful, Perfect, Excellent, Amazing, Absolutely. Just a short farewell.",
     "success_examples": [{"response": "See you then, Maria!", "type": "success"}],
-    "failure_examples": [{"response": "Absolutely! We look forward to seeing you!", "type": "failure"}],
+    "failure_examples": [
+        {"response": "Absolutely! We look forward to seeing you!", "type": "failure"},
+        {"response": "Wonderful. See you then!", "type": "failure"},
+        {"response": "Perfect! Looking forward to it!", "type": "failure"},
+    ],
 })
 
 create_test("4.7 Accept upsell → add service", {
@@ -348,12 +384,12 @@ create_test("4.7 Accept upsell → add service", {
         ("user", "Haircut at 12"),
         ("agent", "12 works. What is your name?"),
         ("user", "Tom"),
-        ("agent", "Tom, booked for a haircut with Nikos at 12. Would you like to add a beard trim or hot towel shave?"),
+        ("agent", "Tom, booked for a haircut with Nikos at 12. Would you like to add a beard trim or a full shave?"),
         ("user", "Yes, add a beard trim"),
     ),
     "success_condition": "Confirm beard trim added. Keep short.",
     "success_examples": [{"response": "Beard trim added. Anything else?", "type": "success"}],
-    "failure_examples": [{"response": "Certainly! I have added a beard trim at 12 euros.", "type": "failure"}],
+    "failure_examples": [{"response": "Certainly! I have added a beard trim at 10 euros.", "type": "failure"}],
 })
 
 create_test("4.8 Unsure client → guide", {
@@ -365,7 +401,7 @@ create_test("4.8 Unsure client → guide", {
     ),
     "success_condition": "Guide with something like: 'Is it for the hair, the beard, or something else?' No service lists.",
     "success_examples": [{"response": "Is it something for the hair, the beard, or something else?", "type": "success"}],
-    "failure_examples": [{"response": "We offer haircuts for 15, beard trims for 12...", "type": "failure"}],
+    "failure_examples": [{"response": "We offer haircuts for 15, beard trims for 10...", "type": "failure"}],
 })
 
 # ── 5. SCHEDULE & AVAILABILITY ──────────────────────────────
@@ -449,6 +485,35 @@ create_test("5.6 Barber availability as range", {
     "failure_examples": [{"response": "Nikos is available at 10:00, 10:30, 12:00, 12:30.", "type": "failure"}],
 })
 
+create_test("5.7 Combo at 19:30 — too late", {
+    "type": "llm",
+    "name": "5.7 Schedule — combo at 19:30 would run past closing",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "I want the haircut and beard combo at 7:30 pm"),
+    ),
+    "dynamic_variables": {"system__time": "17:00"},
+    "success_condition": "The combo takes 45 min, so 19:30 would run past 20:00 closing. Must NOT confirm 19:30. Suggest an earlier time that fits.",
+    "success_examples": [{"response": "That would run past closing. How about 7 or earlier?", "type": "success"}],
+    "failure_examples": [{"response": "7:30 works. What is your name?", "type": "failure"}],
+})
+
+create_test("5.8 Ambiguous time — no day given on closed day", {
+    "type": "llm",
+    "name": "5.8 Schedule — time given without day, today is Sunday",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "I want a haircut at 3"),
+    ),
+    "dynamic_variables": {"system__time": "Sunday 10:00"},
+    "success_condition": "Today is Sunday (closed). Must tell client the shop is closed today AND ask which day works for them. Both parts are required: (1) mention closed/next open day, (2) ask which day.",
+    "success_examples": [{"response": "We are closed today. We open again on Tuesday at 10. Which day works for you?", "type": "success"}],
+    "failure_examples": [
+        {"response": "3 works. What is your name?", "type": "failure"},
+        {"response": "We are closed today. We open again on Tuesday at 10.", "type": "failure"},
+    ],
+})
+
 # ── 6. SERVICES & PRICING ───────────────────────────────────
 print("\n▸ 6. SERVICES & PRICING (llm)")
 
@@ -464,16 +529,16 @@ create_test("6.1 Haircut price = 15€", {
     "failure_examples": [{"response": "15 euros, takes 30 min. We also have beard trims.", "type": "failure"}],
 })
 
-create_test("6.2 Full Grooming = 40€", {
+create_test("6.2 Haircut + Beard Combo = 22€", {
     "type": "llm",
-    "name": "6.2 Price — full grooming package is 40 euros",
+    "name": "6.2 Price — haircut + beard combo is 22 euros",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "What is the price for the full grooming package?"),
+        ("user", "How much for a haircut and beard trim together?"),
     ),
-    "success_condition": "40 euros. May briefly mention what's included. Short.",
-    "success_examples": [{"response": "The full grooming package is 40 euros — haircut, beard trim, and hot towel shave.", "type": "success"}],
-    "failure_examples": [{"response": "40 euros. We also have haircuts for 15, beard trims...", "type": "failure"}],
+    "success_condition": "22 euros. May briefly mention it is the combo. Short.",
+    "success_examples": [{"response": "The haircut and beard combo is 22 euros.", "type": "success"}],
+    "failure_examples": [{"response": "22 euros. We also have haircuts for 15, beard trims...", "type": "failure"}],
 })
 
 create_test("6.3 No price volunteered during booking", {
@@ -485,7 +550,7 @@ create_test("6.3 No price volunteered during booking", {
     ),
     "success_condition": "Proceed to book. Do NOT mention price unless asked.",
     "success_examples": [{"response": "2 works. What is your name?", "type": "success"}],
-    "failure_examples": [{"response": "A beard trim is 12 euros. 2 works.", "type": "failure"}],
+    "failure_examples": [{"response": "A beard trim is 10 euros. 2 works.", "type": "failure"}],
 })
 
 create_test("6.4 No duration unless asked", {
@@ -493,11 +558,11 @@ create_test("6.4 No duration unless asked", {
     "name": "6.4 Duration — never mention unless asked",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "I want a hot towel shave at 4"),
+        ("user", "I want a full shave at 4"),
     ),
     "success_condition": "Proceed to book. Do NOT mention duration.",
     "success_examples": [{"response": "4 works. What is your name?", "type": "success"}],
-    "failure_examples": [{"response": "Takes about 30 minutes. 4 works.", "type": "failure"}],
+    "failure_examples": [{"response": "Takes about 25 minutes. 4 works.", "type": "failure"}],
 })
 
 create_test("6.5 All services listed when asked", {
@@ -507,9 +572,48 @@ create_test("6.5 All services listed when asked", {
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
         ("user", "What services do you offer?"),
     ),
-    "success_condition": "Since client asked, list services with prices: haircut 15, beard trim 12, hot towel shave 18, full grooming 40, head shave 15, scalp massage 10, eyebrow grooming 8, colour 20.",
-    "success_examples": [{"response": "Haircut 15, beard trim 12, hot towel shave 18, full grooming 40, head shave 15, scalp massage 10, eyebrow grooming 8, colour 20.", "type": "success"}],
-    "failure_examples": [{"response": "We do haircuts and beard trims.", "type": "failure"}],
+    "success_condition": "Since client asked, list all 7 services with prices. Must mention: haircut 15, beard trim 10, full shave 12, combo 22, kids cut 10, hair styling 20, eyebrow grooming 5. A longer response is acceptable here since listing all services requires it. Do not add follow-up booking questions.",
+    "success_examples": [{"response": "Haircut 15, beard trim 10, full shave 12, haircut and beard combo 22, kids cut 10, hair styling 20, eyebrow grooming 5.", "type": "success"}],
+    "failure_examples": [
+        {"response": "We do haircuts and beard trims.", "type": "failure"},
+        {"response": "Haircut 15, beard trim 10, full shave 12. Would you like to book?", "type": "failure"},
+    ],
+})
+
+create_test("6.6 Kids cut = 10€", {
+    "type": "llm",
+    "name": "6.6 Price — kids cut is 10 euros when asked",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "How much for a haircut for my son? He is 8."),
+    ),
+    "success_condition": "Answer: kids cut is 10 euros. Short. No extra info.",
+    "success_examples": [{"response": "A kids cut is 10 euros.", "type": "success"}],
+    "failure_examples": [{"response": "10 euros for the kids cut, 20 minutes. We also do hair styling.", "type": "failure"}],
+})
+
+create_test("6.7 Hair styling = 20€", {
+    "type": "llm",
+    "name": "6.7 Price — hair styling is 20 euros when asked",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "How much for hair styling?"),
+    ),
+    "success_condition": "Answer: 20 euros. Short.",
+    "success_examples": [{"response": "Hair styling is 20 euros.", "type": "success"}],
+    "failure_examples": [{"response": "20 euros, takes 40 minutes. Great for special occasions!", "type": "failure"}],
+})
+
+create_test("6.8 Duration given when asked", {
+    "type": "llm",
+    "name": "6.8 Duration — answer when client asks how long",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "How long does the haircut and beard combo take?"),
+    ),
+    "success_condition": "Answer: about 45 minutes. Short.",
+    "success_examples": [{"response": "About 45 minutes.", "type": "success"}],
+    "failure_examples": [{"response": "I cannot tell you how long it takes.", "type": "failure"}],
 })
 
 # ── 7. SHOP INFO ─────────────────────────────────────────────
@@ -587,7 +691,7 @@ create_test("8.1 Max 1-2 short sentences", {
     ),
     "success_condition": "Even with a broad question, max 1-2 short sentences. No paragraphs. Ask what they want to know.",
     "success_examples": [{"response": "We are a barbershop in Egaleo, Athens. What would you like to know?", "type": "success"}],
-    "failure_examples": [{"response": "Greek Barber Festival is a premium barbershop at Kifissou 42 in Egaleo. We offer haircuts, beard trims, hot towel shaves, and more. Our team is Nikos, Giorgos, Eleni, Petros. We are open Tuesday to Saturday.", "type": "failure"}],
+    "failure_examples": [{"response": "Greek Barber Festival is a premium barbershop at Kifissou 42 in Egaleo. We offer haircuts, beard trims, full shaves, and more. Our team is Nikos, Giorgos, Eleni, Petros. We are open Tuesday to Saturday.", "type": "failure"}],
 })
 
 create_test("8.2 No unsolicited info", {
@@ -619,11 +723,15 @@ create_test("8.4 No filler or compliments", {
     "name": "8.4 Tone — no filler, no compliments",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "I want a hot towel shave at 5"),
+        ("user", "I want a full shave at 5"),
     ),
-    "success_condition": "Clean, short. No filler like 'great choice', 'excellent'. Direct.",
+    "success_condition": "Clean, short. No filler words: no 'great choice', 'excellent', 'wonderful', 'perfect', 'amazing', 'certainly', 'of course', 'absolutely', 'sure', 'no problem', 'sounds good', 'sounds great', 'happy to help'. The ideal response is exactly: '5 works. What is your name?' or similar minimal confirmation + name question. No interjections.",
     "success_examples": [{"response": "5 works. What is your name?", "type": "success"}],
-    "failure_examples": [{"response": "Excellent choice! A hot towel shave is very popular.", "type": "failure"}],
+    "failure_examples": [
+        {"response": "Excellent choice! A full shave is very popular.", "type": "failure"},
+        {"response": "Sounds good! 5 works. What is your name?", "type": "failure"},
+        {"response": "Perfect, 5 it is. What is your name?", "type": "failure"},
+    ],
 })
 
 create_test("8.5 Warm but direct tone", {
@@ -633,9 +741,16 @@ create_test("8.5 Warm but direct tone", {
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
         ("user", "Hi, yeah, so, I was thinking maybe I could come in for like, a haircut or something?"),
     ),
-    "success_condition": "Warm but direct. No excessive politeness. Just ask time.",
-    "success_examples": [{"response": "What time works for you?", "type": "success"}],
-    "failure_examples": [{"response": "Of course! I would be delighted to help you schedule an appointment!", "type": "failure"}],
+    "success_condition": "Warm but direct. No excessive politeness, no filler, no interjections. A time-appropriate greeting (like 'Good morning') is acceptable since the user said 'Hi', but nothing beyond that. The core response should simply ask the time. No 'sounds good', 'I'd be happy to', 'certainly', 'of course', 'absolutely'. A veteran desk manager keeps it minimal.",
+    "success_examples": [
+        {"response": "What time works for you?", "type": "success"},
+        {"response": "Good morning. What time works for you?", "type": "success"},
+    ],
+    "failure_examples": [
+        {"response": "Of course! I would be delighted to help you schedule an appointment!", "type": "failure"},
+        {"response": "Sounds good! What time works for you?", "type": "failure"},
+        {"response": "Happy to help! When would you like to come in?", "type": "failure"},
+    ],
 })
 
 create_test("8.6 Kostas does NOT cut hair", {
@@ -672,7 +787,7 @@ create_test("9.1 No Certainly/Of course/Absolutely/Sure/No problem", {
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
         ("user", "Can I book a haircut at 3?"),
     ),
-    "success_condition": "Must NOT use: Certainly, Of course, Absolutely, Great choice, Sure, No problem. Just confirm and ask name.",
+    "success_condition": "Must NOT use any of these words: Certainly, Of course, Absolutely, Great choice, Sure, No problem, Wonderful, Perfect, Excellent, Amazing, Sounds good, Sounds great, Happy to help. Just confirm time and ask name.",
     "success_examples": [{"response": "3 works. What is your name?", "type": "success"}],
     "failure_examples": [
         {"response": "Certainly! 3 is available.", "type": "failure"},
@@ -688,7 +803,7 @@ create_test("9.2 No 'Great choice'", {
     "name": "9.2 Forbidden — no 'Great choice'",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "I want the full grooming package"),
+        ("user", "I want the haircut and beard combo"),
     ),
     "success_condition": "No 'Great choice'. Just ask time.",
     "success_examples": [{"response": "What time works for you?", "type": "success"}],
@@ -716,7 +831,7 @@ end_call_cases = [
         ("user", "Haircut at 2"),
         ("agent", "2 works. What is your name?"),
         ("user", "Chris"),
-        ("agent", "Chris, booked for a haircut with Nikos at 2. Would you like to add a beard trim or hot towel shave?"),
+        ("agent", "Chris, booked for a haircut with Nikos at 2. Would you like to add a beard trim or a full shave?"),
         ("user", "No thanks, bye"),
     ]),
     ("10.2 End call after upsell declined", [
@@ -738,7 +853,7 @@ end_call_cases = [
         ("user", "Haircut at 5"),
         ("agent", "5 works. What is your name?"),
         ("user", "Leo"),
-        ("agent", "Leo, booked for a haircut with Petros at 5. Would you like to add a beard trim?"),
+        ("agent", "Leo, booked for a haircut with Petros at 5. Would you like to add a beard trim or a full shave?"),
         ("user", "Add beard trim"),
         ("agent", "Beard trim added. Anything else?"),
         ("user", "No, see you later"),
@@ -777,63 +892,63 @@ create_test("10.5 No end_call mid-booking", {
 # ── 11. CONTEXTUAL UPSELL ───────────────────────────────────
 print("\n▸ 11. CONTEXTUAL UPSELL (llm)")
 
-create_test("11.1 Haircut → suggest beard/towel, not haircut", {
+create_test("11.1 Haircut → suggest beard/shave, not haircut", {
     "type": "llm",
-    "name": "11.1 Upsell — haircut booked, suggest beard trim or hot towel",
+    "name": "11.1 Upsell — haircut booked, suggest beard trim or full shave",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
         ("user", "Haircut at 3"),
         ("agent", "3 works. What is your name?"),
         ("user", "Nikos"),
     ),
-    "success_condition": "After confirming the haircut booking, the upsell must suggest something that COMPLEMENTS a haircut — like beard trim, hot towel shave, or scalp massage. Must NOT suggest another haircut.",
-    "success_examples": [{"response": "Nikos, booked for a haircut with Eleni at 3. Would you like to add a beard trim or hot towel shave?", "type": "success"}],
+    "success_condition": "After confirming the haircut booking, the upsell must suggest something that COMPLEMENTS a haircut — like beard trim or full shave. Must NOT suggest another haircut.",
+    "success_examples": [{"response": "Nikos, booked for a haircut with Eleni at 3. Would you like to add a beard trim or a full shave?", "type": "success"}],
     "failure_examples": [
         {"response": "Nikos, booked at 3. Would you like to add a haircut?", "type": "failure"},
         {"response": "Nikos, booked at 3. See you then!", "type": "failure"},
     ],
 })
 
-create_test("11.2 Beard trim → suggest haircut/towel, not beard", {
+create_test("11.2 Beard trim → suggest haircut/shave, not beard", {
     "type": "llm",
-    "name": "11.2 Upsell — beard trim booked, suggest haircut or hot towel",
+    "name": "11.2 Upsell — beard trim booked, suggest haircut or full shave",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
         ("user", "Beard trim at 4"),
         ("agent", "4 works. What is your name?"),
         ("user", "Dimitri"),
     ),
-    "success_condition": "After confirming the beard trim booking, suggest something that complements it — like a haircut or hot towel shave. Must NOT suggest another beard trim.",
-    "success_examples": [{"response": "Dimitri, booked for a beard trim with Giorgos at 4. Would you like to add a haircut or hot towel shave?", "type": "success"}],
+    "success_condition": "After confirming the beard trim booking, suggest something that complements it — like a haircut or full shave. Must NOT suggest another beard trim.",
+    "success_examples": [{"response": "Dimitri, booked for a beard trim with Giorgos at 4. Would you like to add a haircut or a full shave?", "type": "success"}],
     "failure_examples": [{"response": "Dimitri, booked at 4. Would you like to add a beard trim?", "type": "failure"}],
 })
 
-create_test("11.3 Full grooming → suggest eyebrow/colour", {
+create_test("11.3 Haircut + Beard Combo → suggest eyebrow/styling", {
     "type": "llm",
-    "name": "11.3 Upsell — full grooming booked, suggest eyebrow or colour",
+    "name": "11.3 Upsell — combo booked, suggest eyebrow or styling",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "Full grooming package at 11"),
+        ("user", "Haircut and beard combo at 11"),
         ("agent", "11 works. What is your name?"),
         ("user", "Sofia"),
     ),
-    "success_condition": "After confirming the full grooming booking, suggest complementary add-ons like eyebrow grooming or colour. Must NOT suggest haircut, beard trim, or hot towel (those are already in the package).",
-    "success_examples": [{"response": "Sofia, booked for the full grooming package with Petros at 11. Would you like to add eyebrow grooming or a colour?", "type": "success"}],
+    "success_condition": "After confirming the combo booking, suggest complementary add-ons like eyebrow grooming or hair styling. Must NOT suggest haircut or beard trim (those are already in the combo).",
+    "success_examples": [{"response": "Sofia, booked for the haircut and beard combo with Petros at 11. Would you like to add eyebrow grooming or hair styling?", "type": "success"}],
     "failure_examples": [{"response": "Sofia, booked at 11. Would you like to add a beard trim?", "type": "failure"}],
 })
 
-create_test("11.4 Head shave → suggest scalp massage", {
+create_test("11.4 Full shave → suggest beard trim/haircut", {
     "type": "llm",
-    "name": "11.4 Upsell — head shave booked, suggest scalp massage",
+    "name": "11.4 Upsell — full shave booked, suggest beard trim or haircut",
     "chat_history": chat(
         ("agent", "Hello! Greek Barber Festival. How can I help you?"),
-        ("user", "Head shave at 6"),
+        ("user", "Full shave at 6"),
         ("agent", "6 works. What is your name?"),
         ("user", "Yiannis"),
     ),
-    "success_condition": "After confirming the head shave, suggest a scalp massage or other complementary service. Must NOT suggest another head shave or a haircut.",
-    "success_examples": [{"response": "Yiannis, booked for a head shave with Nikos at 6. Would you like to add a scalp massage?", "type": "success"}],
-    "failure_examples": [{"response": "Yiannis, booked at 6. Would you like to add a haircut?", "type": "failure"}],
+    "success_condition": "After confirming the full shave, suggest a beard trim, haircut, or other complementary service. Must NOT suggest another full shave.",
+    "success_examples": [{"response": "Yiannis, booked for a full shave with Nikos at 6. Would you like to add a beard trim or a haircut?", "type": "success"}],
+    "failure_examples": [{"response": "Yiannis, booked at 6. Would you like to add a full shave?", "type": "failure"}],
 })
 
 # ── 12. EDGE CASES & SECURITY ───────────────────────────────
@@ -903,6 +1018,30 @@ create_test("12.5 Multiple services at once", {
     "failure_examples": [{"response": "Let me book two separate appointments.", "type": "failure"}],
 })
 
+create_test("12.6 Parent + child booking", {
+    "type": "llm",
+    "name": "12.6 Edge — parent books kids cut and own haircut",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "I need a kids cut for my son and a haircut for myself at 3"),
+    ),
+    "success_condition": "Handle the multi-person request. Book both services. Ask for name. Do not refuse or over-complicate.",
+    "success_examples": [{"response": "3 works for both. What is your name?", "type": "success"}],
+    "failure_examples": [{"response": "I can only book one service at a time.", "type": "failure"}],
+})
+
+create_test("12.7 Rude visitor — de-escalate", {
+    "type": "llm",
+    "name": "12.7 Edge — rude visitor, stay warm and redirect",
+    "chat_history": chat(
+        ("agent", "Hello! Greek Barber Festival. How can I help you?"),
+        ("user", "This is so stupid, talking to a screen"),
+    ),
+    "success_condition": "Stay warm and professional. Do not escalate or be defensive. Redirect to booking.",
+    "success_examples": [{"response": "I am here to book haircuts. What service can I set up for you?", "type": "success"}],
+    "failure_examples": [{"response": "I am sorry you feel that way! Let me make it up to you.", "type": "failure"}],
+})
+
 # ── 13. FULL CONVERSATION SIMULATIONS ────────────────────────
 print("\n▸ 13. FULL CONVERSATION SIMULATIONS")
 
@@ -911,7 +1050,7 @@ create_test("13.1 Sim — English happy path", {
     "name": "13.1 Sim — English happy path booking",
     "chat_history": [],
     "dynamic_variables": {"system__time": "12:00"},
-    "success_condition": "Agent must: greet in English, ask time, confirm, ask first name only, give final confirmation (name + service + barber + time), offer a contextual upsell (complementary to the haircut, NOT another haircut), say brief goodbye, end call. Never use forbidden words. Max 1-2 sentences per turn.",
+    "success_condition": "Agent must complete the booking flow: ask time (or confirm time), confirm slot, ask first name, give final confirmation mentioning name + service + barber + time, offer a complementary upsell (beard trim or full shave — NOT another haircut), then brief goodbye. Must not use forbidden filler words (Certainly, Of course, Absolutely, etc.). Minor phrasing variations are acceptable as long as the core flow steps happen.",
     "simulation_scenario": "You are an English-speaking customer calling to book a haircut. When asked for time, say 2pm. When asked your name, say Alex. Decline upsells and say goodbye.",
     "simulation_max_turns": 10,
 })
@@ -929,10 +1068,10 @@ create_test("13.2 Sim — Greek happy path (formal)", {
 create_test("13.3 Sim — Spanish booking (usted)", {
     "type": "simulation",
     "name": "13.3 Sim — Spanish booking with usted",
-    "chat_history": [],
+    "chat_history": chat(("agent", "¡Hola! Greek Barber Festival. ¿Cómo puedo ayudarle?")),
     "dynamic_variables": {"system__time": "11:00"},
-    "success_condition": "All in formal Spanish (usted, never tú). Full booking flow. When upsell offered, accept beard trim. End call. Contextual upsell must complement the haircut.",
-    "simulation_scenario": "Eres un cliente español. Quieres un corte a las 3. Tu nombre es Carlos. Acepta el recorte de barba cuando ofrezcan extras. Luego despídete.",
+    "success_condition": "All in formal Spanish (usted, never tú). Complete booking flow: confirm time, ask name, final confirmation with barber name, offer complementary upsell (beard trim or full shave — not another haircut). Client accepts beard trim, agent confirms add-on. If the conversation reaches goodbye, it should be brief. Minor phrasing variations acceptable. The core requirement is that the booking flow completes with formality maintained.",
+    "simulation_scenario": "Eres un cliente hispanohablante. Usa usted (formal). Quieres un corte de pelo a las 3 de la tarde. Tu nombre es Carlos. Cuando te ofrezcan extras, acepta el arreglo de barba. Después de que el agente confirme el arreglo de barba, cuando pregunte '¿Algo más?' o similar, responde 'No gracias, eso es todo. ¡Adiós!' y termina. DEBES despedirte al final.",
     "simulation_max_turns": 12,
 })
 
@@ -951,9 +1090,29 @@ create_test("13.5 Sim — Thursday booking (multi-day)", {
     "name": "13.5 Sim — booking for Thursday, not today",
     "chat_history": [],
     "dynamic_variables": {"system__time": "14:00"},
-    "success_condition": "Agent must accept a booking for Thursday naturally — same flow as today. Confirm time, ask name, give final confirmation with barber name, offer contextual upsell. No disclaimers about schedule availability. Must feel like a real receptionist with the full week's schedule.",
+    "success_condition": "Agent must accept Thursday booking naturally. Confirm time, ask name, final confirmation with barber name, offer complementary upsell. No disclaimers about schedule availability. Minor phrasing variations acceptable as long as the core booking flow completes.",
     "simulation_scenario": "You want to book a beard trim for Thursday at 4pm. When asked your name, say Elena. Decline upsells and say goodbye.",
     "simulation_max_turns": 10,
+})
+
+create_test("13.6 Sim — Kids cut booking (parent)", {
+    "type": "simulation",
+    "name": "13.6 Sim — parent books kids cut",
+    "chat_history": [],
+    "dynamic_variables": {"system__time": "11:00"},
+    "success_condition": "Agent must handle kids cut booking naturally. Confirm time, ask name, final confirmation with barber, offer a complementary upsell (eyebrow grooming or similar — NOT another kids cut). Brief goodbye. Minor phrasing variations acceptable as long as core booking flow completes.",
+    "simulation_scenario": "You are a parent. You want to book a kids cut for your 9-year-old son at 2pm. Your name is Maria. Decline upsells and say goodbye.",
+    "simulation_max_turns": 10,
+})
+
+create_test("13.7 Sim — Hair styling with upsell accepted", {
+    "type": "simulation",
+    "name": "13.7 Sim — hair styling booking, accept upsell",
+    "chat_history": chat(("agent", "Hello! Greek Barber Festival. How can I help you?")),
+    "dynamic_variables": {"system__time": "13:00"},
+    "success_condition": "Agent must book hair styling (NOT a haircut). Confirm time, ask name, final confirmation with barber, offer complementary upsell (beard trim or eyebrow grooming). When client accepts, confirm the add-on briefly. Brief goodbye. Minor phrasing variations acceptable as long as core booking flow completes.",
+    "simulation_scenario": "You are an English-speaking customer. Speak only English throughout. You want HAIR STYLING (not a haircut) at 4pm. Your name is Tom. When offered an upsell, accept a beard trim. After the agent confirms the beard trim and asks if you need anything else, respond 'No thanks, that is all. Goodbye!' and end the conversation. Always respond in English. You MUST say goodbye at the end.",
+    "simulation_max_turns": 12,
 })
 
 

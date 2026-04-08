@@ -2,7 +2,7 @@
 # Deploy agent config to ElevenLabs
 # Usage: bash scripts/deploy.sh [json-file]
 
-AGENT_ID="agent_5001kjkkjvs6e7fs5t5fkjh1hhwc"
+AGENT_ID="agent_8701kn7p69jaf0frvsvwd6g2sq4e"
 JSON_FILE="${1:-agent.json}"
 
 if [ -z "$ELEVENLABS_API_KEY" ]; then
