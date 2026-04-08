@@ -256,9 +256,7 @@
       "language": "el",
       "hinglish_mode": false,
       "dynamic_variables": {
-        "dynamic_variable_placeholders": {
-          "system__timezone": "Europe/Athens"
-        }
+        "dynamic_variable_placeholders": {}
       },
       "disable_first_message_interruptions": false,
       "prompt": {
