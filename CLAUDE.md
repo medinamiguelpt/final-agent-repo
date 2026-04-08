@@ -63,7 +63,7 @@ python3 scripts/push-tests.py
 - Schedule is improvised (demo) — shop hours enforced, past times rejected, closed days handled
 - Upsell must complement the booked service (not repeat it)
 
-## Test categories (79 tests)
+## Test categories (84 tests)
 
 1. Language Detection (7) — tool tests for all 7 languages
 2. Language Register & Locking (7) — formal register + language lock
@@ -78,3 +78,4 @@ python3 scripts/push-tests.py
 11. Contextual Upsell (4) — haircut→beard/shave, beard→haircut/shave, combo→eyebrow/styling, shave→beard/haircut
 12. Edge Cases & Security (7) — injection, off-topic, abuse, multi-service, parent+child, rude visitor
 13. Full Simulations (7) — English, Greek, Spanish, info-only, multi-day, kids cut, hair styling
+14. Content Guardrails (5) — sexual, violence, profanity, politics, medical advice

@@ -641,31 +641,31 @@
         "execution_mode": "streaming",
         "config": {
           "sexual": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.56
           },
           "violence": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.85
           },
           "harassment": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.8
           },
           "self_harm": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.1
           },
           "profanity": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.1
           },
           "religion_or_politics": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.1
           },
           "medical_and_legal_information": {
-            "is_enabled": false,
+            "is_enabled": true,
             "threshold": 0.1
           }
         },
@@ -677,47 +677,47 @@
         "execution_mode": "streaming",
         "config": {
           "sexual": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.56
           },
           "violence": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.85
           },
           "violence_graphic": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.49
           },
           "harassment": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.8
           },
           "harassment_threatening": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.05
           },
           "hate": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.43
           },
           "hate_threatening": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.15
           },
           "self_harm_instructions": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.1
           },
           "self_harm": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.1
           },
           "self_harm_intent": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.1
           },
           "sexual_minors": {
-            "is_enabled": true,
+            "is_enabled": false,
             "threshold": 0.067
           }
         }
