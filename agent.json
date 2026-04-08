@@ -286,7 +286,7 @@
           "language_detection": {
             "type": "system",
             "name": "language_detection",
-            "description": "",
+            "description": "Call this tool ONCE on the very first user message to detect their language and switch the voice. After the first call, never call it again — the language is locked permanently.",
             "response_timeout_secs": 20,
             "disable_interruptions": true,
             "force_pre_tool_speech": false,
@@ -363,7 +363,7 @@
           {
             "type": "system",
             "name": "language_detection",
-            "description": "",
+            "description": "Call this tool ONCE on the very first user message to detect their language and switch the voice. After the first call, never call it again — the language is locked permanently.",
             "response_timeout_secs": 20,
             "disable_interruptions": true,
             "force_pre_tool_speech": false,
