@@ -266,7 +266,7 @@
         "llm": "gemini-2.5-flash",
         "reasoning_effort": null,
         "thinking_budget": 1024,
-        "temperature": 0.1,
+        "temperature": 0.02,
         "max_tokens": -1,
         "tool_ids": [],
         "built_in_tools": {
