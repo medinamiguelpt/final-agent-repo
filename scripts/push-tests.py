@@ -61,6 +61,49 @@ created_ids = []
 failed = 0
 
 
+def delete_old_tests():
+    """Delete ALL existing tests in the workspace before creating new ones."""
+    print("Cleaning up old tests...")
+    all_ids = []
+    cursor = None
+    while True:
+        url = f"{BASE}/agent-testing"
+        if cursor:
+            url += f"?cursor={cursor}"
+        req = urllib.request.Request(url, headers={"xi-api-key": API_KEY})
+        try:
+            with urllib.request.urlopen(req) as resp:
+                d = json.loads(resp.read())
+        except urllib.error.HTTPError:
+            break
+        for t in d.get("tests", []):
+            all_ids.append(t["id"])
+        if not d.get("has_more"):
+            break
+        cursor = d.get("next_cursor")
+
+    if not all_ids:
+        print("  No old tests found.\n")
+        return
+
+    deleted = 0
+    for tid in all_ids:
+        req = urllib.request.Request(
+            f"{BASE}/agent-testing/{tid}",
+            headers={"xi-api-key": API_KEY},
+            method="DELETE",
+        )
+        try:
+            with urllib.request.urlopen(req) as resp:
+                deleted += 1
+        except urllib.error.HTTPError:
+            pass
+        if deleted % 50 == 0 and deleted > 0:
+            print(f"  Deleted {deleted}/{len(all_ids)}...")
+
+    print(f"  ✓ Deleted {deleted} old tests\n")
+
+
 def create_test(name, payload):
     # Auto-add system__time if not explicitly set, so tests aren't affected by real clock
     if "dynamic_variables" not in payload:
@@ -83,6 +126,9 @@ def create_test(name, payload):
 print("═══════════════════════════════════════════════════════════")
 print(" CREATING TESTS — Kostas, Greek Barber Festival")
 print("═══════════════════════════════════════════════════════════\n")
+
+# Delete all old tests first to prevent duplicates
+delete_old_tests()
 
 # ── 1. LANGUAGE DETECTION (llm — system tool doesn't fire in text tests) ──
 print("▸ 1. LANGUAGE DETECTION (llm)")
