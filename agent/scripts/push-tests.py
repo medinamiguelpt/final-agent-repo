@@ -6,7 +6,7 @@ Creates and attaches tests to ElevenLabs. Does NOT run them.
 Categories:
   1. Language Detection (llm)          — 7 tests
   2. Language Register & Locking (llm) — 7 tests
-  3. Greeting Logic (llm)              — 3 tests
+  3. No Double Greeting (llm)           — 3 tests
   4. Booking Flow (llm)                — 8 tests
   5. Schedule & Availability (llm)     — 8 tests
   6. Services & Pricing (llm)          — 8 tests
@@ -297,51 +297,54 @@ create_test("2.7 Greek lock — never switch to English", {
     "failure_examples": [{"response": "I have 3 available. What is your name?", "type": "failure"}],
 })
 
-# ── 3. GREETING LOGIC ───────────────────────────────────────
-print("\n▸ 3. GREETING LOGIC (llm)")
+# ── 3. NO DOUBLE GREETING ──────────────────────────────────
+print("\n▸ 3. NO DOUBLE GREETING (llm)")
 
-create_test("3.1 Morning greeting (09:30)", {
+create_test("3.1 No double greeting — Greek", {
     "type": "llm",
-    "name": "3.1 Morning greeting — 09:30 → Καλημέρα",
+    "name": "3.1 No double greeting — first_message already greeted, skip greeting",
     "chat_history": chat(
         GR_GREETING,
         ("user", "Γεια σας, θέλω ραντεβού"),
     ),
-    "dynamic_variables": {"system__time": "09:30"},
-    "success_condition": "Must include Καλημέρα (good morning) since time is 09:30. Response must be in Greek, short, and ask about time or service.",
-    "success_examples": [{"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "success"}],
+    "dynamic_variables": {"system__time": "Wednesday 09:30"},
+    "success_condition": "The opening greeting has already been spoken. Agent must NOT add another greeting (no Καλημέρα, Καλό μεσημέρι, Καλησπέρα). Go directly to the booking flow — ask about time or service.",
+    "success_examples": [{"response": "Τι ώρα σας βολεύει;", "type": "success"}],
     "failure_examples": [
-        {"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "failure"},
-        {"response": "Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Καλό μεσημέρι. Τι ώρα σας βολεύει;", "type": "failure"},
     ],
 })
 
-create_test("3.2 Afternoon greeting (14:00)", {
+create_test("3.2 No double greeting — English", {
     "type": "llm",
-    "name": "3.2 Afternoon greeting — 14:00 → Good afternoon",
+    "name": "3.2 No double greeting — English, no Good afternoon",
     "chat_history": chat(
         EN_GREETING,
         ("user", "Hello, I need a haircut today"),
     ),
-    "dynamic_variables": {"system__time": "14:00"},
-    "success_condition": "If using a time-based greeting, must be afternoon since time is 14:00.",
-    "success_examples": [{"response": "Good afternoon. What time works for you?", "type": "success"}],
-    "failure_examples": [{"response": "Good morning. What time works for you?", "type": "failure"}],
+    "dynamic_variables": {"system__time": "Wednesday 14:00"},
+    "success_condition": "The opening greeting has already been spoken. Agent must NOT add another greeting (no Good morning, Good afternoon, Good evening). Go directly to asking for time.",
+    "success_examples": [{"response": "What time works for you?", "type": "success"}],
+    "failure_examples": [
+        {"response": "Good afternoon. What time works for you?", "type": "failure"},
+        {"response": "Good morning! What time works for you?", "type": "failure"},
+    ],
 })
 
-create_test("3.3 Evening greeting (19:00)", {
+create_test("3.3 No double greeting — Greek evening", {
     "type": "llm",
-    "name": "3.3 Evening greeting — 19:00 → Καλησπέρα",
+    "name": "3.3 No double greeting — evening, still no Καλησπέρα",
     "chat_history": chat(
         GR_GREETING,
         ("user", "Γεια, θέλω ραντεβού"),
     ),
-    "dynamic_variables": {"system__time": "19:00"},
-    "success_condition": "Must include Καλησπέρα (good evening) since time is 19:00. Response must be in Greek, short, and ask about time or service.",
-    "success_examples": [{"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "success"}],
+    "dynamic_variables": {"system__time": "Wednesday 19:00"},
+    "success_condition": "The opening greeting has already been spoken. Even though it is evening, agent must NOT add Καλησπέρα or any greeting. Go directly to booking.",
+    "success_examples": [{"response": "Τι ώρα σας βολεύει;", "type": "success"}],
     "failure_examples": [
-        {"response": "Καλημέρα! Τι ώρα σας βολεύει;", "type": "failure"},
-        {"response": "Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Καλησπέρα! Τι ώρα σας βολεύει;", "type": "failure"},
+        {"response": "Καλησπέρα σας. Τι ώρα σας βολεύει;", "type": "failure"},
     ],
 })
 

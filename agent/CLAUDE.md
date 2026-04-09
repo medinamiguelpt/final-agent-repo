@@ -86,7 +86,7 @@ python3 scripts/push-tests.py
 
 1. Language Detection (7) — tool tests for all 7 languages
 2. Language Register & Locking (7) — formal register + language lock
-3. Greeting Logic (3) — morning/afternoon/evening
+3. No Double Greeting (3) — first_message already greeted, LLM must not add another
 4. Booking Flow (8) — full flow from service request to goodbye
 5. Schedule & Availability (8) — closed days, past times, multi-day, ranges, late combo, ambiguous time
 6. Services & Pricing (8) — prices, durations, kids cut, hair styling, combo duration, service listing
