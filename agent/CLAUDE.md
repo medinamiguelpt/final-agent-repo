@@ -19,6 +19,25 @@ scripts/
   push-tests.py         # Create + attach 84 tests (does NOT run them)
 ```
 
+## ⚠️ Mandatory: Check ElevenLabs docs before ANY agent changes
+
+Before editing `agent.json`, the agent prompt, or any ConvAI configuration:
+
+1. **Use Context7 MCP** to look up the relevant ElevenLabs docs for the fields you're changing. Use the `elevenlabs.io/docs` source (library ID: `/elevenlabs/elevenlabs-docs`). If Context7 MCP is not available, fall back to WebFetch.
+2. **Verify field names, accepted values, and behavior** against the latest docs. ElevenAgents docs change frequently — never assume cached knowledge is correct.
+3. **Key doc pages** (use WebFetch as fallback if Context7 is unavailable):
+   - Overview: https://elevenlabs.io/docs/eleven-agents/overview
+   - Prompting guide: https://elevenlabs.io/docs/eleven-agents/best-practices/prompting-guide
+   - Voice & language: https://elevenlabs.io/docs/eleven-agents/customization/voice
+   - Conversation flow: https://elevenlabs.io/docs/eleven-agents/customization/conversation-flow
+   - Agent testing: https://elevenlabs.io/docs/eleven-agents/customization/agent-testing
+   - Tools: https://elevenlabs.io/docs/eleven-agents/customization/tools
+   - Personalization: https://elevenlabs.io/docs/eleven-agents/customization/personalization
+   - Widget: https://elevenlabs.io/docs/eleven-agents/customization/widget
+   - LLM config: https://elevenlabs.io/docs/eleven-agents/customization/llm
+   - Privacy: https://elevenlabs.io/docs/eleven-agents/customization/privacy
+   - API reference: https://elevenlabs.io/docs/api-reference/agents/create
+
 ## Commands
 
 ```bash
