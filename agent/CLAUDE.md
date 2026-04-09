@@ -16,7 +16,7 @@ AI voice receptionist for a Greek barbershop, built on ElevenLabs ConvAI.
 agent.json              # Full agent config (prompt, voices, TTS, ASR, widget, guardrails)
 scripts/
   deploy.sh             # Push agent.json to ElevenLabs API
-  push-tests.py         # Create + attach 70 tests (does NOT run them)
+  push-tests.py         # Create + attach 84 tests (does NOT run them)
 ```
 
 ## Commands
