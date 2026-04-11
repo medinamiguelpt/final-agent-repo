@@ -5,18 +5,18 @@ import { supabase } from "@/lib/supabase/client";
 import { Sparkles, ArrowRight, Scissors, Clock, Eye, EyeOff } from "lucide-react";
 
 const C = {
-  bg: "#0E1510",
-  surface: "#161C14",
-  surfaceAlt: "#1E2A1C",
-  border: "#2A3828",
-  accent: "#8FBF7F",
-  accentMid: "#6A9A5C",
-  accentLight: "#1E2A1C",
-  text: "#DCF0D4",
-  textMuted: "#8AAC80",
-  textFaint: "#567050",
-  red: "#E07070",
-  redLight: "#3A1818",
+  bg: "#F5F0E8",
+  surface: "#FFFFFF",
+  surfaceAlt: "#FAF7F2",
+  border: "#E0D5C5",
+  accent: "#3D4F35",
+  accentMid: "#6B7D60",
+  accentLight: "#EAF0E6",
+  text: "#2A2520",
+  textMuted: "#7A6F64",
+  textFaint: "#B0A898",
+  red: "#B04040",
+  redLight: "#FDF0F0",
 };
 
 type View = "login" | "signup" | "pending" | "forgot";
@@ -125,7 +125,7 @@ function LoginInner() {
     borderRadius: 12,
     border: "none",
     background: disabled ? C.accentLight : C.accent,
-    color: disabled ? C.accentMid : "#0E1510",
+    color: disabled ? C.accentMid : "#FFFFFF",
     fontSize: 15,
     fontWeight: 800,
     cursor: disabled ? "not-allowed" : "pointer",
@@ -201,7 +201,7 @@ function LoginInner() {
             border: `1px solid ${C.border}`,
             borderRadius: 20,
             padding: "28px 28px 24px",
-            boxShadow: "0 8px 40px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.3)",
+            boxShadow: "0 8px 40px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04)",
             animation: "fadeSlideUp .25s ease",
           }}
         >
