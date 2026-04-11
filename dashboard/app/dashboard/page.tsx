@@ -124,6 +124,7 @@ interface Settings {
   density: DensityKey;
   autoRefresh: boolean;
   navPosition: "top" | "bottom";
+  dyslexia: boolean;
 }
 interface Colors {
   [key: string]: string;
@@ -412,6 +413,7 @@ const DEFAULT_SETTINGS: Settings = {
   density: "comfortable",
   autoRefresh: true,
   navPosition: "top",
+  dyslexia: false,
 };
 const DEFAULT_PROFILE: BusinessProfile = {
   businessName: "Greek Barber Festival",
@@ -2333,6 +2335,14 @@ function SettingsPanel({
       })}
       {toggle("Follow system", "Auto-switch with OS dark mode", settings.mode === "system", (v) =>
         onUpdate({ mode: v ? "system" : "light" }),
+      )}
+
+      {section("Accessibility")}
+      {toggle(
+        "Dyslexia-friendly mode",
+        "OpenDyslexic font, increased spacing, no uppercase text",
+        settings.dyslexia,
+        (v) => onUpdate({ dyslexia: v }),
       )}
     </div>
   );
@@ -8241,6 +8251,17 @@ export default function DashboardPage() {
     <LangCtx.Provider value={t}>
       <>
         <style>{RESPONSIVE_CSS}</style>
+        {settings.dyslexia && (
+          <>
+            <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/opendyslexic" />
+            <style>{`
+              * { font-family: 'OpenDyslexic', sans-serif !important; }
+              * { letter-spacing: 0.05em !important; word-spacing: 0.12em !important; }
+              p, span, div, td, th, li, label, button, input, select, textarea { line-height: 1.65 !important; }
+              * { text-transform: none !important; }
+            `}</style>
+          </>
+        )}
         <style>{`
         :root {
           --gbf-c-accent:       ${C.accent};
