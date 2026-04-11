@@ -5,18 +5,18 @@ import { supabase } from "@/lib/supabase/client";
 import { Sparkles, ArrowRight, Scissors, Clock, Eye, EyeOff } from "lucide-react";
 
 const C = {
-  bg: "#FAF6F1",
+  bg: "#FAFAF7",
   surface: "#FFFFFF",
-  surfaceAlt: "#F5F0EA",
-  border: "#E8DDD0",
-  accent: "#2D6A4F",
-  accentMid: "#5A8F72",
-  accentLight: "#E5F0EB",
-  text: "#2C2416",
-  textMuted: "#6B5D4F",
-  textFaint: "#A89880",
-  red: "#B04040",
-  redLight: "#FDF0F0",
+  surfaceAlt: "#F5F0E8",
+  border: "#E7DFD0",
+  accent: "#D97706",
+  accentMid: "#F59E0B",
+  accentLight: "#FEF3C7",
+  text: "#1C1917",
+  textMuted: "#78716C",
+  textFaint: "#A8A29E",
+  red: "#DC2626",
+  redLight: "#FEE2E2",
 };
 
 type View = "login" | "signup" | "pending" | "forgot";
