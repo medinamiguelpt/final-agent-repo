@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useRef, createContext, useContext } from "react";
+import { useState, useEffect, useCallback, useRef, createContext, useContext, Fragment } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Conversation } from "@11labs/client";
@@ -3200,8 +3200,8 @@ function LedgerTab({ C, density, aiBookings, liveCall, selectedConvId, onConvSel
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr style={{ background: C.surfaceAlt }}>
-              {["", t("colClient"), t("colService"), t("colBarber"), t("colDate"), t("colTime"), t("colPrice"), "", t("colStatus")].map(h => (
-                <th key={h} style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: C.textFaint, textAlign: "left", textTransform: "uppercase", letterSpacing: "0.08em", borderBottom: `1px solid ${C.border}`, whiteSpace: "nowrap" }}>{h}</th>
+              {["", t("colClient"), t("colService"), t("colBarber"), t("colDate"), t("colTime"), t("colPrice"), "", t("colStatus")].map((h, i) => (
+                <th key={i} style={{ padding: "10px 16px", fontSize: 11, fontWeight: 700, color: C.textFaint, textAlign: "left", textTransform: "uppercase", letterSpacing: "0.08em", borderBottom: `1px solid ${C.border}`, whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr></thead>
             <tbody>
@@ -3215,8 +3215,8 @@ function LedgerTab({ C, density, aiBookings, liveCall, selectedConvId, onConvSel
                   const isOpen   = expandedCalls.has(a.id);
                   const detail   = a.conversation_id ? transcripts[a.conversation_id] : undefined;
                   return (
-                    <>
-                      <tr key={a.id} id={`dt-ledger-entry-${a.id}`} className={`gbf-tr-hover${isAI ? " gbf-ai-row" : ""}`} style={{ background: isLiveRow ? C.amberLight : (i % 2 === 0 ? C.surface : C.surfaceAlt), cursor: isAI ? "pointer" : "default" }}
+                    <Fragment key={a.id}>
+                      <tr id={`dt-ledger-entry-${a.id}`} className={`gbf-tr-hover${isAI ? " gbf-ai-row" : ""}`} style={{ background: isLiveRow ? C.amberLight : (i % 2 === 0 ? C.surface : C.surfaceAlt), cursor: isAI ? "pointer" : "default" }}
                         onClick={() => isAI && a.conversation_id ? loadCallTranscript(a.conversation_id, a.summary) : undefined}>
                         <td style={{ padding: pad.row, borderBottom: `1px solid ${C.borderFaint}`, width: 28 }}>
                           <span title={t(SOURCE_CONFIG[a.source]?.labelKey ?? a.source)} style={{ color: SOURCE_CONFIG[a.source]?.color ?? C.textFaint, display: "flex", alignItems: "center" }}>
@@ -3300,7 +3300,7 @@ function LedgerTab({ C, density, aiBookings, liveCall, selectedConvId, onConvSel
                           </td>
                         </tr>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })}
             </tbody>
