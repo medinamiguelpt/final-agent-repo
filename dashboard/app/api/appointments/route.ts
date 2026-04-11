@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { data: appt, error: apptErr } = await (db as never)
+  const { data: appt, error: apptErr } = await db
     .from("appointments")
     .insert({
       business_id,
