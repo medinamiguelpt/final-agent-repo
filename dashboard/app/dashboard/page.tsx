@@ -173,52 +173,6 @@ function useT() {
 
 // ── Palettes (WCAG AA/AAA accessible) ────────────────────────────────────────
 const PALETTES: Record<PaletteKey, { name: string; swatch: string; light: Colors; dark: Colors }> = {
-  slate: {
-    name: "Slate + Indigo",
-    swatch: "#6366F1",
-    light: {
-      bg: "#F8FAFC",
-      surface: "#FFFFFF",
-      surfaceAlt: "#F1F5F9",
-      border: "#E2E8F0",
-      borderFaint: "#EDF2F7",
-      accent: "#6366F1",
-      accentMid: "#A5B4FC",
-      accentLight: "#EEF2FF",
-      text: "#1E293B",
-      textMuted: "#64748B",
-      textFaint: "#94A3B8",
-      green: "#16A34A",
-      greenLight: "#DCFCE7",
-      amber: "#D97706",
-      amberLight: "#FEF9C3",
-      red: "#DC2626",
-      redLight: "#FEE2E2",
-      row: "#F8FAFC",
-      overlay: "rgba(30,41,59,0.5)",
-    },
-    dark: {
-      bg: "#0F172A",
-      surface: "#1E293B",
-      surfaceAlt: "#283548",
-      border: "#334155",
-      borderFaint: "#293548",
-      accent: "#818CF8",
-      accentMid: "#6366F1",
-      accentLight: "#1E1B4B",
-      text: "#E2E8F0",
-      textMuted: "#94A3B8",
-      textFaint: "#475569",
-      green: "#4ADE80",
-      greenLight: "#052E16",
-      amber: "#FBBF24",
-      amberLight: "#422006",
-      red: "#F87171",
-      redLight: "#450A0A",
-      row: "#162032",
-      overlay: "rgba(0,0,0,0.7)",
-    },
-  },
   cream: {
     name: "Warm Cream + Amber",
     swatch: "#D97706",
@@ -262,6 +216,52 @@ const PALETTES: Record<PaletteKey, { name: string; swatch: string; light: Colors
       red: "#F87171",
       redLight: "#450A0A",
       row: "#221A14",
+      overlay: "rgba(0,0,0,0.7)",
+    },
+  },
+  slate: {
+    name: "Slate + Indigo",
+    swatch: "#6366F1",
+    light: {
+      bg: "#F8FAFC",
+      surface: "#FFFFFF",
+      surfaceAlt: "#F1F5F9",
+      border: "#E2E8F0",
+      borderFaint: "#EDF2F7",
+      accent: "#6366F1",
+      accentMid: "#A5B4FC",
+      accentLight: "#EEF2FF",
+      text: "#1E293B",
+      textMuted: "#64748B",
+      textFaint: "#94A3B8",
+      green: "#16A34A",
+      greenLight: "#DCFCE7",
+      amber: "#D97706",
+      amberLight: "#FEF9C3",
+      red: "#DC2626",
+      redLight: "#FEE2E2",
+      row: "#F8FAFC",
+      overlay: "rgba(30,41,59,0.5)",
+    },
+    dark: {
+      bg: "#0F172A",
+      surface: "#1E293B",
+      surfaceAlt: "#283548",
+      border: "#334155",
+      borderFaint: "#293548",
+      accent: "#818CF8",
+      accentMid: "#6366F1",
+      accentLight: "#1E1B4B",
+      text: "#E2E8F0",
+      textMuted: "#94A3B8",
+      textFaint: "#475569",
+      green: "#4ADE80",
+      greenLight: "#052E16",
+      amber: "#FBBF24",
+      amberLight: "#422006",
+      red: "#F87171",
+      redLight: "#450A0A",
+      row: "#162032",
       overlay: "rgba(0,0,0,0.7)",
     },
   },
@@ -2227,7 +2227,8 @@ function SettingsPanel({
           <Moon size={10} strokeWidth={2} /> DARK
         </span>
       </div>
-      {(Object.entries(PALETTES) as [PaletteKey, (typeof PALETTES)[PaletteKey]][]).map(([key, p]) => {
+      {(["cream", "slate", "teal"] as PaletteKey[]).map((key) => {
+        const p = PALETTES[key];
         const lightActive = settings.palette === key && settings.mode === "light";
         const darkActive = settings.palette === key && settings.mode === "dark";
         const sysActive = settings.palette === key && settings.mode === "system";
@@ -2338,6 +2339,113 @@ function SettingsPanel({
       )}
 
       {section("Accessibility")}
+      {(["contrast", "lowvision"] as PaletteKey[]).map((key) => {
+        const p = PALETTES[key];
+        const lightActive = settings.palette === key && settings.mode === "light";
+        const darkActive = settings.palette === key && settings.mode === "dark";
+        const sysActive = settings.palette === key && settings.mode === "system";
+        return (
+          <div
+            key={key}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "7px 0",
+              borderBottom: `1px solid ${C.borderFaint}`,
+            }}
+          >
+            <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.text }}>{p.name}</span>
+            <button
+              onClick={() => onUpdate({ palette: key, mode: "light" })}
+              title={`${p.name} Light`}
+              className="gbf-btn"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+                background: p.light.bg,
+                border: `2.5px solid ${lightActive || sysActive ? p.light.accent : "transparent"}`,
+                boxShadow: lightActive || sysActive ? `0 0 0 1px ${p.light.accentMid}` : "0 1px 4px rgba(0,0,0,.12)",
+                transition: "all .15s",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 5,
+                  right: 5,
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: p.light.accent,
+                }}
+              />
+              {(lightActive || sysActive) && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Check size={13} strokeWidth={3} />
+                </div>
+              )}
+            </button>
+            <button
+              onClick={() => onUpdate({ palette: key, mode: "dark" })}
+              title={`${p.name} Dark`}
+              className="gbf-btn"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                cursor: "pointer",
+                position: "relative",
+                overflow: "hidden",
+                background: p.dark.bg,
+                border: `2.5px solid ${darkActive ? p.dark.accent : "transparent"}`,
+                boxShadow: darkActive ? `0 0 0 1px ${p.dark.accentMid}` : "0 1px 4px rgba(0,0,0,.3)",
+                transition: "all .15s",
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 5,
+                  right: 5,
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  background: p.dark.accent,
+                }}
+              />
+              {darkActive && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: p.dark.text,
+                  }}
+                >
+                  <Check size={13} strokeWidth={3} />
+                </div>
+              )}
+            </button>
+          </div>
+        );
+      })}
       {toggle(
         "Dyslexia-friendly mode",
         "OpenDyslexic font, increased spacing, no uppercase text",
