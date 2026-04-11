@@ -4,7 +4,7 @@
     {
       "name": "Dashboard (Next.js)",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["run", "dev", "--prefix", "dashboard"],
       "port": 3000
     }
   ]
