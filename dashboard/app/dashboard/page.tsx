@@ -2197,6 +2197,116 @@ function SettingsPanel({
     </div>
   );
 
+  // ── Palette row renderer ────────────────────────────────────────────────
+  const paletteRows = (keys: PaletteKey[]) =>
+    keys.map((key) => {
+      const p = PALETTES[key];
+      const lightActive = settings.palette === key && settings.mode === "light";
+      const darkActive = settings.palette === key && settings.mode === "dark";
+      const sysActive = settings.palette === key && settings.mode === "system";
+      return (
+        <div
+          key={key}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "7px 0",
+            borderBottom: `1px solid ${C.borderFaint}`,
+          }}
+        >
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.text }}>{p.name}</span>
+          <button
+            onClick={() => onUpdate({ palette: key, mode: "light" })}
+            title={`${p.name} Light`}
+            className="gbf-btn"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+              background: p.light.bg,
+              border: `2.5px solid ${lightActive || sysActive ? p.light.accent : "transparent"}`,
+              boxShadow: lightActive || sysActive ? `0 0 0 1px ${p.light.accentMid}` : "0 1px 4px rgba(0,0,0,.12)",
+              transition: "all .15s",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                bottom: 5,
+                right: 5,
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: p.light.accent,
+              }}
+            />
+            {(lightActive || sysActive) && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Check size={13} strokeWidth={3} />
+              </div>
+            )}
+          </button>
+          <button
+            onClick={() => onUpdate({ palette: key, mode: "dark" })}
+            title={`${p.name} Dark`}
+            className="gbf-btn"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 10,
+              cursor: "pointer",
+              position: "relative",
+              overflow: "hidden",
+              background: p.dark.bg,
+              border: `2.5px solid ${darkActive ? p.dark.accent : "transparent"}`,
+              boxShadow: darkActive ? `0 0 0 1px ${p.dark.accentMid}` : "0 1px 4px rgba(0,0,0,.3)",
+              transition: "all .15s",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                bottom: 5,
+                right: 5,
+                width: 10,
+                height: 10,
+                borderRadius: "50%",
+                background: p.dark.accent,
+              }}
+            />
+            {darkActive && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: p.dark.text,
+                }}
+              >
+                <Check size={13} strokeWidth={3} />
+              </div>
+            )}
+          </button>
+        </div>
+      );
+    });
+
   // ── Section: Appearance ───────────────────────────────────────────────────
   const AppearanceSection = () => (
     <div>
@@ -2227,225 +2337,13 @@ function SettingsPanel({
           <Moon size={10} strokeWidth={2} /> DARK
         </span>
       </div>
-      {(["cream", "slate", "teal"] as PaletteKey[]).map((key) => {
-        const p = PALETTES[key];
-        const lightActive = settings.palette === key && settings.mode === "light";
-        const darkActive = settings.palette === key && settings.mode === "dark";
-        const sysActive = settings.palette === key && settings.mode === "system";
-        return (
-          <div
-            key={key}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "7px 0",
-              borderBottom: `1px solid ${C.borderFaint}`,
-            }}
-          >
-            <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.text }}>{p.name}</span>
-            <button
-              onClick={() => onUpdate({ palette: key, mode: "light" })}
-              title={`${p.name} Light`}
-              className="gbf-btn"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                background: p.light.bg,
-                border: `2.5px solid ${lightActive || sysActive ? p.light.accent : "transparent"}`,
-                boxShadow: lightActive || sysActive ? `0 0 0 1px ${p.light.accentMid}` : "0 1px 4px rgba(0,0,0,.12)",
-                transition: "all .15s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: p.light.accent,
-                }}
-              />
-              {(lightActive || sysActive) && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Check size={13} strokeWidth={3} />
-                </div>
-              )}
-            </button>
-            <button
-              onClick={() => onUpdate({ palette: key, mode: "dark" })}
-              title={`${p.name} Dark`}
-              className="gbf-btn"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                background: p.dark.bg,
-                border: `2.5px solid ${darkActive ? p.dark.accent : "transparent"}`,
-                boxShadow: darkActive ? `0 0 0 1px ${p.dark.accentMid}` : "0 1px 4px rgba(0,0,0,.3)",
-                transition: "all .15s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: p.dark.accent,
-                }}
-              />
-              {darkActive && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: p.dark.text,
-                  }}
-                >
-                  <Check size={13} strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          </div>
-        );
-      })}
+      {paletteRows(["cream", "slate", "teal"])}
       {toggle("Follow system", "Auto-switch with OS dark mode", settings.mode === "system", (v) =>
         onUpdate({ mode: v ? "system" : "light" }),
       )}
 
       {section("Accessibility")}
-      {(["contrast", "lowvision"] as PaletteKey[]).map((key) => {
-        const p = PALETTES[key];
-        const lightActive = settings.palette === key && settings.mode === "light";
-        const darkActive = settings.palette === key && settings.mode === "dark";
-        const sysActive = settings.palette === key && settings.mode === "system";
-        return (
-          <div
-            key={key}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "7px 0",
-              borderBottom: `1px solid ${C.borderFaint}`,
-            }}
-          >
-            <span style={{ flex: 1, fontSize: 14, fontWeight: 500, color: C.text }}>{p.name}</span>
-            <button
-              onClick={() => onUpdate({ palette: key, mode: "light" })}
-              title={`${p.name} Light`}
-              className="gbf-btn"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                background: p.light.bg,
-                border: `2.5px solid ${lightActive || sysActive ? p.light.accent : "transparent"}`,
-                boxShadow: lightActive || sysActive ? `0 0 0 1px ${p.light.accentMid}` : "0 1px 4px rgba(0,0,0,.12)",
-                transition: "all .15s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: p.light.accent,
-                }}
-              />
-              {(lightActive || sysActive) && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Check size={13} strokeWidth={3} />
-                </div>
-              )}
-            </button>
-            <button
-              onClick={() => onUpdate({ palette: key, mode: "dark" })}
-              title={`${p.name} Dark`}
-              className="gbf-btn"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                cursor: "pointer",
-                position: "relative",
-                overflow: "hidden",
-                background: p.dark.bg,
-                border: `2.5px solid ${darkActive ? p.dark.accent : "transparent"}`,
-                boxShadow: darkActive ? `0 0 0 1px ${p.dark.accentMid}` : "0 1px 4px rgba(0,0,0,.3)",
-                transition: "all .15s",
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 5,
-                  right: 5,
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: p.dark.accent,
-                }}
-              />
-              {darkActive && (
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: p.dark.text,
-                  }}
-                >
-                  <Check size={13} strokeWidth={3} />
-                </div>
-              )}
-            </button>
-          </div>
-        );
-      })}
+      {paletteRows(["contrast", "lowvision"])}
       {toggle(
         "Dyslexia-friendly mode",
         "OpenDyslexic font, increased spacing, no uppercase text",
