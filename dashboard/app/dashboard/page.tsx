@@ -311,7 +311,7 @@ const CALL_TREND = [
 ];
 const BARBER_STATS = [
   { name: "Nikos",   revenue: 1840, clients: 87, appts: 92, topService: "Haircut",          avgTicket: 21.1, utilization: 88, color: "#3D7A50" },
-  { name: "Giorgos", revenue: 1620, clients: 74, appts: 79, topService: "Full Package",     avgTicket: 20.5, utilization: 78, color: "#1B5EBE" },
+  { name: "Giorgos", revenue: 1620, clients: 74, appts: 79, topService: "Haircut + Beard Combo", avgTicket: 20.5, utilization: 78, color: "#1B5EBE" },
   { name: "Eleni",   revenue: 1280, clients: 68, appts: 73, topService: "Eyebrow Grooming", avgTicket: 17.5, utilization: 72, color: "#C0305A" },
   { name: "Petros",  revenue: 1100, clients: 52, appts: 58, topService: "Full Shave",  avgTicket: 19.0, utilization: 63, color: "#6747C7" },
 ];
@@ -320,10 +320,9 @@ const SERVICE_STATS = [
   { name: "Beard Trim",       count: 32, revenue: 384, pct: 21 },
   { name: "Full Shave",       count: 18, revenue: 216, pct: 12 },
   { name: "Eyebrow Grooming", count: 16, revenue: 128, pct: 11 },
-  { name: "Full Package",     count: 14, revenue: 560, pct: 9  },
+  { name: "Haircut + Beard Combo", count: 20, revenue: 440, pct: 13 },
   { name: "Hair Styling",      count: 10, revenue: 200, pct: 7  },
   { name: "Kids Cut",         count: 8,  revenue: 80,  pct: 5  },
-  { name: "Haircut + Beard Combo", count: 6, revenue: 132, pct: 4 },
 ];
 const PEAK_DAYS = ["Tue", "Wed", "Thu", "Fri", "Sat"];
 const PEAK_HOURS_LABELS = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
@@ -2009,9 +2008,12 @@ function WalkInModal({ C, barbers, businessId, onClose, onSaved }: {
     if (!name.trim()) { setErr("Client name is required."); return; }
     setSaving(true); setErr("");
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      if (!token) { setErr("Not authenticated — please refresh and log in again."); setSaving(false); return; }
       const res = await fetch("/api/appointments", {
         method:"POST",
-        headers:{"Content-Type":"application/json"},
+        headers:{"Content-Type":"application/json", Authorization: `Bearer ${token}`},
         body: JSON.stringify({
           business_id: businessId,
           client_name: name.trim(),
