@@ -3325,7 +3325,7 @@ function LedgerTab({ C, density, aiBookings, liveCall, selectedConvId, onConvSel
             <div key={a.id} id={`m-ledger-entry-${a.id}`}>
               <div className={`gbf-lift-sm${isAI ? " gbf-card-pressable" : ""}`}
                 onClick={() => isAI && a.conversation_id ? loadCallTranscript(a.conversation_id, a.summary) : undefined}
-                style={{ background: isLiveRow ? C.amberLight : C.surface, borderRadius: 14, overflow: "hidden", border: `1px solid ${isLiveRow ? C.amber + "55" : C.border}`, borderLeft: `4px solid ${STATUS_BORDER[a.status] ?? C.border}`, cursor: isAI ? "pointer" : "default" }}>
+                style={{ background: isLiveRow ? C.amberLight : C.surface, borderRadius: 14, overflow: "hidden", borderTop: `1px solid ${isLiveRow ? C.amber + "55" : C.border}`, borderRight: `1px solid ${isLiveRow ? C.amber + "55" : C.border}`, borderBottom: `1px solid ${isLiveRow ? C.amber + "55" : C.border}`, borderLeft: `4px solid ${STATUS_BORDER[a.status] ?? C.border}`, cursor: isAI ? "pointer" : "default" }}>
                 <div style={{ padding: "14px 16px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
