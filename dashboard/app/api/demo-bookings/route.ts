@@ -4,14 +4,13 @@ import { SERVICE_CATALOGUE, BARBER_NAME_POOL, rInt, pick, pickN } from "@/lib/ba
 
 // Durations (minutes) for each catalogue service — server-only concern
 const SERVICE_DURATIONS: Record<string, number> = {
-  "Haircut":              30,
-  "Beard Trim & Shaping": 20,
-  "Hot Towel Shave":      30,
-  "Full Grooming Package":60,
-  "Head Shave":           25,
-  "Hair Colour":          60,
-  "Eyebrow Grooming":     15,
-  "Scalp Massage":        20,
+  "Haircut":               30,
+  "Beard Trim":            20,
+  "Full Shave":            25,
+  "Haircut + Beard Combo": 45,
+  "Kids Cut":              20,
+  "Hair Styling":          40,
+  "Eyebrow Grooming":      10,
 };
 const SERVICES = SERVICE_CATALOGUE.map(s => ({ ...s, duration: SERVICE_DURATIONS[s.name] ?? 30 }));
 

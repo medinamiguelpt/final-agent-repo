@@ -1,16 +1,15 @@
 export interface BarberService { name: string; price: number }
 export interface BarberDraft   { name: string; services: BarberService[] }
 
-/** Service catalogue — exact names the AI agent detects + real prices. */
+/** Service catalogue — must match the agent prompt exactly. */
 export const SERVICE_CATALOGUE: BarberService[] = [
-  { name: "Haircut",              price: 15 },
-  { name: "Beard Trim & Shaping", price: 12 },
-  { name: "Hot Towel Shave",      price: 18 },
-  { name: "Full Grooming Package",price: 30 },
-  { name: "Head Shave",           price: 15 },
-  { name: "Hair Colour",          price: 20 },
-  { name: "Eyebrow Grooming",     price:  8 },
-  { name: "Scalp Massage",        price: 10 },
+  { name: "Haircut",                price: 15 },
+  { name: "Beard Trim",             price: 10 },
+  { name: "Full Shave",             price: 12 },
+  { name: "Haircut + Beard Combo",  price: 22 },
+  { name: "Kids Cut",               price: 10 },
+  { name: "Hair Styling",           price: 20 },
+  { name: "Eyebrow Grooming",       price:  5 },
 ];
 
 /** Shared barber name pool used by both the creation modal and demo-booking generator. */

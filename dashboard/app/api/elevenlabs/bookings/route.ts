@@ -15,13 +15,12 @@ import {
 // Checked in priority order — first match wins
 
 const SERVICE_PATTERNS: { name: string; patterns: RegExp[] }[] = [
-  { name: "Full Grooming Package",  patterns: [/full\s*(grooming\s*)?package/i,/paquete\s*completo/i,/πλήρ(ες|η)\s*πακέτο/i,/πακέτο\s*(περιποίησης|grooming)/i,/full\s*service/i] },
-  { name: "Hot Towel Shave",        patterns: [/hot\s*towel\s*shave/i,/afeitado\s*(clásico|navaja|tradicional)/i,/rasage\s*(traditionnel|classique)/i,/ξύρισμα\s*(με\s*(ζεστή|θερμή)\s*πετσέτα|κλασικό)/i,/straight\s*razor/i,/traditional\s*shave/i] },
-  { name: "Head Shave",             patterns: [/head\s*shave/i,/afeitar\s*(cabeza|cráneo)/i,/ξύρισμα\s*(κεφαλιού|κεφάλι)/i,/shave\s*(my\s*)?head/i,/zero\s*(cut|grade)/i] },
-  { name: "Beard Trim & Shaping",   patterns: [/beard\s*(trim|shap|groom|cut|style)/i,/trim\s*(my\s*)?beard/i,/arreglo\s*de\s*barba/i,/barba/i,/μούσι/i,/γενειάδα/i,/\bbeard\b/i] },
+  { name: "Haircut + Beard Combo",  patterns: [/combo/i,/haircut\s*(\+|and|&)\s*beard/i,/κούρεμα\s*(και|&|\+)\s*(γέν|μούσι|μπαρμπ)/i,/corte\s*y\s*barba/i,/full\s*(grooming\s*)?package/i,/πακέτο/i] },
+  { name: "Full Shave",             patterns: [/full\s*shave/i,/ξύρισμα/i,/afeitado/i,/rasage/i,/straight\s*razor/i,/traditional\s*shave/i,/hot\s*towel\s*shave/i,/head\s*shave/i,/shave\s*(my\s*)?head/i] },
+  { name: "Beard Trim",             patterns: [/beard\s*(trim|shap|groom|cut|style)/i,/trim\s*(my\s*)?beard/i,/arreglo\s*de\s*barba/i,/barba/i,/μούσι/i,/γενειάδα/i,/γένι(α)?/i,/\bbeard\b/i] },
   { name: "Eyebrow Grooming",       patterns: [/eyebrow/i,/brow\s*(shap|trim|groom)/i,/cejas/i,/φρύδι(α|ων)?/i] },
-  { name: "Scalp Massage",          patterns: [/scalp\s*massage/i,/masaje\s*(capilar|cuero)/i,/μασάζ\s*(κεφαλιού|κεφάλι)/i,/head\s*massage/i] },
-  { name: "Hair Colour",            patterns: [/hair\s*(colo(u)?r|dye|tint)/i,/color(ación)?\s*(de\s*pelo|cabello)/i,/tinte/i,/βαφή\s*μαλλιών/i] },
+  { name: "Kids Cut",               patterns: [/kids?\s*cut/i,/child('?s)?\s*(hair)?cut/i,/παιδικό/i,/corte\s*(de\s*)?niño/i,/under\s*12/i] },
+  { name: "Hair Styling",           patterns: [/hair\s*styl/i,/styling/i,/στάιλ/i,/στάιλινγκ/i,/peinado/i,/coiffure/i,/frisur/i,/grooming/i] },
   { name: "Haircut",                patterns: [/hair\s*cut/i,/haircut/i,/corte\s*(de\s*(pelo|cabello))?/i,/κούρεμα/i,/κόψ(ιμο|ω|ε)\s*(τα\s*)?μαλλιά/i,/\bcut\b/i,/coupe/i,/haarschnitt/i,/taglio/i] },
 ];
 
@@ -42,16 +41,15 @@ function detectServices(text: string): string {
 
 // ── Price extraction ──────────────────────────────────────────────────────────
 
-// Standard prices for this shop — used as fallback when nothing is in the transcript
+// Standard prices — must match the agent prompt exactly
 const SERVICE_DEFAULT_PRICES: Record<string, number> = {
-  "Haircut":              15,
-  "Beard Trim & Shaping": 12,
-  "Hot Towel Shave":      18,
-  "Head Shave":           15,
-  "Hair Colour":          20,
-  "Eyebrow Grooming":     8,
-  "Scalp Massage":        10,
-  "Full Grooming Package":30,
+  "Haircut":               15,
+  "Beard Trim":            10,
+  "Full Shave":            12,
+  "Haircut + Beard Combo": 22,
+  "Kids Cut":              10,
+  "Hair Styling":          20,
+  "Eyebrow Grooming":       5,
 };
 
 /**
@@ -482,16 +480,48 @@ export async function GET(req: Request) {
         ? await query.eq("business_id", businessIds[0])
         : await query.in("business_id", businessIds);
 
-      // If a specific business was requested and we got a clean (even empty) result,
-      // return it directly — don't fall through to the ElevenLabs global agent.
-      // Specific business: return result even if empty (no ElevenLabs fallback needed)
-      if (businessIdParam && !error) {
-        return NextResponse.json({ bookings: (rows ?? []).map(mapCallToBooking), source: "supabase" });
-      }
+      // Supabase returned a clean result — use it, but also merge any
+      // ElevenLabs conversations not yet stored via webhook (covers calls
+      // that happened before the webhook was set up).
+      if (!error) {
+        const supabaseBookings = (rows ?? []).map(mapCallToBooking);
+        const supabaseConvIds = new Set(supabaseBookings.map((b: { conversation_id: string }) => b.conversation_id));
 
-      // All-shops: return if query succeeded (empty result is still valid)
-      if (!error && rows) {
-        return NextResponse.json({ bookings: (rows as Call[]).map(mapCallToBooking), source: "supabase" });
+        // Try enriching with live ElevenLabs data
+        let elBookings: ReturnType<typeof buildBooking>[] = [];
+        if (process.env.ELEVENLABS_API_KEY) {
+          try {
+            const agentConvs = await Promise.all(
+              ACTIVE_AGENTS.map(async (agent) => {
+                try {
+                  const convs = await listConversations(agent.id, 50);
+                  return convs.map(c => ({ ...c, _agentId: agent.id }));
+                } catch { return []; }
+              })
+            );
+            const seen = new Set<string>();
+            const allConvs = agentConvs
+              .flat()
+              .sort((a, b) => b.start_time_unix_secs - a.start_time_unix_secs)
+              .filter(c => {
+                if (seen.has(c.conversation_id)) return false;
+                if (supabaseConvIds.has(c.conversation_id)) { seen.add(c.conversation_id); return false; }
+                seen.add(c.conversation_id);
+                const title = c.call_summary_title ?? "";
+                const isTrivial = c.message_count <= 1 && c.call_duration_secs < 20
+                  && (!title || /^greek barber festival/i.test(title));
+                return !isTrivial;
+              });
+            const toEnrich = allConvs.slice(0, 15);
+            const details = await Promise.all(toEnrich.map(c => getConversation(c.conversation_id)));
+            elBookings = toEnrich.map((conv, i) => buildBooking(conv, details[i]));
+          } catch { /* ElevenLabs unavailable — just use Supabase data */ }
+        }
+
+        const merged = [...supabaseBookings, ...elBookings]
+          .sort((a, b) => b.start_time_unix_secs - a.start_time_unix_secs);
+
+        return NextResponse.json({ bookings: merged, source: supabaseBookings.length > 0 ? "supabase" : "elevenlabs" });
       }
     } catch (e) {
       console.warn("[bookings] Supabase read failed, falling back to ElevenLabs:", e);

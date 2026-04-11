@@ -202,12 +202,12 @@ const DEFAULT_SETTINGS: Settings = {
   navPosition: "top",
 };
 const DEFAULT_PROFILE: BusinessProfile = {
-  businessName: "Demo Barbershop",
+  businessName: "Greek Barber Festival",
   ownerName: "",
   size: "small",
   email: "demo@barbershop.com",
   phone: "",
-  address: "",
+  address: "Leoforos Kifissou 42, Egaleo",
   city: "Athens",
   country: "GR",
   postcode: "",
@@ -254,21 +254,21 @@ const fmt = (d: Date) => d.toLocaleDateString("el-GR", { day: "2-digit", month: 
 const d0 = fmt(TODAY), d1 = fmt(new Date(TODAY.getTime() + 86400000)), d2 = fmt(new Date(TODAY.getTime() + 172800000));
 
 const APPOINTMENTS = [
-  { id: 1,  name: "Αλέξανδρος", service: "Haircut",              barber: "Nikos",   date: d0, time: "10:30", status: "confirmed",   price: 15 },
-  { id: 2,  name: "Maria S.",   service: "Eyebrow Grooming",     barber: "Eleni",   date: d0, time: "11:00", status: "confirmed",   price: 8  },
-  { id: 3,  name: "Δημήτρης",  service: "Full Grooming Package", barber: "Giorgos", date: d0, time: "12:00", status: "in-progress", price: 40 },
-  { id: 4,  name: "Sofia A.",   service: "Hot Towel Shave",      barber: "Petros",  date: d0, time: "13:30", status: "confirmed",   price: 18 },
-  { id: 5,  name: "Νίκος Κ.",  service: "Beard Trim & Shaping", barber: "Nikos",   date: d0, time: "14:00", status: "pending",     price: 12 },
-  { id: 6,  name: "Elena P.",   service: "Hair Colour",          barber: "Eleni",   date: d0, time: "15:00", status: "confirmed",   price: 20 },
-  { id: 7,  name: "Βασίλης",   service: "Head Shave",           barber: "Giorgos", date: d0, time: "16:30", status: "confirmed",   price: 15 },
-  { id: 8,  name: "Κώστας Μ.", service: "Scalp Massage",        barber: "Petros",  date: d0, time: "17:00", status: "cancelled",   price: 10 },
-  { id: 9,  name: "Θανάσης",   service: "Haircut",              barber: "Nikos",   date: d1, time: "10:30", status: "confirmed",   price: 15 },
-  { id: 10, name: "Ειρήνη",    service: "Full Grooming Package", barber: "Eleni",  date: d1, time: "11:00", status: "pending",     price: 40 },
-  { id: 11, name: "Παναγιώτης",service: "Hot Towel Shave",      barber: "Giorgos", date: d1, time: "13:00", status: "confirmed",   price: 18 },
-  { id: 12, name: "Μαρία Κ.",  service: "Eyebrow Grooming",     barber: "Eleni",   date: d1, time: "14:30", status: "confirmed",   price: 8  },
-  { id: 13, name: "Γιώργης",   service: "Beard Trim & Shaping", barber: "Petros",  date: d1, time: "15:00", status: "confirmed",   price: 12 },
-  { id: 14, name: "Στέλιος",   service: "Haircut",              barber: "Nikos",   date: d2, time: "10:00", status: "confirmed",   price: 15 },
-  { id: 15, name: "Χριστίνα",  service: "Hair Colour",          barber: "Eleni",   date: d2, time: "11:00", status: "confirmed",   price: 20 },
+  { id: 1,  name: "Αλέξανδρος", service: "Haircut",               barber: "Nikos",   date: d0, time: "10:30", status: "confirmed",   price: 15 },
+  { id: 2,  name: "Maria S.",   service: "Eyebrow Grooming",      barber: "Eleni",   date: d0, time: "11:00", status: "confirmed",   price: 5  },
+  { id: 3,  name: "Δημήτρης",  service: "Haircut + Beard Combo", barber: "Giorgos", date: d0, time: "12:00", status: "in-progress", price: 22 },
+  { id: 4,  name: "Sofia A.",   service: "Full Shave",            barber: "Petros",  date: d0, time: "13:30", status: "confirmed",   price: 12 },
+  { id: 5,  name: "Νίκος Κ.",  service: "Beard Trim",            barber: "Nikos",   date: d0, time: "14:00", status: "pending",     price: 10 },
+  { id: 6,  name: "Elena P.",   service: "Hair Styling",          barber: "Eleni",   date: d0, time: "15:00", status: "confirmed",   price: 20 },
+  { id: 7,  name: "Βασίλης",   service: "Full Shave",            barber: "Giorgos", date: d0, time: "16:30", status: "confirmed",   price: 12 },
+  { id: 8,  name: "Κώστας Μ.", service: "Kids Cut",              barber: "Petros",  date: d0, time: "17:00", status: "cancelled",   price: 10 },
+  { id: 9,  name: "Θανάσης",   service: "Haircut",               barber: "Nikos",   date: d1, time: "10:30", status: "confirmed",   price: 15 },
+  { id: 10, name: "Ειρήνη",    service: "Haircut + Beard Combo", barber: "Eleni",   date: d1, time: "11:00", status: "pending",     price: 22 },
+  { id: 11, name: "Παναγιώτης",service: "Full Shave",            barber: "Giorgos", date: d1, time: "13:00", status: "confirmed",   price: 12 },
+  { id: 12, name: "Μαρία Κ.",  service: "Eyebrow Grooming",      barber: "Eleni",   date: d1, time: "14:30", status: "confirmed",   price: 5  },
+  { id: 13, name: "Γιώργης",   service: "Beard Trim",            barber: "Petros",  date: d1, time: "15:00", status: "confirmed",   price: 10 },
+  { id: 14, name: "Στέλιος",   service: "Haircut",               barber: "Nikos",   date: d2, time: "10:00", status: "confirmed",   price: 15 },
+  { id: 15, name: "Χριστίνα",  service: "Hair Styling",          barber: "Eleni",   date: d2, time: "11:00", status: "confirmed",   price: 20 },
 ];
 const DENSITY_PAD: Record<DensityKey, { card: string; row: string; gap: number }> = {
   compact:     { card: "14px 18px", row: "9px 14px",  gap: 14 },
@@ -313,17 +313,17 @@ const BARBER_STATS = [
   { name: "Nikos",   revenue: 1840, clients: 87, appts: 92, topService: "Haircut",          avgTicket: 21.1, utilization: 88, color: "#3D7A50" },
   { name: "Giorgos", revenue: 1620, clients: 74, appts: 79, topService: "Full Package",     avgTicket: 20.5, utilization: 78, color: "#1B5EBE" },
   { name: "Eleni",   revenue: 1280, clients: 68, appts: 73, topService: "Eyebrow Grooming", avgTicket: 17.5, utilization: 72, color: "#C0305A" },
-  { name: "Petros",  revenue: 1100, clients: 52, appts: 58, topService: "Hot Towel Shave",  avgTicket: 19.0, utilization: 63, color: "#6747C7" },
+  { name: "Petros",  revenue: 1100, clients: 52, appts: 58, topService: "Full Shave",  avgTicket: 19.0, utilization: 63, color: "#6747C7" },
 ];
 const SERVICE_STATS = [
   { name: "Haircut",          count: 48, revenue: 720, pct: 32 },
   { name: "Beard Trim",       count: 32, revenue: 384, pct: 21 },
-  { name: "Hot Towel Shave",  count: 18, revenue: 324, pct: 12 },
+  { name: "Full Shave",       count: 18, revenue: 216, pct: 12 },
   { name: "Eyebrow Grooming", count: 16, revenue: 128, pct: 11 },
   { name: "Full Package",     count: 14, revenue: 560, pct: 9  },
-  { name: "Hair Colour",      count: 10, revenue: 200, pct: 7  },
-  { name: "Head Shave",       count: 8,  revenue: 120, pct: 5  },
-  { name: "Scalp Massage",    count: 6,  revenue: 60,  pct: 4  },
+  { name: "Hair Styling",      count: 10, revenue: 200, pct: 7  },
+  { name: "Kids Cut",         count: 8,  revenue: 80,  pct: 5  },
+  { name: "Haircut + Beard Combo", count: 6, revenue: 132, pct: 4 },
 ];
 const PEAK_DAYS = ["Tue", "Wed", "Thu", "Fri", "Sat"];
 const PEAK_HOURS_LABELS = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
@@ -346,41 +346,47 @@ const _pastDate = (daysAgo: number) => _dfmt(new Date(Date.now() - daysAgo * 864
 type TMsg = { role: "agent" | "user"; message: string; time_in_call_secs: number };
 const DEMO_TRANSCRIPTS: Record<string, TMsg[]> = {
   demo_001: [
-    { role: "agent", message: "Καλησπέρα, ευχαριστούμε που επικοινωνήσατε με το Demo Barbershop! Πώς μπορώ να σας βοηθήσω;", time_in_call_secs: 0 },
+    { role: "agent", message: "Καλησπέρα σας, Greek Barber Festival. Τι μπορώ να κάνω για εσάς;", time_in_call_secs: 0 },
     { role: "user",  message: "Γεια σας, θα ήθελα να κλείσω ένα ραντεβού για κούρεμα.", time_in_call_secs: 7 },
-    { role: "agent", message: "Φυσικά! Έχουμε τον Nikos, τον Giorgos, την Eleni και τον Petros διαθέσιμους. Έχετε κάποια προτίμηση;", time_in_call_secs: 10 },
-    { role: "user",  message: "Με τον Nikos παρακαλώ. Μπορείτε σήμερα στις 10:30;", time_in_call_secs: 18 },
-    { role: "agent", message: "Μια στιγμή να ελέγξω τη διαθεσιμότητα... Ναι, ο Nikos είναι ελεύθερος σήμερα στις 10:30! Πώς σας λένε;", time_in_call_secs: 22 },
+    { role: "agent", message: "Τι μέρα και ώρα σας βολεύει;", time_in_call_secs: 10 },
+    { role: "user",  message: "Σήμερα στις δεκα και μισή, με τον Nikos.", time_in_call_secs: 18 },
+    { role: "agent", message: "Σήμερα στις δέκα και μισή με τον Nikos. Πώς σας λένε;", time_in_call_secs: 22 },
     { role: "user",  message: "Μιχάλης.", time_in_call_secs: 32 },
-    { role: "agent", message: "Τέλεια Μιχάλη! Έχω κλείσει ραντεβού για κούρεμα με τον Nikos σήμερα στις 10:30. Σας περιμένουμε!", time_in_call_secs: 35 },
-    { role: "user",  message: "Ευχαριστώ πολύ!", time_in_call_secs: 44 },
-    { role: "agent", message: "Παρακαλώ! Καλή συνέχεια!", time_in_call_secs: 46 },
+    { role: "agent", message: "Μιχάλη, κούρεμα με τον Nikos σήμερα στις δέκα και μισή. Θέλετε να προσθέσουμε και beard trim;", time_in_call_secs: 35 },
+    { role: "user",  message: "Όχι, μόνο κούρεμα. Ευχαριστώ!", time_in_call_secs: 44 },
+    { role: "agent", message: "Κλείσαμε! Τα λέμε, Μιχάλη!", time_in_call_secs: 46 },
   ],
   demo_002: [
-    { role: "agent", message: "Good afternoon, thank you for calling Demo Barbershop! How can I help you today?", time_in_call_secs: 0 },
-    { role: "user",  message: "Hi! I'd like to book a hair colouring appointment please.", time_in_call_secs: 6 },
-    { role: "agent", message: "Of course! We have Eleni who specialises in hair colour and colouring treatments. Would you like to book with her?", time_in_call_secs: 9 },
-    { role: "user",  message: "Yes, that sounds great. Do you have anything available this afternoon?", time_in_call_secs: 18 },
-    { role: "agent", message: "Let me check availability… We have a slot at 14:00 this afternoon with Eleni. Does that work for you?", time_in_call_secs: 22 },
-    { role: "user",  message: "Perfect, yes! That works.", time_in_call_secs: 33 },
-    { role: "agent", message: "Wonderful! May I take your name please?", time_in_call_secs: 36 },
-    { role: "user",  message: "Elena, Elena Papadimitriou.", time_in_call_secs: 41 },
-    { role: "agent", message: "Great, Elena! You're booked for a hair colour with Eleni today at 14:00. We look forward to seeing you!", time_in_call_secs: 44 },
+    { role: "agent", message: "Good afternoon, thank you for calling Greek Barber Festival! How can I help you today?", time_in_call_secs: 0 },
+    { role: "user",  message: "Hi! I'd like to book a hair styling appointment please.", time_in_call_secs: 6 },
+    { role: "agent", message: "What day and time works for you?", time_in_call_secs: 9 },
+    { role: "user",  message: "This afternoon if possible?", time_in_call_secs: 18 },
+    { role: "agent", message: "What time in the afternoon?", time_in_call_secs: 22 },
+    { role: "user",  message: "Two o'clock works.", time_in_call_secs: 33 },
+    { role: "agent", message: "Two works. Do you have a preference for a barber?", time_in_call_secs: 36 },
+    { role: "user",  message: "Eleni please.", time_in_call_secs: 41 },
+    { role: "agent", message: "What is your name?", time_in_call_secs: 44 },
+    { role: "user",  message: "Elena.", time_in_call_secs: 48 },
+    { role: "agent", message: "Elena, hair styling with Eleni today at two. Would you like to add a beard trim or eyebrow grooming?", time_in_call_secs: 50 },
+    { role: "user",  message: "No thanks, just the styling.", time_in_call_secs: 56 },
+    { role: "agent", message: "All set! See you, Elena!", time_in_call_secs: 58 },
     { role: "user",  message: "Thank you so much!", time_in_call_secs: 53 },
     { role: "agent", message: "You're welcome! See you this afternoon!", time_in_call_secs: 55 },
   ],
   demo_003: [
-    { role: "agent", message: "Καλημέρα, Demo Barbershop! Τι μπορώ να κάνω για εσάς;", time_in_call_secs: 0 },
-    { role: "user",  message: "Γεια σας! Θα ήθελα να κλείσω ένα full grooming package. Έχω μία ειδική εκδήλωση αύριο.", time_in_call_secs: 5 },
-    { role: "agent", message: "Εξαιρετικά! Το full grooming package περιλαμβάνει κούρεμα, περιποίηση γενιάς και φαβορίτες. Ποιον κουρέα προτιμάτε;", time_in_call_secs: 9 },
-    { role: "user",  message: "Τον Giorgos αν είναι δυνατόν. Μπορεί χθες στις 11;", time_in_call_secs: 20 },
-    { role: "agent", message: "Ναι, ο Giorgos είναι διαθέσιμος στις 11:00! Το όνομά σας παρακαλώ;", time_in_call_secs: 25 },
-    { role: "user",  message: "Δημήτρης Αναστασίου.", time_in_call_secs: 34 },
-    { role: "agent", message: "Τέλεια Δημήτρη! Έχω κλείσει full grooming package με τον Giorgos στις 11:00. Καλή επιτυχία στην εκδήλωση!", time_in_call_secs: 37 },
+    { role: "agent", message: "Καλημέρα, Greek Barber Festival! Τι μπορώ να κάνω για εσάς;", time_in_call_secs: 0 },
+    { role: "user",  message: "Γεια σας! Θα ήθελα κούρεμα και γένια μαζί. Έχω μία ειδική εκδήλωση αύριο.", time_in_call_secs: 5 },
+    { role: "agent", message: "Τι μέρα και ώρα σας βολεύει;", time_in_call_secs: 9 },
+    { role: "user",  message: "Αύριο στις 11 αν γίνεται, με τον Giorgos.", time_in_call_secs: 20 },
+    { role: "agent", message: "Αύριο στις έντεκα με τον Giorgos. Πώς σας λένε;", time_in_call_secs: 25 },
+    { role: "user",  message: "Δημήτρης.", time_in_call_secs: 34 },
+    { role: "agent", message: "Δημήτρη, κούρεμα και γένια combo με τον Giorgos αύριο στις έντεκα. Θέλετε να προσθέσουμε και eyebrow grooming;", time_in_call_secs: 37 },
+    { role: "user",  message: "Όχι ευχαριστώ.", time_in_call_secs: 44 },
+    { role: "agent", message: "Κλείσαμε! Τα λέμε, Δημήτρη!", time_in_call_secs: 46 },
     { role: "user",  message: "Ευχαριστώ πολύ!", time_in_call_secs: 48 },
   ],
   demo_004: [
-    { role: "agent", message: "Demo Barbershop, καλησπέρα! Πώς μπορώ να σας εξυπηρετήσω;", time_in_call_secs: 0 },
+    { role: "agent", message: "Greek Barber Festival, καλησπέρα! Πώς μπορώ να σας εξυπηρετήσω;", time_in_call_secs: 0 },
     { role: "user",  message: "Γεια σας, θέλω να κλείσω ραντεβού για διαμόρφωση φρυδιών με την Eleni.", time_in_call_secs: 6 },
     { role: "agent", message: "Φυσικά! Η Eleni είναι ειδικεύεται στο eyebrow grooming. Ποιο απόγευμα σας βολεύει;", time_in_call_secs: 10 },
     { role: "user",  message: "Χθες στις 4 και μισή αν γίνεται.", time_in_call_secs: 18 },
@@ -389,40 +395,42 @@ const DEMO_TRANSCRIPTS: Record<string, TMsg[]> = {
     { role: "agent", message: "Άψογα Sofia! Eyebrow grooming με την Eleni στις 16:30. Σας περιμένουμε!", time_in_call_secs: 33 },
   ],
   demo_005: [
-    { role: "agent", message: "Καλημέρα, Demo Barbershop! Τι μπορώ να κάνω για εσάς;", time_in_call_secs: 0 },
+    { role: "agent", message: "Καλημέρα, Greek Barber Festival! Τι μπορώ να κάνω για εσάς;", time_in_call_secs: 0 },
     { role: "user",  message: "Γεια σας. Θέλω να ακυρώσω το ραντεβού μου, κάτι έτυχε στη δουλειά.", time_in_call_secs: 5 },
     { role: "agent", message: "Λυπάμαι που το ακούω αυτό. Μπορείτε να μου πείτε το όνομά σας για να βρω το ραντεβού;", time_in_call_secs: 10 },
     { role: "user",  message: "Κώστας Βασιλόπουλος.", time_in_call_secs: 18 },
-    { role: "agent", message: "Βρήκα το ραντεβού σας Κώστα — hot towel shave με τον Petros στις 09:30. Θέλετε να το ακυρώσω;", time_in_call_secs: 22 },
+    { role: "agent", message: "Βρήκα το ραντεβού σας Κώστα — ξύρισμα με τον Petros στις 09:30. Θέλετε να το ακυρώσω;", time_in_call_secs: 22 },
     { role: "user",  message: "Ναι παρακαλώ.", time_in_call_secs: 32 },
     { role: "agent", message: "Το ραντεβού ακυρώθηκε. Θα θέλατε να κλείσουμε κάποια άλλη ημέρα;", time_in_call_secs: 35 },
     { role: "user",  message: "Όχι αυτή τη στιγμή, θα επικοινωνήσω ξανά. Ευχαριστώ.", time_in_call_secs: 41 },
     { role: "agent", message: "Κανένα πρόβλημα! Σας περιμένουμε όποτε θέλετε. Καλή συνέχεια!", time_in_call_secs: 45 },
   ],
   demo_006: [
-    { role: "agent", message: "Demo Barbershop, καλημέρα! Πώς μπορώ να σας βοηθήσω;", time_in_call_secs: 0 },
-    { role: "user",  message: "Γεια! Θέλω ραντεβού για beard trim and shaping. Ειδικά με τον Nikos αν μπορεί.", time_in_call_secs: 6 },
-    { role: "agent", message: "Ο Nikos κάνει εξαιρετική δουλειά στη διαμόρφωση γενιάς! Πότε σας βολεύει;", time_in_call_secs: 11 },
-    { role: "user",  message: "Πριν λίγες μέρες στη 1 το μεσημέρι;", time_in_call_secs: 19 },
-    { role: "agent", message: "Ο Nikos είναι ελεύθερος εκείνη την ώρα. Το όνομά σας;", time_in_call_secs: 23 },
-    { role: "user",  message: "Γιώργης Παπαδόπουλος. Και μια ερώτηση — πουλάτε και προϊόντα για γένια;", time_in_call_secs: 30 },
-    { role: "agent", message: "Ναι, έχουμε μια επιλογή από premium προϊόντα περιποίησης γενιάς. Μπορείτε να ρωτήσετε τον Nikos όταν έρθετε!", time_in_call_secs: 37 },
-    { role: "user",  message: "Τέλεια, ευχαριστώ!", time_in_call_secs: 50 },
-    { role: "agent", message: "Παρακαλώ Γιώργη! Beard trim με τον Nikos στις 13:00 είναι κλεισμένο. Σας περιμένουμε!", time_in_call_secs: 53 },
+    { role: "agent", message: "Greek Barber Festival, καλημέρα! Πώς μπορώ να σας βοηθήσω;", time_in_call_secs: 0 },
+    { role: "user",  message: "Γεια! Θέλω ραντεβού για τακτοποίηση μούσι. Με τον Nikos αν μπορεί.", time_in_call_secs: 6 },
+    { role: "agent", message: "Τι μέρα και ώρα σας βολεύει;", time_in_call_secs: 11 },
+    { role: "user",  message: "Στη μία το μεσημέρι.", time_in_call_secs: 19 },
+    { role: "agent", message: "Στη μία με τον Nikos. Πώς σας λένε;", time_in_call_secs: 23 },
+    { role: "user",  message: "Γιώργης.", time_in_call_secs: 30 },
+    { role: "agent", message: "Γιώργη, beard trim με τον Nikos σήμερα στη μία. Θέλετε να προσθέσουμε και κούρεμα;", time_in_call_secs: 33 },
+    { role: "user",  message: "Όχι, μόνο γένια. Ευχαριστώ!", time_in_call_secs: 40 },
+    { role: "agent", message: "Κλείσαμε! Τα λέμε, Γιώργη!", time_in_call_secs: 42 },
   ],
   demo_007: [
-    { role: "agent", message: "Good afternoon, Demo Barbershop! How can I assist you?", time_in_call_secs: 0 },
-    { role: "user",  message: "Hi, I wanted to ask about scalp massage — do you offer that?", time_in_call_secs: 6 },
-    { role: "agent", message: "Yes we do! Our scalp massage is a relaxing 30-minute treatment that improves circulation and reduces tension. It's priced at €10. Would you like to book one?", time_in_call_secs: 10 },
-    { role: "user",  message: "That sounds wonderful. Yes, I'd like to book with Eleni if possible.", time_in_call_secs: 24 },
-    { role: "agent", message: "Eleni is available Wednesday at 15:00. Does that work for you?", time_in_call_secs: 28 },
-    { role: "user",  message: "Perfect! And can I make it a regular weekly appointment?", time_in_call_secs: 36 },
-    { role: "agent", message: "Absolutely, we'd love that! I'll note your preference. May I have your name?", time_in_call_secs: 40 },
-    { role: "user",  message: "Maria Konstantinou.", time_in_call_secs: 48 },
-    { role: "agent", message: "Wonderful Maria! Scalp massage with Eleni at 15:00 is confirmed. We look forward to making this a weekly treat for you!", time_in_call_secs: 51 },
+    { role: "agent", message: "Good afternoon, Greek Barber Festival! How can I assist you?", time_in_call_secs: 0 },
+    { role: "user",  message: "Hi, I'd like to book a kids haircut for my son. He's eight.", time_in_call_secs: 6 },
+    { role: "agent", message: "What day and time works for you?", time_in_call_secs: 10 },
+    { role: "user",  message: "Wednesday at three if possible.", time_in_call_secs: 18 },
+    { role: "agent", message: "Three works. Do you have a preference for a barber?", time_in_call_secs: 22 },
+    { role: "user",  message: "Eleni please.", time_in_call_secs: 28 },
+    { role: "agent", message: "What is your name?", time_in_call_secs: 31 },
+    { role: "user",  message: "Maria.", time_in_call_secs: 36 },
+    { role: "agent", message: "Maria, kids cut with Eleni Wednesday at three. Would you like to add eyebrow grooming?", time_in_call_secs: 39 },
+    { role: "user",  message: "No thanks, just the haircut.", time_in_call_secs: 45 },
+    { role: "agent", message: "All set! See you, Maria!", time_in_call_secs: 47 },
   ],
   demo_008: [
-    { role: "agent", message: "Good morning, Demo Barbershop! How can I help you?", time_in_call_secs: 0 },
+    { role: "agent", message: "Good morning, Greek Barber Festival! How can I help you?", time_in_call_secs: 0 },
     { role: "user",  message: "Hi there, my name's James. I'd like to book a haircut.", time_in_call_secs: 5 },
     { role: "agent", message: "Hi James! Happy to help. Do you have a preferred barber or style in mind?", time_in_call_secs: 9 },
     { role: "user",  message: "I've heard Giorgos is good. Do you have him available Tuesday morning?", time_in_call_secs: 16 },
@@ -434,21 +442,27 @@ const DEMO_TRANSCRIPTS: Record<string, TMsg[]> = {
     { role: "user",  message: "Perfect, see you!", time_in_call_secs: 62 },
   ],
   demo_009: [
-    { role: "agent", message: "Demo Barbershop, καλημέρα! Σε τι μπορώ να σας βοηθήσω;", time_in_call_secs: 0 },
-    { role: "user",  message: "Γεια σας. Θέλω να κλείσω ξύρισμα κεφαλιού με τον Petros.", time_in_call_secs: 5 },
-    { role: "agent", message: "Βεβαίως! Ο Petros είναι ειδικός στο head shave. Πότε θέλετε να έρθετε;", time_in_call_secs: 9 },
-    { role: "user",  message: "Δευτέρα πρωί, 10 η ώρα.", time_in_call_secs: 16 },
-    { role: "agent", message: "Ο Petros είναι ελεύθερος Δευτέρα στις 10:00. Το όνομά σας;", time_in_call_secs: 19 },
+    { role: "agent", message: "Greek Barber Festival, καλημέρα! Σε τι μπορώ να σας βοηθήσω;", time_in_call_secs: 0 },
+    { role: "user",  message: "Γεια σας. Θέλω ξύρισμα με τον Petros.", time_in_call_secs: 5 },
+    { role: "agent", message: "Τι μέρα και ώρα σας βολεύει;", time_in_call_secs: 9 },
+    { role: "user",  message: "Τρίτη πρωί, δέκα η ώρα.", time_in_call_secs: 16 },
+    { role: "agent", message: "Τρίτη στις δέκα με τον Petros. Πώς σας λένε;", time_in_call_secs: 19 },
     { role: "user",  message: "Αλέξανδρος.", time_in_call_secs: 27 },
-    { role: "agent", message: "Αλέξανδρε, έχω κλείσει head shave με τον Petros Δευτέρα στις 10:00. Σας περιμένουμε!", time_in_call_secs: 30 },
+    { role: "agent", message: "Αλέξανδρε, ξύρισμα με τον Petros Τρίτη στις δέκα. Θέλετε να προσθέσουμε και beard trim;", time_in_call_secs: 30 },
+    { role: "user",  message: "Όχι, μόνο ξύρισμα.", time_in_call_secs: 36 },
+    { role: "agent", message: "Κλείσαμε! Τα λέμε, Αλέξανδρε!", time_in_call_secs: 38 },
     { role: "user",  message: "Ευχαριστώ, γεια σας.", time_in_call_secs: 39 },
   ],
   demo_010: [
-    { role: "agent", message: "Καλησπέρα, Demo Barbershop! Πώς μπορώ να σας εξυπηρετήσω;", time_in_call_secs: 0 },
-    { role: "user",  message: "Γεια σας, είμαι ο Νίκος, τακτικός πελάτης. Θέλω να κλείσω beard trim.", time_in_call_secs: 6 },
-    { role: "agent", message: "Γεια σας Νίκο, χαιρόμαστε που μας καλείτε ξανά! Με τον Giorgos όπως συνήθως;", time_in_call_secs: 11 },
-    { role: "user",  message: "Ναι ακριβώς. Έχει ώρα την Κυριακή στις 12;", time_in_call_secs: 20 },
-    { role: "agent", message: "Ναι, ο Giorgos είναι ελεύθερος! Κλείνω beard trim & shaping Κυριακή 12:00.", time_in_call_secs: 24 },
+    { role: "agent", message: "Καλησπέρα, Greek Barber Festival! Πώς μπορώ να σας εξυπηρετήσω;", time_in_call_secs: 0 },
+    { role: "user",  message: "Γεια σας, είμαι ο Νίκος. Θέλω να κλείσω για τακτοποίηση μούσι.", time_in_call_secs: 6 },
+    { role: "agent", message: "Τι μέρα και ώρα σας βολεύει;", time_in_call_secs: 11 },
+    { role: "user",  message: "Σάββατο στις δώδεκα, με τον Giorgos.", time_in_call_secs: 20 },
+    { role: "agent", message: "Σάββατο στις δώδεκα με τον Giorgos. Πώς σας λένε;", time_in_call_secs: 24 },
+    { role: "user",  message: "Νίκος.", time_in_call_secs: 30 },
+    { role: "agent", message: "Νίκο, beard trim με τον Giorgos Σάββατο στις δώδεκα. Θέλετε να προσθέσουμε και κούρεμα;", time_in_call_secs: 33 },
+    { role: "user",  message: "Όχι ευχαριστώ.", time_in_call_secs: 38 },
+    { role: "agent", message: "Κλείσαμε! Τα λέμε, Νίκο!", time_in_call_secs: 40 },
     { role: "user",  message: "Εξαιρετικά, ευχαριστώ!", time_in_call_secs: 34 },
     { role: "agent", message: "Παρακαλώ Νίκο! Σας περιμένουμε. Καλό απόγευμα!", time_in_call_secs: 37 },
   ],
@@ -458,7 +472,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
   {
     conversation_id: "demo_001", source: "ai-call", status: "confirmed",
     client_name: "Μιχάλης", service: "Haircut", barber: "Nikos",
-    date: d0, time: "10:30", price: 0, duration_secs: 87, message_count: 9,
+    date: d0, time: "10:30", price: 15, duration_secs: 87, message_count: 9,
     start_time_unix_secs: _N - 3 * 3600,
     summary: "Michalis called to book a haircut for today at 10:30 with Nikos. Classic short cut requested.",
     first_user_message: "Γεια σας, θέλω να κλείσω ραντεβού για κούρεμα σήμερα στις 10:30 αν είναι διαθέσιμος ο Nikos.",
@@ -466,26 +480,26 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
   },
   {
     conversation_id: "demo_002", source: "ai-call", status: "confirmed",
-    client_name: "Elena P.", service: "Hair Colour", barber: "Eleni",
+    client_name: "Elena P.", service: "Hair Styling", barber: "Eleni",
     date: d0, time: "14:00", price: 20, duration_secs: 134, message_count: 12,
     start_time_unix_secs: _N - 5 * 3600,
-    summary: "Elena called about hair colouring options and booked a slot at 14:00 with Eleni.",
-    first_user_message: "Hi! I was wondering about your hair colouring options and how much it costs for a full colour?",
+    summary: "Elena called about hair styling options and booked a slot at 14:00 with Eleni.",
+    first_user_message: "Hi! I was wondering about your hair styling options and how much it costs?",
     call_status: "done", call_language: "en",
   },
   {
     conversation_id: "demo_003", source: "ai-call", status: "confirmed",
-    client_name: "Δημήτρης", service: "Full Grooming Package", barber: "Giorgos",
-    date: _pastDate(1), time: "11:00", price: 0, duration_secs: 112, message_count: 10,
+    client_name: "Δημήτρης", service: "Haircut + Beard Combo", barber: "Giorgos",
+    date: _pastDate(1), time: "11:00", price: 22, duration_secs: 112, message_count: 10,
     start_time_unix_secs: _N - 26 * 3600,
-    summary: "Dimitris booked a full grooming package with Giorgos at 11:00. Special occasion.",
-    first_user_message: "Θέλω να κλείσω το full grooming package για αύριο στις 11. Είναι για μια ειδική περίσταση.",
+    summary: "Dimitris booked the haircut + beard combo with Giorgos at 11:00. Special occasion.",
+    first_user_message: "Θέλω να κλείσω για κούρεμα και γένια μαζί για αύριο στις 11. Είναι για μια ειδική περίσταση.",
     call_status: "done",
   },
   {
     conversation_id: "demo_004", source: "ai-call", status: "confirmed",
     client_name: "Sofia M.", service: "Eyebrow Grooming", barber: "Eleni",
-    date: _pastDate(1), time: "16:30", price: 0, duration_secs: 68, message_count: 7,
+    date: _pastDate(1), time: "16:30", price: 5, duration_secs: 68, message_count: 7,
     start_time_unix_secs: _N - 30 * 3600,
     summary: "Sofia booked an eyebrow grooming session with Eleni at 16:30 yesterday.",
     first_user_message: "Καλημέρα! Θέλω να κλείσω ραντεβού για διαμόρφωση φρυδιών — είναι διαθέσιμη η Eleni σήμερα το απόγευμα;",
@@ -493,17 +507,17 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
   },
   {
     conversation_id: "demo_005", source: "ai-call", status: "cancelled",
-    client_name: "Κώστας Β.", service: "Hot Towel Shave", barber: "Petros",
-    date: _pastDate(2), time: "09:30", price: 0, duration_secs: 45, message_count: 5,
+    client_name: "Κώστας Β.", service: "Full Shave", barber: "Petros",
+    date: _pastDate(2), time: "09:30", price: 12, duration_secs: 45, message_count: 5,
     start_time_unix_secs: _N - 52 * 3600,
-    summary: "Kostas called to cancel his hot towel shave with Petros. Will call back to reschedule.",
+    summary: "Kostas called to cancel his full shave with Petros. Will call back to reschedule.",
     first_user_message: "Γεια σας, πρέπει να ακυρώσω το ραντεβού μου για ξύρισμα με τον Petros. Κάτι έτυχε.",
     call_status: "done",
   },
   {
     conversation_id: "demo_006", source: "ai-call", status: "confirmed",
-    client_name: "Γιώργης Π.", service: "Beard Trim & Shaping", barber: "Nikos",
-    date: _pastDate(3), time: "13:00", price: 0, duration_secs: 93, message_count: 8,
+    client_name: "Γιώργης Π.", service: "Beard Trim", barber: "Nikos",
+    date: _pastDate(3), time: "13:00", price: 10, duration_secs: 93, message_count: 8,
     start_time_unix_secs: _N - 75 * 3600,
     summary: "Giorgos booked a beard trim with Nikos at 13:00. Also asked about beard care products.",
     first_user_message: "Θέλω να κλείσω για τακτοποίηση μούσι — μπορώ συγκεκριμένα με τον Nikos αν γίνεται;",
@@ -511,11 +525,11 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
   },
   {
     conversation_id: "demo_007", source: "ai-call", status: "confirmed",
-    client_name: "Maria K.", service: "Scalp Massage", barber: "Eleni",
+    client_name: "Maria K.", service: "Kids Cut", barber: "Eleni",
     date: _pastDate(4), time: "15:00", price: 10, duration_secs: 78, message_count: 8,
     start_time_unix_secs: _N - 98 * 3600,
-    summary: "Maria booked a 30-min scalp massage with Eleni at 15:00. Interested in regular appointments.",
-    first_user_message: "Hi, do you offer scalp massage treatments? I've been having a lot of tension and someone recommended it.",
+    summary: "Maria booked a kids cut for her son with Eleni at 15:00. Asked about the process.",
+    first_user_message: "Hi, do you do kids haircuts? My son is 8 and needs a trim.",
     call_status: "done", call_language: "en",
   },
   {
@@ -529,19 +543,19 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
   },
   {
     conversation_id: "demo_009", source: "ai-call", status: "confirmed",
-    client_name: "Αλέξανδρος", service: "Head Shave", barber: "Petros",
-    date: _pastDate(6), time: "10:00", price: 0, duration_secs: 59, message_count: 6,
+    client_name: "Αλέξανδρος", service: "Full Shave", barber: "Petros",
+    date: _pastDate(6), time: "10:00", price: 12, duration_secs: 59, message_count: 6,
     start_time_unix_secs: _N - 148 * 3600,
-    summary: "Alexandros booked a head shave with Petros at 10:00 Monday. Short efficient call.",
-    first_user_message: "Γεια, θέλω να κάνω ξύρισμα κεφαλής. Είναι διαθέσιμος ο Petros τη Δευτέρα στις 10;",
+    summary: "Alexandros booked a full shave with Petros at 10:00. Short efficient call.",
+    first_user_message: "Γεια, θέλω να κάνω ξύρισμα. Είναι διαθέσιμος ο Petros τη Δευτέρα στις 10;",
     call_status: "done",
   },
   {
     conversation_id: "demo_010", source: "ai-call", status: "confirmed",
-    client_name: "Νίκος Π.", service: "Beard Trim & Shaping", barber: "Giorgos",
-    date: _pastDate(7), time: "12:00", price: 0, duration_secs: 82, message_count: 9,
+    client_name: "Νίκος Π.", service: "Beard Trim", barber: "Giorgos",
+    date: _pastDate(7), time: "12:00", price: 10, duration_secs: 82, message_count: 9,
     start_time_unix_secs: _N - 170 * 3600,
-    summary: "Nikos (regular customer) booked a beard trim with Giorgos at noon Sunday.",
+    summary: "Nikos (regular customer) booked a beard trim with Giorgos at noon.",
     first_user_message: "Γεια σας, είμαι τακτικός πελάτης — ο Νίκος. Θέλω να κλείσω για τακτοποίηση μούσι με τον Giorgos.",
     call_status: "done",
   },
@@ -1523,7 +1537,7 @@ function SettingsPanel({
 
       {section("Your shops")}
       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 4 }}>
-        {(businesses && businesses.length > 0 ? businesses : [{ id: "", name: profile.businessName || "Demo Barbershop", plan: undefined }]).map(shop => {
+        {(businesses && businesses.length > 0 ? businesses : [{ id: "", name: profile.businessName || "Greek Barber Festival", plan: undefined }]).map(shop => {
           const isActive = currentBiz ? currentBiz.id === shop.id : true;
           const isDeleting = deletingBiz?.id === shop.id;
           const inProgress = isDeleting && !!deletingBiz?.inProgress;
@@ -1914,7 +1928,7 @@ function Badge({ status, label, C }: { status: string; label: string; C: Colors 
 }
 
 // ── WalkInModal ───────────────────────────────────────────────────────────────
-const SERVICE_OPTIONS = ["Haircut","Beard Trim & Shaping","Hot Towel Shave","Eyebrow Grooming","Full Grooming Package","Hair Colour","Head Shave","Scalp Massage"];
+const SERVICE_OPTIONS = ["Haircut","Beard Trim","Full Shave","Haircut + Beard Combo","Kids Cut","Hair Styling","Eyebrow Grooming"];
 
 type WalkInServiceLine = { service: string; barber: string; price: string; duration_minutes: number };
 
@@ -1964,13 +1978,13 @@ function WalkInModal({ C, barbers, businessId, onClose, onSaved }: {
 
     const DEMO_SVCS: { service: string; price: number; duration_minutes: number }[] = [
       { service:"Haircut",              price:15, duration_minutes:30 },
-      { service:"Beard Trim & Shaping", price:12, duration_minutes:20 },
-      { service:"Hot Towel Shave",      price:18, duration_minutes:30 },
-      { service:"Full Grooming Package",price:30, duration_minutes:60 },
-      { service:"Head Shave",           price:15, duration_minutes:25 },
-      { service:"Hair Colour",          price:20, duration_minutes:60 },
+      { service:"Beard Trim",             price:10, duration_minutes:20 },
+      { service:"Full Shave",            price:12, duration_minutes:25 },
+      { service:"Haircut + Beard Combo", price:22, duration_minutes:45 },
+      { service:"Kids Cut",              price:10, duration_minutes:20 },
+      { service:"Hair Styling",          price:20, duration_minutes:40 },
       { service:"Eyebrow Grooming",     price:8,  duration_minutes:15 },
-      { service:"Scalp Massage",        price:10, duration_minutes:20 },
+      { service:"Eyebrow Grooming",     price: 5, duration_minutes:10 },
     ];
 
     const count  = Math.random() < 0.5 ? 1 : Math.random() < 0.65 ? 2 : 3;
@@ -2585,7 +2599,7 @@ function HubTab({ agent, C, density, loading, profile, conversations, aiBookings
       <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: pad.card }}>
         <div style={{ fontFamily: "var(--gbf-font-display)", fontSize: 17, fontWeight: 600, color: C.text, marginBottom: 14 }}>{t("servicesTitle")}</div>
         <div className="gbf-services-grid gbf-stagger">
-          {([[t("svcHaircut"),"€15"],[t("svcBeard"),"€12"],[t("svcShave"),"€18"],[t("svcFull"),"€40"],[t("svcHead"),"€15"],[t("svcScalp"),"€10"],[t("svcBrow"),"€8"],[t("svcColour"),"€20"]] as [string,string][]).map(([name, price]) => (
+          {([[t("svcHaircut"),"€15"],[t("svcBeard"),"€10"],[t("svcShave"),"€12"],[t("svcCombo"),"€22"],[t("svcKids"),"€10"],[t("svcStyling"),"€20"],[t("svcBrow"),"€5"]] as [string,string][]).map(([name, price]) => (
             <div key={name} className="gbf-lift-sm gbf-svc-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: C.surfaceAlt, borderRadius: 10, border: `1px solid ${C.borderFaint}` }}>
               <span style={{ fontSize: 13, color: C.text, fontWeight: 500 }}>{name}</span>
               <span style={{ fontSize: 14, color: C.accent, fontWeight: 700, marginLeft: 8 }}>{price}</span>
@@ -4063,10 +4077,11 @@ export default function DashboardPage() {
           ? (businesses.find(biz => biz.id === b.business_id)?.name ?? currentBiz?.name ?? "Unknown shop")
           : currentBiz?.name,
       }));
-      // Only pad with demo bookings when viewing the demo business or all-shops with no real data
+      // Keep demo bookings as baseline, prepend any real calls on top
       const isDemoBiz = !currentBiz || currentBiz.id === "00000000-0000-0000-0000-000000000001";
-      if (isDemoBiz && real.length === 0) {
-        setAiBookings(DEMO_AI_BOOKINGS);
+      const realOnly = real.filter(b => !b.conversation_id.startsWith("demo_"));
+      if (isDemoBiz) {
+        setAiBookings([...realOnly, ...DEMO_AI_BOOKINGS]);
       } else {
         setAiBookings(real);
       }
@@ -4278,7 +4293,7 @@ export default function DashboardPage() {
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", display: "inline-block", animation: "gbf-pulse .8s infinite", flexShrink: 0 }} />
                   AI call in progress
                 </div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2 }}>ElevenLabs · transcribing live →</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2 }}>Transcribing live →</div>
               </div>
             </div>
             {/* End call button */}
@@ -4305,7 +4320,7 @@ export default function DashboardPage() {
               <div style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, background: "linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7)", backgroundSize: "300% 300%", animation: "gbf-gradFlow 3s ease infinite", boxShadow: "0 0 16px rgba(108,92,231,.45)" }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>Try a live demo call</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2, lineHeight: 1.3 }}>Powered by ElevenLabs · Demo only</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2, lineHeight: 1.3 }}>AI Voice Receptionist · Demo</div>
               </div>
               <div style={{ width: 34, height: 34, borderRadius: "50%", flexShrink: 0, background: "rgba(108,92,231,.22)", border: "1px solid rgba(108,92,231,.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <Phone size={15} color="#c4b5fd" strokeWidth={2} />

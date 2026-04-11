@@ -29,7 +29,7 @@ export const BARBER_SCHEMA: DataCollectionDict = {
     type: "string",
     description:
       "The exact hair or grooming service the client booked or requested. " +
-      "Examples: 'Haircut', 'Fade', 'Beard Trim', 'Hot Towel Shave', 'Full Grooming Package', 'Head Shave'. " +
+      "Examples: 'Haircut', 'Beard Trim', 'Full Shave', 'Haircut + Beard Combo', 'Kids Cut', 'Hair Styling', 'Eyebrow Grooming'. " +
       "If multiple services were booked, list them all separated by ' + '. " +
       "Return null if no specific service was agreed upon.",
   },
