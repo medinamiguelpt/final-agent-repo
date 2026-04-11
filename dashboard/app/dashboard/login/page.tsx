@@ -5,16 +5,16 @@ import { supabase } from "@/lib/supabase/client";
 import { Sparkles, ArrowRight, Scissors, Clock, Eye, EyeOff } from "lucide-react";
 
 const C = {
-  bg: "#F5F0E8",
+  bg: "#FAF6F1",
   surface: "#FFFFFF",
-  surfaceAlt: "#FAF7F2",
-  border: "#E0D5C5",
-  accent: "#3D4F35",
-  accentMid: "#6B7D60",
-  accentLight: "#EAF0E6",
-  text: "#2A2520",
-  textMuted: "#7A6F64",
-  textFaint: "#B0A898",
+  surfaceAlt: "#F5F0EA",
+  border: "#E8DDD0",
+  accent: "#2D6A4F",
+  accentMid: "#5A8F72",
+  accentLight: "#E5F0EB",
+  text: "#2C2416",
+  textMuted: "#6B5D4F",
+  textFaint: "#A89880",
   red: "#B04040",
   redLight: "#FDF0F0",
 };
