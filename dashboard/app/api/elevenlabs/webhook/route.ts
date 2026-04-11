@@ -15,7 +15,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, dcr, DataCollectionValue } from "@/lib/elevenlabs/client";
-import { getAgentById, AGENTS } from "@/lib/elevenlabs/agents";
 import { supabaseAdmin } from "@/lib/supabase/client";
 
 // ── Payload types ─────────────────────────────────────────────────────────────
@@ -61,11 +60,7 @@ async function businessIdForAgent(agentId: string): Promise<string> {
   if (agentCache[agentId]) return agentCache[agentId];
   try {
     const db = supabaseAdmin();
-    const { data } = await db
-      .from("agents")
-      .select("business_id")
-      .eq("elevenlabs_agent_id", agentId)
-      .single();
+    const { data } = await db.from("agents").select("business_id").eq("elevenlabs_agent_id", agentId).single();
     const bid = (data as { business_id: string } | null)?.business_id ?? FALLBACK_BUSINESS_ID;
     agentCache[agentId] = bid;
     return bid;
@@ -121,13 +116,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Must return 200 quickly — do DB work async-safe
   if (type === "call_initiation_failure") {
     await persistCall({
-      business_id:        await businessIdForAgent(data.agent_id),
-      conversation_id:    data.conversation_id,
-      status:             "failed",
-      message_count:      0,
+      business_id: await businessIdForAgent(data.agent_id),
+      conversation_id: data.conversation_id,
+      status: "failed",
+      message_count: 0,
       call_duration_secs: 0,
       appointment_status: "not_booked",
-      raw_data:           data as unknown as Record<string, unknown>,
+      raw_data: data as unknown as Record<string, unknown>,
     });
     return NextResponse.json({ ok: true });
   }
@@ -139,37 +134,37 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   if (type === "post_call_transcription") {
     const results = data.analysis?.data_collection_results;
     const priceRaw = dcr(results, "price_quoted");
-    const durRaw   = dcr(results, "duration_minutes");
-    const cbRaw    = results?.["callback_requested"]?.value;
+    const durRaw = dcr(results, "duration_minutes");
+    const cbRaw = results?.["callback_requested"]?.value;
 
     const apptDate = toIsoDate(dcr(results, "appointment_date", "date"));
     const apptTime = toIsoTime(dcr(results, "appointment_time", "time"));
     const apptStatus = dcr(results, "appointment_status", "status") || "not_booked";
 
     const callRow = {
-      business_id:        await businessIdForAgent(data.agent_id),
-      conversation_id:    data.conversation_id,
-      status:             data.status ?? "done",
-      client_name:        dcr(results, "client_name", "customer_name", "name") || null,
-      phone_number:       dcr(results, "phone_number", "phone") || null,
-      service_type:       dcr(results, "service_type", "service") || null,
-      barber_name:        dcr(results, "barber_name", "barber") || null,
-      appointment_date:   apptDate,
-      appointment_time:   apptTime,
+      business_id: await businessIdForAgent(data.agent_id),
+      conversation_id: data.conversation_id,
+      status: data.status ?? "done",
+      client_name: dcr(results, "client_name", "customer_name", "name") || null,
+      phone_number: dcr(results, "phone_number", "phone") || null,
+      service_type: dcr(results, "service_type", "service") || null,
+      barber_name: dcr(results, "barber_name", "barber") || null,
+      appointment_date: apptDate,
+      appointment_time: apptTime,
       appointment_status: apptStatus,
-      price:              priceRaw ? parseFloat(priceRaw) : null,
-      duration_minutes:   durRaw   ? parseInt(durRaw, 10)  : null,
-      special_requests:   dcr(results, "special_requests", "notes") || null,
-      call_language:      dcr(results, "call_language", "language") || data.metadata?.main_language || null,
+      price: priceRaw ? parseFloat(priceRaw) : null,
+      duration_minutes: durRaw ? parseInt(durRaw, 10) : null,
+      special_requests: dcr(results, "special_requests", "notes") || null,
+      call_language: dcr(results, "call_language", "language") || data.metadata?.main_language || null,
       callback_requested: cbRaw === true || cbRaw === "true",
-      summary:            data.analysis?.transcript_summary || null,
+      summary: data.analysis?.transcript_summary || null,
       call_duration_secs: data.metadata?.call_duration_secs ?? 0,
-      message_count:      (data.transcript ?? []).length,
-      main_language:      data.metadata?.main_language || null,
-      call_successful:    data.analysis?.call_successful || null,
+      message_count: (data.transcript ?? []).length,
+      main_language: data.metadata?.main_language || null,
+      call_successful: data.analysis?.call_successful || null,
       termination_reason: data.analysis?.termination_reason || null,
-      source:             "ai_call",
-      raw_data:           data as unknown as Record<string, unknown>,
+      source: "ai_call",
+      raw_data: data as unknown as Record<string, unknown>,
     };
 
     const callId = await persistCall(callRow);
@@ -177,18 +172,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Also create/upsert an appointment row if the call resulted in a booking
     if (apptDate && apptStatus === "confirmed" && callId) {
       await persistAppointment({
-        business_id:      callRow.business_id,
-        call_id:          callId,
-        source:           "ai_call",
-        client_name:      callRow.client_name,
-        phone_number:     callRow.phone_number,
-        service_type:     callRow.service_type,
-        barber_name:      callRow.barber_name,
+        business_id: callRow.business_id,
+        call_id: callId,
+        source: "ai_call",
+        client_name: callRow.client_name,
+        phone_number: callRow.phone_number,
+        service_type: callRow.service_type,
+        barber_name: callRow.barber_name,
         appointment_date: apptDate,
         appointment_time: apptTime,
         duration_minutes: callRow.duration_minutes,
-        price:            callRow.price,
-        status:           "confirmed",
+        price: callRow.price,
+        status: "confirmed",
       });
     }
 
@@ -208,7 +203,10 @@ async function persistCall(row: Record<string, unknown>): Promise<string | null>
       .upsert(row as never, { onConflict: "conversation_id" })
       .select("id")
       .single();
-    if (error) { console.error("[webhook] persistCall error:", error.message); return null; }
+    if (error) {
+      console.error("[webhook] persistCall error:", error.message);
+      return null;
+    }
     return (data as { id: string }).id;
   } catch (e) {
     console.error("[webhook] persistCall threw:", e);
@@ -219,9 +217,7 @@ async function persistCall(row: Record<string, unknown>): Promise<string | null>
 async function persistAppointment(row: Record<string, unknown>): Promise<void> {
   try {
     const db = supabaseAdmin();
-    const { error } = await db
-      .from("appointments")
-      .upsert(row as never, { onConflict: "call_id" });
+    const { error } = await db.from("appointments").upsert(row as never, { onConflict: "call_id" });
     if (error) console.error("[webhook] persistAppointment error:", error.message);
   } catch (e) {
     console.error("[webhook] persistAppointment threw:", e);

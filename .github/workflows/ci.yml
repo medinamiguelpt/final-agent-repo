@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Lint, Type-check & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - run: npm ci
+
+      - name: Prettier check
+        run: npx prettier --check .
+
+      - name: ESLint
+        run: npm run lint:check
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: Build
+        run: npm run build

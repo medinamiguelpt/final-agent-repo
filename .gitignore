@@ -24,6 +24,7 @@ dashboard/*.json
 !dashboard/package.json
 !dashboard/package-lock.json
 !dashboard/tsconfig.json
+!dashboard/.prettierrc.json
 !dashboard/next-env.d.ts
 dashboard/modal-test.js
 dashboard/modal-screenshots/

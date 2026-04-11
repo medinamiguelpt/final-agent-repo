@@ -6,13 +6,27 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint --fix .",
+    "lint:check": "eslint .",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "cd .. && husky dashboard/.husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,js,jsx,mjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@11labs/client": "^0.2.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.0",
-"lucide-react": "^1.7.0",
+    "lucide-react": "^1.7.0",
     "next": "16.2.2",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -23,6 +37,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.2",
     "typescript": "^5"
   }
 }
