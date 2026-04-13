@@ -595,7 +595,6 @@
         }
       }
     },
-    "data_collection": {},
     "overrides": {
       "conversation_config_override": {
         "turn": {
