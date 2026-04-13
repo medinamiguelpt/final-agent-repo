@@ -4768,7 +4768,6 @@ function HubTab({
                 {[
                   [t("business"), profile.businessName || "Greek Barber Festival"],
                   [t("hours"), profile.hours || "Tue–Sat · 10:00–20:00"],
-                  [t("llm"), agent?.llm ?? "gemini-2.5-flash"],
                 ].map(([label, value]) => (
                   <div
                     key={label}
