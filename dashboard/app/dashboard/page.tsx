@@ -1193,39 +1193,49 @@ const RESPONSIVE_CSS = `
   @keyframes gbf-swipeHint { 0%,100%{transform:translateX(0)} 40%{transform:translateX(5px)} }
   @keyframes gbf-cardIn    { from{opacity:0;transform:translateY(14px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
 
-  /* ── ElevenLabs demo call card ─────────────────────────────────────────────── */
-  .gbf-call-card {
-    width: min(276px, calc(100vw - 32px));
-    background: #0e0e1c;
-    border: 1px solid rgba(108,92,231,.32);
-    border-radius: 18px;
-    cursor: pointer;
-    box-shadow: 0 8px 32px rgba(108,92,231,.22), 0 2px 8px rgba(0,0,0,.45);
+  /* ── Call orb widget ──────────────────────────────────────────────────────── */
+  .gbf-call-orb {
+    width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7);
+    background-size: 300% 300%;
+    animation: gbf-gradFlow 3s ease infinite;
+    box-shadow: 0 4px 20px rgba(108,92,231,.45), 0 0 0 0 rgba(108,92,231,.3);
     transition: box-shadow .2s, transform .15s;
-    animation: gbf-floatIn .35s ease;
-    font-family: inherit;
-    overflow: hidden;
-    padding: 0;
-    display: block;
-    text-align: left;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; font-family: inherit;
   }
-  .gbf-call-card:hover  { box-shadow: 0 12px 40px rgba(108,92,231,.38), 0 2px 8px rgba(0,0,0,.45); transform: translateY(-2px); }
-  .gbf-call-card:active { transform: scale(.96); }
-  .gbf-call-card-active {
-    width: min(276px, calc(100vw - 32px));
-    background: #0e0e1c;
-    border: 1px solid rgba(239,68,68,.35);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(239,68,68,.18), 0 2px 8px rgba(0,0,0,.45);
-    animation: gbf-floatIn .25s ease;
-    overflow: hidden;
+  .gbf-call-orb:hover  { box-shadow: 0 6px 28px rgba(108,92,231,.55), 0 0 0 4px rgba(108,92,231,.15); transform: scale(1.08); }
+  .gbf-call-orb:active { transform: scale(.92); }
+  .gbf-call-orb-active {
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: #ef4444;
+    box-shadow: 0 4px 20px rgba(239,68,68,.4), 0 0 0 0 rgba(239,68,68,.3);
+    animation: gbf-pulse 1.2s ease infinite;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0; font-family: inherit;
+    transition: box-shadow .2s, transform .15s;
+  }
+  .gbf-call-orb-active:hover { box-shadow: 0 6px 28px rgba(239,68,68,.55); transform: scale(1.08); }
+  .gbf-call-orb-active:active { transform: scale(.92); }
+  .gbf-call-orb-connecting {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7);
+    background-size: 300% 300%;
+    animation: gbf-gradFlow 1.5s ease infinite, gbf-pulse .8s ease infinite;
+    box-shadow: 0 4px 20px rgba(108,92,231,.55);
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .gbf-call-label {
+    position: absolute; right: 64px; top: 50%; transform: translateY(-50%);
+    background: #0e0e1cee; border: 1px solid rgba(108,92,231,.3); border-radius: 10px;
+    padding: 6px 12px; white-space: nowrap; font-size: 12px; font-weight: 600;
+    color: #c4b5fd; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    animation: gbf-staggerIn .2s ease; pointer-events: none;
   }
   @media (max-width: 480px) {
-    .gbf-call-card, .gbf-call-card-active { width: min(240px, calc(100vw - 32px)); border-radius: 14px; }
+    .gbf-call-orb, .gbf-call-orb-active, .gbf-call-orb-connecting { width: 50px; height: 50px; }
     .gbf-call-fab { bottom: 16px!important; right: 12px!important; }
-  }
-  @media (max-width: 390px) {
-    .gbf-call-card, .gbf-call-card-active { width: min(210px, calc(100vw - 24px)); }
   }
   @keyframes gbf-borderGlow{ 0%,100%{border-color:transparent} 50%{border-color:rgba(79,142,247,.5)} }
 
@@ -2386,7 +2396,7 @@ function SettingsPanel({
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {[
-            ["ElevenLabs Conversational AI", "Connected"],
+            ["AI Voice Receptionist", "Connected"],
             ["Appointment Ledger", "Local data"],
             ["Live call feed", "Always · every 10 s"],
           ].map(([name, note]) => (
@@ -8298,7 +8308,7 @@ export default function DashboardPage() {
           C={C}
         />
 
-        {/* ── ElevenLabs demo call card ── */}
+        {/* ── Call orb widget ── */}
         <div
           className={`gbf-call-fab${navBottom ? " gbf-bnav-widget" : ""}`}
           style={{
@@ -8338,164 +8348,35 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Active call card */}
-          {callStatus === "active" && (
-            <div className="gbf-call-card-active">
-              {/* Orb + status row */}
-              <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "11px 14px" }}>
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background: "linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7)",
-                    backgroundSize: "300% 300%",
-                    animation: "gbf-gradFlow 1.8s ease infinite, gbf-pulse 1.2s ease infinite",
-                    boxShadow: "0 0 18px rgba(108,92,231,.55)",
-                  }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        background: "#ef4444",
-                        display: "inline-block",
-                        animation: "gbf-pulse .8s infinite",
-                        flexShrink: 0,
-                      }}
-                    />
-                    AI call in progress
-                  </div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2 }}>Transcribing live →</div>
-                </div>
+          {/* Orb */}
+          <div style={{ position: "relative" }}>
+            {callStatus === "idle" && <div className="gbf-call-label">Talk to Kostas</div>}
+            {callStatus === "connecting" && <div className="gbf-call-label">Connecting…</div>}
+            {callStatus === "active" && (
+              <div className="gbf-call-label" style={{ borderColor: "rgba(239,68,68,.4)", color: "#fca5a5" }}>
+                Tap to end call
               </div>
-              {/* End call button */}
-              <button
-                onClick={endCall}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 7,
-                  padding: "9px 14px",
-                  background: "rgba(239,68,68,.15)",
-                  border: "none",
-                  borderTop: "1px solid rgba(239,68,68,.2)",
-                  color: "#ef4444",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-              >
-                <PhoneOff size={15} strokeWidth={2.5} /> End call
-              </button>
-            </div>
-          )}
-
-          {/* Connecting state */}
-          {callStatus === "connecting" && (
-            <div
-              style={{
-                background: "#0e0e1c",
-                border: "1px solid rgba(108,92,231,.32)",
-                borderRadius: 12,
-                padding: "8px 14px",
-                fontSize: 12,
-                fontWeight: 600,
-                color: "#c4b5fd",
-                boxShadow: "0 4px 16px rgba(0,0,0,.25)",
-                animation: "gbf-staggerIn .2s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
+            )}
+            <button
+              onClick={callStatus === "idle" ? startCall : callStatus === "active" ? endCall : undefined}
+              className={
+                callStatus === "active"
+                  ? "gbf-call-orb-active"
+                  : callStatus === "connecting"
+                    ? "gbf-call-orb-connecting"
+                    : "gbf-call-orb"
+              }
+              title={callStatus === "active" ? "End call" : "Start a call with Kostas"}
             >
-              <div
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  background: "linear-gradient(135deg,#6C5CE7,#E040FB)",
-                  animation: "gbf-pulse .8s infinite",
-                  flexShrink: 0,
-                }}
-              />
-              Connecting…
-            </div>
-          )}
-
-          {/* Idle — descriptive demo call card */}
-          {callStatus === "idle" && (
-            <button onClick={startCall} className="gbf-call-card">
-              {/* Top row: EL orb + labels + phone icon */}
-              <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "12px 14px 10px" }}>
-                {/* ElevenLabs animated gradient orb */}
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background: "linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7)",
-                    backgroundSize: "300% 300%",
-                    animation: "gbf-gradFlow 3s ease infinite",
-                    boxShadow: "0 0 16px rgba(108,92,231,.45)",
-                  }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1.25 }}>
-                    Try a live demo call
-                  </div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 2, lineHeight: 1.3 }}>
-                    AI Voice Receptionist · Demo
-                  </div>
-                </div>
-                <div
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background: "rgba(108,92,231,.22)",
-                    border: "1px solid rgba(108,92,231,.35)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Phone size={15} color="#c4b5fd" strokeWidth={2} />
-                </div>
-              </div>
-              {/* Explanation strip */}
-              <div
-                style={{
-                  borderTop: "1px solid rgba(255,255,255,.07)",
-                  padding: "7px 14px 9px",
-                  fontSize: 10,
-                  color: "rgba(255,255,255,.38)",
-                  lineHeight: 1.5,
-                }}
-              >
-                💬 Live transcription &amp; appointment ledger update in real-time and stay in the dashboard — this call
-                button is temporary (demo trial only)
-              </div>
+              {callStatus === "active" ? (
+                <PhoneOff size={22} color="#fff" strokeWidth={2.5} />
+              ) : callStatus === "connecting" ? (
+                <Loader size={22} color="#fff" strokeWidth={2} style={{ animation: "spin 1s linear infinite" }} />
+              ) : (
+                <Phone size={22} color="#fff" strokeWidth={2} />
+              )}
             </button>
-          )}
+          </div>
         </div>
 
         {settingsOpen && (
@@ -9213,7 +9094,7 @@ export default function DashboardPage() {
             }}
           >
             <span style={{ fontSize: 12, color: C.textMuted }}>{t("poweredBy")}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: C.accent }}>ElevenLabs Conversational AI</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: C.accent }}>AI Voice Receptionist</span>
             <span style={{ fontSize: 12, color: C.textFaint }}>·</span>
             <span style={{ fontSize: 12, color: C.textMuted }}>{t("footerSuffix")}</span>
           </footer>
