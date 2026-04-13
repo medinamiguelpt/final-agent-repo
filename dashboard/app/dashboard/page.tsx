@@ -1618,6 +1618,8 @@ const RESPONSIVE_CSS = `
     .gbf-content   { padding:20px 20px 96px; }
     .gbf-header    { padding:0 20px; }
     .gbf-tabs-inner{ padding:0 20px; }
+    .gbf-header-date{ display:none; }
+    .gbf-header-right{ gap:8px!important; }
   }
 
   /* ────────────────────────────────────────────────────────────────────────────
