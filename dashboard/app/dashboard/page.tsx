@@ -1196,45 +1196,14 @@ const RESPONSIVE_CSS = `
   /* ── Call orb widget ──────────────────────────────────────────────────────── */
   .gbf-call-orb {
     width: 56px; height: 56px; border-radius: 50%; border: none; cursor: pointer;
-    background: linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7);
-    background-size: 300% 300%;
-    animation: gbf-gradFlow 3s ease infinite;
-    box-shadow: 0 4px 20px rgba(108,92,231,.45), 0 0 0 0 rgba(108,92,231,.3);
     transition: box-shadow .2s, transform .15s;
     display: flex; align-items: center; justify-content: center;
     padding: 0; font-family: inherit;
   }
-  .gbf-call-orb:hover  { box-shadow: 0 6px 28px rgba(108,92,231,.55), 0 0 0 4px rgba(108,92,231,.15); transform: scale(1.08); }
+  .gbf-call-orb:hover  { transform: scale(1.08); }
   .gbf-call-orb:active { transform: scale(.92); }
-  .gbf-call-orb-active {
-    width: 56px; height: 56px; border-radius: 50%; border: none;
-    background: #ef4444;
-    box-shadow: 0 4px 20px rgba(239,68,68,.4), 0 0 0 0 rgba(239,68,68,.3);
-    animation: gbf-pulse 1.2s ease infinite;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; padding: 0; font-family: inherit;
-    transition: box-shadow .2s, transform .15s;
-  }
-  .gbf-call-orb-active:hover { box-shadow: 0 6px 28px rgba(239,68,68,.55); transform: scale(1.08); }
-  .gbf-call-orb-active:active { transform: scale(.92); }
-  .gbf-call-orb-connecting {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: linear-gradient(135deg,#6C5CE7,#E040FB,#06B6D4,#6C5CE7);
-    background-size: 300% 300%;
-    animation: gbf-gradFlow 1.5s ease infinite, gbf-pulse .8s ease infinite;
-    box-shadow: 0 4px 20px rgba(108,92,231,.55);
-    display: flex; align-items: center; justify-content: center;
-    pointer-events: none;
-  }
-  .gbf-call-label {
-    position: absolute; right: 64px; top: 50%; transform: translateY(-50%);
-    background: #0e0e1cee; border: 1px solid rgba(108,92,231,.3); border-radius: 10px;
-    padding: 6px 12px; white-space: nowrap; font-size: 12px; font-weight: 600;
-    color: #c4b5fd; box-shadow: 0 4px 16px rgba(0,0,0,.3);
-    animation: gbf-staggerIn .2s ease; pointer-events: none;
-  }
   @media (max-width: 480px) {
-    .gbf-call-orb, .gbf-call-orb-active, .gbf-call-orb-connecting { width: 50px; height: 50px; }
+    .gbf-call-orb { width: 50px; height: 50px; }
     .gbf-call-fab { bottom: 16px!important; right: 12px!important; }
   }
   @keyframes gbf-borderGlow{ 0%,100%{border-color:transparent} 50%{border-color:rgba(79,142,247,.5)} }
@@ -8350,23 +8319,98 @@ export default function DashboardPage() {
 
           {/* Orb */}
           <div style={{ position: "relative" }}>
-            {callStatus === "idle" && <div className="gbf-call-label">Talk to Kostas</div>}
-            {callStatus === "connecting" && <div className="gbf-call-label">Connecting…</div>}
+            {callStatus === "idle" && (
+              <div
+                style={{
+                  position: "absolute",
+                  right: 64,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: `${C.surface}ee`,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 10,
+                  padding: "6px 12px",
+                  whiteSpace: "nowrap",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.accent,
+                  boxShadow: `0 4px 16px ${C.overlay}`,
+                  animation: "gbf-staggerIn .2s ease",
+                  pointerEvents: "none" as const,
+                }}
+              >
+                Talk to Kostas
+              </div>
+            )}
+            {callStatus === "connecting" && (
+              <div
+                style={{
+                  position: "absolute",
+                  right: 64,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: `${C.surface}ee`,
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 10,
+                  padding: "6px 12px",
+                  whiteSpace: "nowrap",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.accent,
+                  boxShadow: `0 4px 16px ${C.overlay}`,
+                  animation: "gbf-staggerIn .2s ease",
+                  pointerEvents: "none" as const,
+                }}
+              >
+                Connecting…
+              </div>
+            )}
             {callStatus === "active" && (
-              <div className="gbf-call-label" style={{ borderColor: "rgba(239,68,68,.4)", color: "#fca5a5" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  right: 64,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: `${C.surface}ee`,
+                  border: `1px solid ${C.red}66`,
+                  borderRadius: 10,
+                  padding: "6px 12px",
+                  whiteSpace: "nowrap",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: C.red,
+                  boxShadow: `0 4px 16px ${C.overlay}`,
+                  animation: "gbf-staggerIn .2s ease",
+                  pointerEvents: "none" as const,
+                }}
+              >
                 Tap to end call
               </div>
             )}
             <button
               onClick={callStatus === "idle" ? startCall : callStatus === "active" ? endCall : undefined}
-              className={
-                callStatus === "active"
-                  ? "gbf-call-orb-active"
-                  : callStatus === "connecting"
-                    ? "gbf-call-orb-connecting"
-                    : "gbf-call-orb"
-              }
+              className="gbf-call-orb"
               title={callStatus === "active" ? "End call" : "Start a call with Kostas"}
+              style={
+                callStatus === "active"
+                  ? {
+                      background: C.red,
+                      boxShadow: `0 4px 20px ${C.red}66`,
+                      animation: "gbf-pulse 1.2s ease infinite",
+                    }
+                  : callStatus === "connecting"
+                    ? {
+                        background: C.accent,
+                        boxShadow: `0 4px 20px ${C.accent}88`,
+                        animation: "gbf-pulse .8s ease infinite",
+                        pointerEvents: "none",
+                      }
+                    : {
+                        background: C.accent,
+                        boxShadow: `0 4px 20px ${C.accent}66`,
+                      }
+              }
             >
               {callStatus === "active" ? (
                 <PhoneOff size={22} color="#fff" strokeWidth={2.5} />
