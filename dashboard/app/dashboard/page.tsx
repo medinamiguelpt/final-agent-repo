@@ -8521,7 +8521,7 @@ export default function DashboardPage() {
                   <Scissors size={18} style={{ color: C.accent }} strokeWidth={1.75} />
                 </div>
                 {businesses.length >= 1 ? (
-                  <div style={{ position: "relative" }}>
+                  <div style={{ position: "relative", minWidth: 0 }}>
                     <button
                       onClick={() => setBizOpen((v) => !v)}
                       className="gbf-btn"
@@ -8537,10 +8537,12 @@ export default function DashboardPage() {
                         fontFamily: "inherit",
                         textAlign: "left",
                         transition: "background .15s, border-color .15s",
+                        minWidth: 0,
+                        overflow: "hidden",
                       }}
                     >
                       <Store size={14} style={{ color: C.accent, flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0, overflow: "hidden" }}>
                         <div
                           style={{
                             fontFamily: "var(--gbf-font-display)",
@@ -8550,6 +8552,8 @@ export default function DashboardPage() {
                             lineHeight: 1.2,
                             letterSpacing: "-0.01em",
                             whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                           }}
                         >
                           {currentBiz?.name ?? "All shops"}
