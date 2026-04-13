@@ -1628,10 +1628,11 @@ const RESPONSIVE_CSS = `
   @media(max-width:768px){
     .gbf-call-fab{bottom:20px!important;right:16px!important}
 
-    .gbf-header           { padding:0 16px; }
+    .gbf-header           { padding:0 16px; overflow:hidden; }
     .gbf-header-inner     { height:56px; }
     .gbf-header-date      { display:none; }
     .gbf-header-live-text { display:none; }
+    .gbf-header-right     { gap:6px!important; }
     .gbf-tabs-inner       { padding:0; overflow-x:auto; scrollbar-width:none; }
     .gbf-tabs-inner::-webkit-scrollbar{ display:none; }
     .gbf-tab-btn          { padding:0 14px; height:50px; font-size:13px; flex:1; justify-content:center; min-width:72px; }
@@ -1694,6 +1695,10 @@ const RESPONSIVE_CSS = `
     .gbf-content         { padding:12px 12px 104px; }
     .gbf-stat-grid       { gap:8px; }
     .gbf-tab-btn         { padding:0 10px; font-size:12px; }
+    .gbf-header-right    { gap:4px!important; }
+    .gbf-lang-label      { display:none; }
+    .gbf-header-right .gbf-icon-btn  { width:34px!important; height:34px!important; }
+    .gbf-header-right .gbf-action-btn{ height:34px!important; padding:0 8px!important; }
     /* Filter selects: 2-column grid at narrow phones */
     .gbf-filter-selects  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     /* Ledger cards: always column, never the IVI row wrap */
@@ -1708,6 +1713,10 @@ const RESPONSIVE_CSS = `
     .gbf-content      { padding:10px 10px 100px; }
     .gbf-stat-grid    { gap:7px; }
     .gbf-header-inner { height:52px; }
+    .gbf-header-right { gap:3px!important; }
+    .gbf-header-live  { display:none; }
+    .gbf-header-right .gbf-icon-btn  { width:32px!important; height:32px!important; border-radius:8px!important; }
+    .gbf-header-right .gbf-action-btn{ height:32px!important; padding:0 6px!important; border-radius:8px!important; }
     .gbf-services-grid{ grid-template-columns:1fr; }
   }
 
@@ -8751,11 +8760,15 @@ export default function DashboardPage() {
                   </button>
                 )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+              <div
+                className="gbf-header-right"
+                style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 1, minWidth: 0 }}
+              >
                 <span className="gbf-header-date" style={{ fontSize: 13, color: C.textMuted }}>
                   {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
                 </span>
                 <div
+                  className="gbf-header-live"
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -8793,7 +8806,7 @@ export default function DashboardPage() {
                 <div style={{ position: "relative", flexShrink: 0 }}>
                   <button
                     onClick={() => setLangOpen((v) => !v)}
-                    className="gbf-btn"
+                    className="gbf-btn gbf-icon-btn"
                     title="Language"
                     style={{
                       display: "flex",
@@ -8811,7 +8824,10 @@ export default function DashboardPage() {
                     }}
                   >
                     <span style={{ fontSize: 16 }}>{LANG_META[langSettings.lang].flag}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: C.textMuted }}>
+                    <span
+                      className="gbf-lang-label"
+                      style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: C.textMuted }}
+                    >
                       {langSettings.lang.toUpperCase()}
                     </span>
                   </button>
