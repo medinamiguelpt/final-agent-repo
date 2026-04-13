@@ -232,7 +232,7 @@
           "language_detection": {
             "type": "system",
             "name": "language_detection",
-            "description": "Call this tool IMMEDIATELY on the user's very first message if it contains words in any non-Greek language (e.g. English, Spanish, French). Do not wait for the user to explicitly ask for a language switch. Ignore short filler sounds — focus on the substantive words to detect language.",
+            "description": "Call this tool IMMEDIATELY on the user's very first message if it contains words in any non-Greek language. Do not wait for the user to explicitly ask. Ignore filler sounds — focus on substantive words. IMPORTANT: the language parameter must be an ISO 639-1 code: en, es, pt, fr, de, ar. Never use full names like English or Spanish.",
             "response_timeout_secs": 20,
             "disable_interruptions": true,
             "force_pre_tool_speech": false,
@@ -299,7 +299,7 @@
           {
             "type": "system",
             "name": "language_detection",
-            "description": "Call this tool IMMEDIATELY on the user's very first message if it contains words in any non-Greek language (e.g. English, Spanish, French). Do not wait for the user to explicitly ask for a language switch. Ignore short filler sounds — focus on the substantive words to detect language.",
+            "description": "Call this tool IMMEDIATELY on the user's very first message if it contains words in any non-Greek language. Do not wait for the user to explicitly ask. Ignore filler sounds — focus on substantive words. IMPORTANT: the language parameter must be an ISO 639-1 code: en, es, pt, fr, de, ar. Never use full names like English or Spanish.",
             "response_timeout_secs": 20,
             "disable_interruptions": true,
             "force_pre_tool_speech": false,
