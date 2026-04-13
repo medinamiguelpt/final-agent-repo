@@ -5069,20 +5069,18 @@ function HubTab({
                           </span>
                         </div>
                       </div>
-                      {entry.client_name ? (
-                        <div
-                          style={{
-                            fontSize: 15,
-                            fontWeight: 800,
-                            color: C.text,
-                            lineHeight: 1.2,
-                            letterSpacing: "-0.01em",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {entry.client_name}
-                        </div>
-                      ) : null}
+                      <div
+                        style={{
+                          fontSize: 15,
+                          fontWeight: 800,
+                          color: C.text,
+                          lineHeight: 1.2,
+                          letterSpacing: "-0.01em",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {entry.client_name || "Unknown"}
+                      </div>
                     </div>
 
                     {/* Quote — the actual client's words, prominent */}
@@ -5513,7 +5511,7 @@ function LedgerTab({
   }));
   const aiEntries: UnifiedEntry[] = aiBookings.map((b) => ({
     id: b.conversation_id,
-    name: b.client_name || "—",
+    name: b.client_name || "Unknown",
     service: b.service,
     barber: b.barber,
     services: b.services,
