@@ -5069,18 +5069,20 @@ function HubTab({
                           </span>
                         </div>
                       </div>
-                      <div
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 800,
-                          color: C.text,
-                          lineHeight: 1.2,
-                          letterSpacing: "-0.01em",
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {entry.client_name}
-                      </div>
+                      {entry.client_name ? (
+                        <div
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 800,
+                            color: C.text,
+                            lineHeight: 1.2,
+                            letterSpacing: "-0.01em",
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {entry.client_name}
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* Quote — the actual client's words, prominent */}
@@ -5511,7 +5513,7 @@ function LedgerTab({
   }));
   const aiEntries: UnifiedEntry[] = aiBookings.map((b) => ({
     id: b.conversation_id,
-    name: b.client_name,
+    name: b.client_name || "—",
     service: b.service,
     barber: b.barber,
     services: b.services,
@@ -8052,10 +8054,10 @@ export default function DashboardPage() {
       setLiveCall(data.has_live_call ?? convs.some((c) => c.status === "in-progress" || c.status === "processing"));
       // Enrich with business_name so the ledger can show per-shop badges
       const BAD_NAMES =
-        /^(initiated|switching|attempted|disconnected|connected|transferred|forwarded|terminated|ended|started|continued|resumed|abandoned|dropped|client|caller|user|customer|unknown)$/i;
+        /^(initiated|switching|attempted|disconnected|connected|transferred|forwarded|terminated|ended|started|continued|resumed|abandoned|dropped|client|caller|user|customer|unknown|today|yesterday|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|morning|afternoon|evening|tonight|εεε?|ε|ααα|λοιπόν|eee|aaa|erm|err|ehm)$/i;
       const real: AiBooking[] = (bookingsData.bookings ?? []).map((b: AiBooking) => ({
         ...b,
-        client_name: BAD_NAMES.test(b.client_name.trim()) ? "Client" : b.client_name,
+        client_name: BAD_NAMES.test(b.client_name.trim().replace(/[,;.!?]+$/, "")) ? "" : b.client_name,
         business_name: b.business_id
           ? (businesses.find((biz) => biz.id === b.business_id)?.name ?? currentBiz?.name ?? "Unknown shop")
           : currentBiz?.name,
