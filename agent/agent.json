@@ -397,7 +397,7 @@
           "id": "language_consistency",
           "name": "Language Consistency",
           "type": "prompt",
-          "conversation_goal_prompt": "The agent locked to the correct language from the client's first message and never switched languages."
+          "conversation_goal_prompt": "The agent detected the client's language from their first message and responded in that language. If the client spoke a different language than the greeting, the agent switched to match. Once locked, the agent never switched again."
         },
         {
           "id": "brevity",
