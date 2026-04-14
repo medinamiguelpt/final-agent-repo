@@ -403,13 +403,13 @@
           "id": "brevity",
           "name": "Brevity",
           "type": "prompt",
-          "conversation_goal_prompt": "All agent responses were kept to one or two short sentences maximum."
+          "conversation_goal_prompt": "All agent responses were kept to two or three short sentences maximum."
         },
         {
-          "id": "no_forbidden_words",
-          "name": "No Forbidden Words",
+          "id": "natural_tone",
+          "name": "Natural Tone",
           "type": "prompt",
-          "conversation_goal_prompt": "The agent never used forbidden filler words like Certainly, Of course, Absolutely, Great choice, Sure, No problem, Wonderful, Perfect, Excellent, Amazing, Sounds good, Sounds great, Happy to help, I'd be happy to, Got it."
+          "conversation_goal_prompt": "The agent maintained a warm and direct tone. A small amount of filler or warmth is acceptable but responses stayed focused on the booking."
         }
       ]
     },
