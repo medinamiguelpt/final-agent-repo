@@ -676,19 +676,19 @@
           },
           "self_harm": {
             "is_enabled": true,
-            "threshold": 0.1
+            "threshold": 0.5
           },
           "profanity": {
             "is_enabled": true,
-            "threshold": 0.1
+            "threshold": 0.7
           },
           "religion_or_politics": {
             "is_enabled": true,
-            "threshold": 0.1
+            "threshold": 0.8
           },
           "medical_and_legal_information": {
             "is_enabled": true,
-            "threshold": 0.1
+            "threshold": 0.7
           }
         },
         "trigger_action": {
