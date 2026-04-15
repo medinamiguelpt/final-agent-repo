@@ -7859,20 +7859,23 @@ export default function DashboardPage() {
   const [currentBiz, setCurrentBiz] = useState<{ id: string; name: string; plan?: string } | null>(null);
   const [bizOpen, setBizOpen] = useState(false);
   const [walkinOpen, setWalkinOpen] = useState(false);
+  const [creditsOpen, setCreditsOpen] = useState(false);
+  const TOTAL_CREDITS = 10000; // 10,000 minutes (demo)
   const [addShopOpen, setAddShopOpen] = useState(false);
 
   // Close dropdowns on Escape
   useEffect(() => {
-    if (!bizOpen && !langOpen) return;
+    if (!bizOpen && !langOpen && !creditsOpen) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setBizOpen(false);
         setLangOpen(false);
+        setCreditsOpen(false);
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [bizOpen, langOpen]);
+  }, [bizOpen, langOpen, creditsOpen]);
 
   // Scroll-to-top visibility
   useEffect(() => {
@@ -8934,6 +8937,163 @@ export default function DashboardPage() {
                   <Plus size={15} strokeWidth={2.5} />
                   <span className="gbf-header-date">Walk-in</span>
                 </button>
+
+                {/* Credits / balance */}
+                {(() => {
+                  const usedCredits = Math.ceil(
+                    [...aiBookings, ...manualBookings].reduce((sum, b) => sum + (b.duration_secs || 0), 0) / 60,
+                  );
+                  const remaining = Math.max(0, TOTAL_CREDITS - usedCredits);
+                  const pct = Math.round((remaining / TOTAL_CREDITS) * 100);
+                  return (
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <button
+                        onClick={() => setCreditsOpen((v) => !v)}
+                        title="Credits balance"
+                        className="gbf-btn gbf-icon-btn"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          padding: "0 12px",
+                          height: 40,
+                          borderRadius: 10,
+                          border: `1px solid ${C.border}`,
+                          background: creditsOpen ? C.accentLight : C.surfaceAlt,
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                          color: C.text,
+                          transition: "all .15s",
+                        }}
+                      >
+                        <Coins size={14} style={{ color: C.accent }} strokeWidth={2.2} />
+                        <span
+                          className="gbf-header-date"
+                          style={{ fontSize: 12, fontWeight: 700, color: C.text, letterSpacing: "0.01em" }}
+                        >
+                          {remaining.toLocaleString()}
+                        </span>
+                        <span className="gbf-header-date" style={{ fontSize: 10, color: C.textFaint, fontWeight: 500 }}>
+                          min
+                        </span>
+                      </button>
+                      {creditsOpen && (
+                        <>
+                          {createPortal(
+                            <div
+                              onClick={() => setCreditsOpen(false)}
+                              style={{ position: "fixed", inset: 0, zIndex: 25 }}
+                            />,
+                            document.body,
+                          )}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "calc(100% + 8px)",
+                              right: isRTL ? "auto" : 0,
+                              left: isRTL ? 0 : "auto",
+                              zIndex: 201,
+                              background: C.surface,
+                              border: `1px solid ${C.border}`,
+                              borderRadius: 14,
+                              boxShadow: "0 8px 32px rgba(0,0,0,.18)",
+                              padding: 16,
+                              minWidth: 230,
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                marginBottom: 14,
+                              }}
+                            >
+                              <Coins size={16} style={{ color: C.accent }} strokeWidth={2.2} />
+                              <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>Balance</span>
+                            </div>
+                            <div style={{ marginBottom: 10 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  fontSize: 12,
+                                  color: C.textMuted,
+                                  marginBottom: 4,
+                                }}
+                              >
+                                <span>Total</span>
+                                <span style={{ fontWeight: 600, color: C.text }}>
+                                  {TOTAL_CREDITS.toLocaleString()} min
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  fontSize: 12,
+                                  color: C.textMuted,
+                                  marginBottom: 8,
+                                }}
+                              >
+                                <span>Remaining</span>
+                                <span style={{ fontWeight: 600, color: pct > 20 ? C.green : C.accent }}>
+                                  {remaining.toLocaleString()} min
+                                </span>
+                              </div>
+                              <div
+                                style={{
+                                  height: 6,
+                                  borderRadius: 3,
+                                  background: C.borderFaint,
+                                  overflow: "hidden",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: "100%",
+                                    width: `${pct}%`,
+                                    borderRadius: 3,
+                                    background: pct > 20 ? C.green : C.accent,
+                                    transition: "width .3s",
+                                  }}
+                                />
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: 11,
+                                  color: C.textFaint,
+                                  marginTop: 4,
+                                  textAlign: "right",
+                                }}
+                              >
+                                {usedCredits.toLocaleString()} min used ({100 - pct}%)
+                              </div>
+                            </div>
+                            <button
+                              className="gbf-btn"
+                              style={{
+                                width: "100%",
+                                padding: "8px 0",
+                                borderRadius: 8,
+                                border: `1px solid ${C.accent}44`,
+                                background: C.accentLight,
+                                color: C.accent,
+                                fontWeight: 700,
+                                fontSize: 12,
+                                cursor: "pointer",
+                                fontFamily: "inherit",
+                                transition: "all .15s",
+                              }}
+                            >
+                              Upgrade
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* User + logout */}
                 {userEmail && (
