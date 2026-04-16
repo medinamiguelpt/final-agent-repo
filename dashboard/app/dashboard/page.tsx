@@ -47,6 +47,8 @@ import {
   Rows2,
   Rows3,
   Rows4,
+  ArrowUpDown,
+  ChevronUp,
 } from "lucide-react";
 import { LanguageKey, LANG_META, LangSettings, DEFAULT_LANG, translate } from "./translations";
 import { supabase } from "@/lib/supabase/client";
@@ -644,6 +646,19 @@ const STATUS_BORDER: Record<string, string> = {
   pending: "#9AAABB",
   cancelled: "#B04040",
 };
+
+// ── Language badge config ────────────────────────────────────────────────────
+const LANG_BADGE_COLORS: Record<string, { color: string; bg: string; border: string }> = {
+  el: { color: "#2563EB", bg: "#DBEAFE", border: "#2563EB22" }, // blue
+  en: { color: "#B45309", bg: "#FEF3C7", border: "#D9770822" }, // amber
+  es: { color: "#DC2626", bg: "#FEE2E2", border: "#DC262622" }, // red
+  pt: { color: "#16A34A", bg: "#DCFCE7", border: "#16A34A22" }, // green
+  fr: { color: "#7C3AED", bg: "#EDE9FE", border: "#7C3AED22" }, // purple
+  de: { color: "#CA8A04", bg: "#FEF9C3", border: "#CA8A0422" }, // yellow
+  ar: { color: "#0D9488", bg: "#CCFBF1", border: "#0D948822" }, // teal
+};
+const LANG_BADGE_FALLBACK = { color: "#6B7280", bg: "#F3F4F6", border: "#6B728022" };
+
 const MOCK_SESSIONS = [
   { id: 1, device: "Chrome · macOS", location: "Athens, GR", current: true, lastSeen: "Now" },
   { id: 2, device: "Safari · iPhone", location: "Athens, GR", current: false, lastSeen: "2h ago" },
@@ -682,7 +697,7 @@ const BARBER_STATS = [
     clients: 87,
     appts: 92,
     topService: "Haircut",
-    avgTicket: 21.1,
+    avgTicket: 20.0,
     utilization: 88,
     color: "#3D7A50",
   },
@@ -718,10 +733,10 @@ const BARBER_STATS = [
   },
 ];
 const SERVICE_STATS = [
-  { name: "Haircut", count: 48, revenue: 720, pct: 32 },
-  { name: "Beard Trim", count: 32, revenue: 384, pct: 21 },
+  { name: "Haircut", count: 48, revenue: 720, pct: 31 },
+  { name: "Beard Trim", count: 32, revenue: 320, pct: 21 },
   { name: "Full Shave", count: 18, revenue: 216, pct: 12 },
-  { name: "Eyebrow Grooming", count: 16, revenue: 128, pct: 11 },
+  { name: "Eyebrow Grooming", count: 16, revenue: 80, pct: 11 },
   { name: "Haircut + Beard Combo", count: 20, revenue: 440, pct: 13 },
   { name: "Hair Styling", count: 10, revenue: 200, pct: 7 },
   { name: "Kids Cut", count: 8, revenue: 80, pct: 5 },
@@ -984,6 +999,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     summary: "Michalis called to book a haircut for today at 10:30 with Nikos. Classic short cut requested.",
     first_user_message: "Γεια σας, θέλω να κλείσω ραντεβού για κούρεμα σήμερα στις 10:30 αν είναι διαθέσιμος ο Nikos.",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_002",
@@ -1019,6 +1035,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     summary: "Dimitris booked the haircut + beard combo with Giorgos at 11:00. Special occasion.",
     first_user_message: "Θέλω να κλείσω για κούρεμα και γένια μαζί για αύριο στις 11. Είναι για μια ειδική περίσταση.",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_004",
@@ -1037,6 +1054,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     first_user_message:
       "Καλημέρα! Θέλω να κλείσω ραντεβού για διαμόρφωση φρυδιών — είναι διαθέσιμη η Eleni σήμερα το απόγευμα;",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_005",
@@ -1054,6 +1072,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     summary: "Kostas called to cancel his full shave with Petros. Will call back to reschedule.",
     first_user_message: "Γεια σας, πρέπει να ακυρώσω το ραντεβού μου για ξύρισμα με τον Petros. Κάτι έτυχε.",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_006",
@@ -1071,6 +1090,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     summary: "Giorgos booked a beard trim with Nikos at 13:00. Also asked about beard care products.",
     first_user_message: "Θέλω να κλείσω για τακτοποίηση μούσι — μπορώ συγκεκριμένα με τον Nikos αν γίνεται;",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_007",
@@ -1124,6 +1144,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     summary: "Alexandros booked a full shave with Petros at 10:00. Short efficient call.",
     first_user_message: "Γεια, θέλω να κάνω ξύρισμα. Είναι διαθέσιμος ο Petros τη Δευτέρα στις 10;",
     call_status: "done",
+    call_language: "el",
   },
   {
     conversation_id: "demo_010",
@@ -1142,6 +1163,7 @@ const DEMO_AI_BOOKINGS: AiBooking[] = [
     first_user_message:
       "Γεια σας, είμαι τακτικός πελάτης — ο Νίκος. Θέλω να κλείσω για τακτοποίηση μούσι με τον Giorgos.",
     call_status: "done",
+    call_language: "el",
   },
 ];
 
@@ -2154,13 +2176,6 @@ function SettingsPanel({
         hint: "Comma-separated — shown in the dashboard and agent config",
       })}
 
-      {section("AI Configuration")}
-      {field("ElevenLabs Agent ID", profileDraft.agentId, () => {}, {
-        readonly: true,
-        mono: true,
-        hint: "Contact support to change your agent ID",
-      })}
-
       <button
         onClick={saveProfile}
         style={{
@@ -2501,23 +2516,23 @@ function SettingsPanel({
     {
       id: "starter",
       name: "Starter",
-      price: "€29/mo",
+      price: "€79/mo",
       color: "#3D7A50",
-      features: ["1 AI Agent", "500 min/month", "Full analytics", "Email support"],
+      features: ["1 AI Agent", "200 min/month", "Full analytics", "Email support"],
     },
     {
       id: "professional",
       name: "Professional",
-      price: "€79/mo",
+      price: "€149/mo",
       color: "#1B5EBE",
-      features: ["3 AI Agents", "Unlimited min/month", "Custom branding", "Priority support"],
+      features: ["3 AI Agents", "500 min/month", "Custom branding", "Priority support"],
     },
     {
       id: "enterprise",
       name: "Enterprise",
-      price: "Custom",
+      price: "€299/mo",
       color: "#6747C7",
-      features: ["Unlimited agents", "White-label", "Dedicated SLA", "Phone support"],
+      features: ["Unlimited agents", "Unlimited min/month", "White-label", "Dedicated SLA"],
     },
   ];
   const initials = (profile.ownerName || profile.businessName).slice(0, 2).toUpperCase();
@@ -5037,22 +5052,26 @@ function HubTab({
                           {entry.feedType}
                         </span>
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                          {entry.call_language && entry.call_language !== "el" && (
-                            <span
-                              style={{
-                                fontSize: 10,
-                                fontWeight: 700,
-                                color: C.accentMid,
-                                background: C.accentLight,
-                                border: `1px solid ${C.accent}22`,
-                                padding: "2px 6px",
-                                borderRadius: 4,
-                                letterSpacing: "0.06em",
-                              }}
-                            >
-                              {entry.call_language.toUpperCase()}
-                            </span>
-                          )}
+                          {entry.call_language &&
+                            (() => {
+                              const lc = LANG_BADGE_COLORS[entry.call_language] ?? LANG_BADGE_FALLBACK;
+                              return (
+                                <span
+                                  style={{
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    color: lc.color,
+                                    background: lc.bg,
+                                    border: `1px solid ${lc.border}`,
+                                    padding: "2px 6px",
+                                    borderRadius: 4,
+                                    letterSpacing: "0.06em",
+                                  }}
+                                >
+                                  {entry.call_language.toUpperCase()}
+                                </span>
+                              );
+                            })()}
                           <span style={{ fontSize: 10, color: C.textFaint, fontVariantNumeric: "tabular-nums" }}>
                             {timeAgo(entry.start_time_unix_secs)}
                           </span>
@@ -5290,6 +5309,19 @@ function LedgerTab({
   const [openFilter, setOpenFilter] = useState<"date" | "barber" | "status" | "shop" | null>(null);
   const [hideNoAnswer, setHideNoAnswer] = useState(false);
   const [filterSources, setFilterSources] = useState<Set<SourceKey>>(new Set(ALL_SOURCES));
+
+  // ── Sort state ─────────────────────────────────────────────────────────────
+  type SortCol = "client" | "service" | "barber" | "datetime" | "price" | "status";
+  const [sortCol, setSortCol] = useState<SortCol>("datetime");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  function toggleSort(col: SortCol) {
+    if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else {
+      setSortCol(col);
+      setSortDir(col === "price" ? "desc" : "asc");
+    }
+  }
+
   const [expandedCalls, setExpandedCalls] = useState<Set<string>>(new Set());
   const [regenLoading, setRegenLoading] = useState(false);
   const [regenMsg, setRegenMsg] = useState<string | null>(null);
@@ -5491,6 +5523,7 @@ function LedgerTab({
     business_id?: string;
     business_name?: string;
     services?: ServiceLine[];
+    call_language?: string;
   }
 
   const demoEntries: UnifiedEntry[] = APPOINTMENTS.map((a) => ({
@@ -5525,6 +5558,7 @@ function LedgerTab({
     message_count: b.message_count,
     business_id: b.business_id,
     business_name: b.business_name,
+    call_language: b.call_language,
   }));
 
   // Combine — AI entries first (most recent first), then demo
@@ -5549,10 +5583,51 @@ function LedgerTab({
       (filterShop === "all" || a.business_id === filterShop) &&
       !(hideNoAnswer && isNoAnswer(a)),
   );
+  // ── Sort filtered entries ────────────────────────────────────────────────
+  const STATUS_ORDER: Record<string, number> = { confirmed: 0, "in-progress": 1, pending: 2, cancelled: 3, failed: 4 };
+
+  // Proximity-based date sort: today → future (ascending) → past (most recent first)
+  function dateProximityKey(d: string, t: string): number {
+    const [dd, mm] = (d || "00/00").split("/").map(Number);
+    const [hh, mi] = (t || "00:00").split(":").map(Number);
+    const nowD = new Date();
+    const entry = new Date(nowD.getFullYear(), (mm || 1) - 1, dd || 1);
+    const today = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+    const diffDays = Math.round((entry.getTime() - today.getTime()) / 86400000);
+    const timeVal = (hh || 0) * 60 + (mi || 0);
+    if (diffDays >= 0) return diffDays * 1440 + timeVal; // today=0..1439, tomorrow=1440..2879, …
+    return 1000000 + -diffDays * 1440 + timeVal; // past pushed to end
+  }
+
+  const sorted = [...filtered].sort((a, b) => {
+    let cmp = 0;
+    switch (sortCol) {
+      case "client":
+        cmp = (a.name || "").localeCompare(b.name || "");
+        break;
+      case "service":
+        cmp = (a.service || "").localeCompare(b.service || "");
+        break;
+      case "barber":
+        cmp = (a.barber || "").localeCompare(b.barber || "");
+        break;
+      case "datetime":
+        cmp = dateProximityKey(a.date, a.time) - dateProximityKey(b.date, b.time);
+        break;
+      case "price":
+        cmp = a.price - b.price;
+        break;
+      case "status":
+        cmp = (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
+        break;
+    }
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
   // "active" = confirmed/pending bookings only — excludes cancelled, failed, and no-answer calls
   const active = filtered.filter((a) => a.status !== "cancelled" && a.status !== "failed" && a.call_status !== "error");
   const revenue = active.reduce((s, a) => s + a.price, 0);
-  const fillPct = Math.round((active.filter((a) => a.date === d0).length / 20) * 100);
+  const fillPct = Math.min(100, Math.round((active.filter((a) => a.date === d0).length / 20) * 100));
 
   // Today's non-cancelled entries (for "cancel all today" action)
   const todayActive = allEntriesWithLocal.filter(
@@ -6269,45 +6344,63 @@ function LedgerTab({
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: C.surfaceAlt }}>
-                {[
-                  "",
-                  t("colClient"),
-                  t("colService"),
-                  t("colBarber"),
-                  t("colDate"),
-                  t("colTime"),
-                  t("colPrice"),
-                  "",
-                  t("colStatus"),
-                ].map((h, i) => (
+                {(
+                  [
+                    { label: "", col: null },
+                    { label: t("colClient"), col: "client" as SortCol },
+                    { label: t("colService"), col: "service" as SortCol },
+                    { label: t("colBarber"), col: "barber" as SortCol },
+                    { label: t("colDate"), col: "datetime" as SortCol },
+                    { label: t("colTime"), col: "datetime" as SortCol },
+                    { label: t("colPrice"), col: "price" as SortCol },
+                    { label: "", col: null },
+                    { label: t("colStatus"), col: "status" as SortCol },
+                  ] as { label: string; col: SortCol | null }[]
+                ).map((h, i) => (
                   <th
                     key={i}
+                    onClick={h.col ? () => toggleSort(h.col!) : undefined}
                     style={{
                       padding: "10px 16px",
                       fontSize: 11,
                       fontWeight: 700,
-                      color: C.textFaint,
+                      color: sortCol === h.col ? C.accent : C.textFaint,
                       textAlign: "left",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                       borderBottom: `1px solid ${C.border}`,
                       whiteSpace: "nowrap",
+                      cursor: h.col ? "pointer" : "default",
+                      userSelect: h.col ? "none" : undefined,
+                      transition: "color .15s",
                     }}
                   >
-                    {h}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      {h.label}
+                      {h.col &&
+                        (sortCol === h.col ? (
+                          sortDir === "asc" ? (
+                            <ChevronUp size={12} strokeWidth={2.5} />
+                          ) : (
+                            <ChevronDown size={12} strokeWidth={2.5} />
+                          )
+                        ) : (
+                          <ArrowUpDown size={11} strokeWidth={2} style={{ opacity: 0.35 }} />
+                        ))}
+                    </span>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {sorted.length === 0 ? (
                 <tr>
                   <td colSpan={9} style={{ padding: 40, textAlign: "center", color: C.textMuted, fontSize: 14 }}>
                     {filterShop !== "all" ? t("noAICalls") : t("noEntriesMatch")}
                   </td>
                 </tr>
               ) : (
-                filtered.map((a, i) => {
+                sorted.map((a, i) => {
                   const isAI = a.isAiCall === true;
                   const isLiveRow = a.call_status === "in-progress" || a.call_status === "processing";
                   const isOpen = expandedCalls.has(a.id);
@@ -6338,7 +6431,30 @@ function LedgerTab({
                           </span>
                         </td>
                         <td style={{ padding: pad.row, borderBottom: `1px solid ${C.borderFaint}` }}>
-                          <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{a.name}</div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>{a.name}</span>
+                            {a.call_language &&
+                              (() => {
+                                const lc = LANG_BADGE_COLORS[a.call_language] ?? LANG_BADGE_FALLBACK;
+                                return (
+                                  <span
+                                    style={{
+                                      fontSize: 9,
+                                      fontWeight: 800,
+                                      color: lc.color,
+                                      background: lc.bg,
+                                      border: `1px solid ${lc.border}`,
+                                      padding: "1px 5px",
+                                      borderRadius: 4,
+                                      letterSpacing: "0.06em",
+                                      flexShrink: 0,
+                                    }}
+                                  >
+                                    {a.call_language.toUpperCase()}
+                                  </span>
+                                );
+                              })()}
+                          </div>
                           {isAI && a.start_time_unix_secs && (
                             <div style={{ fontSize: 10, color: C.textFaint }}>{timeAgo(a.start_time_unix_secs)}</div>
                           )}
@@ -6579,7 +6695,7 @@ function LedgerTab({
 
       {/* Mobile cards */}
       <div className="gbf-ledger-cards">
-        {filtered.length === 0 ? (
+        {sorted.length === 0 ? (
           <div style={{ textAlign: "center", padding: "48px 24px", color: C.textMuted }}>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
               <div
@@ -6600,7 +6716,7 @@ function LedgerTab({
             <div style={{ fontSize: 13, marginTop: 4 }}>{t("adjustFilters")}</div>
           </div>
         ) : (
-          filtered.map((a) => {
+          sorted.map((a) => {
             const isAI = a.isAiCall === true;
             const isLiveRow = a.call_status === "in-progress" || a.call_status === "processing";
             const isOpen = expandedCalls.has(a.id);
@@ -6653,6 +6769,26 @@ function LedgerTab({
                           >
                             {t(SOURCE_CONFIG[a.source]?.labelKey ?? a.source)}
                           </span>
+                          {a.call_language &&
+                            (() => {
+                              const lc = LANG_BADGE_COLORS[a.call_language] ?? LANG_BADGE_FALLBACK;
+                              return (
+                                <span
+                                  style={{
+                                    fontSize: 9,
+                                    fontWeight: 800,
+                                    color: lc.color,
+                                    background: lc.bg,
+                                    border: `1px solid ${lc.border}`,
+                                    padding: "1px 5px",
+                                    borderRadius: 4,
+                                    letterSpacing: "0.06em",
+                                  }}
+                                >
+                                  {a.call_language.toUpperCase()}
+                                </span>
+                              );
+                            })()}
                           {isLiveRow && (
                             <span
                               style={{
@@ -7258,18 +7394,39 @@ function AnalyticsTab({
   // KPIs — blend real conversation data with mock historical data
   const [nowSecs] = useState(() => Math.floor(Date.now() / 1000));
   const sevenDaysAgo = nowSecs - 7 * 86400;
-  const realCalls7d = conversations.filter((c) => c.start_time_unix_secs > sevenDaysAgo).length;
-  const realDone = conversations.filter((c) => c.status === "done").length;
-  const realFailed = conversations.filter((c) => c.status === "error").length;
+  const real7d = conversations.filter((c) => c.start_time_unix_secs > sevenDaysAgo);
+  const realCalls7d = real7d.length;
+  const realFailed = real7d.filter((c) => c.status === "error").length;
+  const realDone = realCalls7d - realFailed; // everything non-error = answered (matches bar chart green)
   const totalRevenue = REVENUE_TREND.reduce((s, d) => s + d.revenue, 0);
   const totalAppts = REVENUE_TREND.reduce((s, d) => s + d.appts, 0);
-  const successCalls = realCalls7d > 0 ? realDone : CALL_TREND.reduce((s, d) => s + d.successful, 0);
-  const failedCalls = realCalls7d > 0 ? realFailed : CALL_TREND.reduce((s, d) => s + d.failed, 0);
-  const totalCalls = realCalls7d > 0 ? realCalls7d : successCalls + failedCalls;
-  const successRate = Math.round((successCalls / Math.max(totalCalls, 1)) * 100);
+  // Build per-day call trend from real data when available
+  const callTrend = (() => {
+    if (realCalls7d === 0) return CALL_TREND;
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const buckets: Record<string, { successful: number; failed: number }> = {};
+    // Seed last 7 days in order
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(nowSecs * 1000 - i * 86400000);
+      const label = dayNames[d.getDay()];
+      buckets[label] = { successful: 0, failed: 0 };
+    }
+    for (const c of real7d) {
+      const d = new Date(c.start_time_unix_secs * 1000);
+      const label = dayNames[d.getDay()];
+      if (!buckets[label]) buckets[label] = { successful: 0, failed: 0 };
+      if (c.status === "error") buckets[label].failed++;
+      else buckets[label].successful++;
+    }
+    return Object.entries(buckets).map(([label, v]) => ({ label, ...v }));
+  })();
+  const successCalls = realCalls7d > 0 ? realDone : callTrend.reduce((s, d) => s + d.successful, 0);
+  const failedCalls = realCalls7d > 0 ? realFailed : callTrend.reduce((s, d) => s + d.failed, 0);
+  const totalCalls = successCalls + failedCalls;
+  const successRate = Math.min(100, Math.round((successCalls / Math.max(totalCalls, 1)) * 100));
   const avgTicket = totalAppts > 0 ? (totalRevenue / totalAppts).toFixed(2) : "0";
   const totalBarberRev = BARBER_STATS.reduce((s, b) => s + b.revenue, 0);
-  const maxCallsDay = Math.max(...CALL_TREND.map((d) => d.successful + d.failed), 1);
+  const maxCallsDay = Math.max(...callTrend.map((d) => d.successful + d.failed), 1);
   const maxSvcCount = Math.max(...SERVICE_STATS.map((s) => s.count));
 
   // Revenue SVG chart
@@ -7457,7 +7614,7 @@ function AnalyticsTab({
             <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>{t("aCallsSubtitle")}</div>
           </div>
           <div className="gbf-bar-group" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {CALL_TREND.map((day) => {
+            {callTrend.map((day) => {
               const total = day.successful + day.failed;
               const sPct = total > 0 ? (day.successful / maxCallsDay) * 100 : 0;
               const fPct = total > 0 ? (day.failed / maxCallsDay) * 100 : 0;
