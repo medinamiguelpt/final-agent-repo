@@ -8245,6 +8245,10 @@ export default function DashboardPage() {
     }
   }, [currentBiz, businesses]);
 
+  // Track state transitions so we can trigger a full refresh when a live call ends
+  const prevLiveCallRef = useRef<boolean>(false);
+  const prevConvCountRef = useRef<number>(0);
+
   // Lightweight live-status check — only ElevenLabs call feed, no bookings
   const fetchLiveStatus = useCallback(async () => {
     try {
@@ -8252,22 +8256,33 @@ export default function DashboardPage() {
       if (data.agent) setAgent(data.agent);
       const convs: ConversationSummary[] = data.conversations ?? [];
       setConversations(convs);
-      setLiveCall(data.has_live_call ?? convs.some((c) => c.status === "in-progress" || c.status === "processing"));
+      const nowLive = data.has_live_call ?? convs.some((c) => c.status === "in-progress" || c.status === "processing");
+      setLiveCall(nowLive);
+
+      // Trigger full refresh when: (a) a live call just ended, or (b) new conversations appeared
+      const callEnded = prevLiveCallRef.current && !nowLive;
+      const newConvs = convs.length > prevConvCountRef.current;
+      if (callEnded || newConvs) {
+        fetchDashboardData();
+      }
+      prevLiveCallRef.current = nowLive;
+      prevConvCountRef.current = convs.length;
     } catch {
       /* swallow */
     }
-  }, []);
+  }, [fetchDashboardData]);
 
   // Initial full fetch
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Live status poll: checks for in-progress calls every 30 s (Supabase Realtime handles data refresh)
+  // Live status poll: checks ElevenLabs for call changes every 15 s.
+  // When a call ends or a new one appears, triggers a full data refresh (see fetchLiveStatus).
   useEffect(() => {
     const iv = setInterval(() => {
       if (!document.hidden) fetchLiveStatus();
-    }, 30_000);
+    }, 15_000);
     return () => clearInterval(iv);
   }, [fetchLiveStatus]);
 
