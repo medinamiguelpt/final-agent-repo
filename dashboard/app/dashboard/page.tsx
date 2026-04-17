@@ -4231,7 +4231,7 @@ function HubTab({
     let feedType = "CALL";
     let feedColor = C.accent;
     let feedBg = C.accentLight;
-    if (b.call_status === "in-progress" || b.call_status === "processing") {
+    if (b.call_status === "in-progress") {
       feedType = "LIVE";
       feedColor = C.red;
       feedBg = C.redLight;
@@ -5495,9 +5495,7 @@ function LedgerTab({
   }, [selectedConvId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Poll the live call's transcript every 2 s while the call is in progress ──
-  const liveConvId = aiBookings.find(
-    (b) => b.call_status === "in-progress" || b.call_status === "processing",
-  )?.conversation_id;
+  const liveConvId = aiBookings.find((b) => b.call_status === "in-progress")?.conversation_id;
   useEffect(() => {
     if (!liveConvId) return;
     // Kick off immediately, then poll
@@ -6422,7 +6420,7 @@ function LedgerTab({
               ) : (
                 sorted.map((a, i) => {
                   const isAI = a.isAiCall === true;
-                  const isLiveRow = a.call_status === "in-progress" || a.call_status === "processing";
+                  const isLiveRow = a.call_status === "in-progress";
                   const isOpen = expandedCalls.has(a.id);
                   const detail = a.conversation_id ? transcripts[a.conversation_id] : undefined;
                   return (
@@ -6738,7 +6736,7 @@ function LedgerTab({
         ) : (
           sorted.map((a) => {
             const isAI = a.isAiCall === true;
-            const isLiveRow = a.call_status === "in-progress" || a.call_status === "processing";
+            const isLiveRow = a.call_status === "in-progress";
             const isOpen = expandedCalls.has(a.id);
             const detail = a.conversation_id ? transcripts[a.conversation_id] : undefined;
             return (
@@ -7214,7 +7212,7 @@ function RecentCallsSection({
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {recent.map((conv) => {
-          const isLive = conv.status === "in-progress" || conv.status === "processing";
+          const isLive = conv.status === "in-progress";
           const isOpen = expandedId === conv.conversation_id;
           const detail = transcripts[conv.conversation_id];
           const isLoading = loadingId === conv.conversation_id;
@@ -8231,7 +8229,7 @@ export default function DashboardPage() {
       if (data.agent) setAgent(data.agent);
       const convs: ConversationSummary[] = data.conversations ?? [];
       setConversations(convs);
-      setLiveCall(data.has_live_call ?? convs.some((c) => c.status === "in-progress" || c.status === "processing"));
+      setLiveCall(data.has_live_call ?? convs.some((c) => c.status === "in-progress"));
       // Enrich with business_name so the ledger can show per-shop badges
       const BAD_NAMES =
         /^(initiated|switching|attempted|disconnected|connected|transferred|forwarded|terminated|ended|started|continued|resumed|abandoned|dropped|client|caller|user|customer|unknown|today|yesterday|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|morning|afternoon|evening|tonight|εεε?|ε|ααα|λοιπόν|eee|aaa|erm|err|ehm)$/i;
@@ -8269,7 +8267,7 @@ export default function DashboardPage() {
       if (data.agent) setAgent(data.agent);
       const convs: ConversationSummary[] = data.conversations ?? [];
       setConversations(convs);
-      const nowLive = data.has_live_call ?? convs.some((c) => c.status === "in-progress" || c.status === "processing");
+      const nowLive = data.has_live_call ?? convs.some((c) => c.status === "in-progress");
       setLiveCall(nowLive);
 
       // Trigger full refresh when: (a) a live call just ended, or (b) new conversations appeared

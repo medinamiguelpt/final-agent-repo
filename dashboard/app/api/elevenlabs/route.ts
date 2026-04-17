@@ -48,12 +48,11 @@ export async function GET() {
 
     // Compute real 7-day call count from actual conversation timestamps
     const sevenDaysAgo = Math.floor(Date.now() / 1000) - 7 * 86400;
-    const real7dCount = allConvs.filter(c => c.start_time_unix_secs > sevenDaysAgo).length;
+    const real7dCount = allConvs.filter((c) => c.start_time_unix_secs > sevenDaysAgo).length;
 
-    // Check for active call
-    const hasLiveCall = allConvs.some(
-      c => c.status === "in-progress" || c.status === "processing"
-    );
+    // Check for active call — only "in-progress" (call happening now).
+    // "processing" means ElevenLabs is generating post-call analysis — call has ended.
+    const hasLiveCall = allConvs.some((c) => c.status === "in-progress");
 
     return NextResponse.json({
       agent: {

@@ -470,7 +470,9 @@ function inferStatus(
   summary: string,
   dcrStatus: string,
 ): string {
-  if (convStatus === "in-progress" || convStatus === "processing") return "in-progress";
+  // Only "in-progress" is an actively-happening call. "processing" means the call
+  // has ended and ElevenLabs is generating the analysis — treat as "done/pending".
+  if (convStatus === "in-progress") return "in-progress";
   if (dcrStatus === "confirmed") return "confirmed";
   if (dcrStatus === "pending") return "pending";
   if (dcrStatus === "not_booked") return "cancelled";
