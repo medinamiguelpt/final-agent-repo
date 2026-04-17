@@ -8003,7 +8003,6 @@ export default function DashboardPage() {
   const [agent, setAgent] = useState<AgentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const [C, setC] = useState<Colors>(PALETTES.cream.light);
   const [tab, setTab] = useState<"hub" | "ledger" | "analytics">("hub");
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
@@ -8021,20 +8020,34 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState("");
   const [businesses, setBusinesses] = useState<{ id: string; name: string; plan?: string }[]>([]);
   const [currentBiz, setCurrentBiz] = useState<{ id: string; name: string; plan?: string } | null>(null);
-  const [bizOpen, setBizOpen] = useState(false);
+  // Single menu state — only one header dropdown open at a time
+  type HeaderMenu = "biz" | "lang" | "credits" | null;
+  const [openMenu, setOpenMenu] = useState<HeaderMenu>(null);
+  const bizOpen = openMenu === "biz";
+  const langOpen = openMenu === "lang";
+  const creditsOpen = openMenu === "credits";
+  const setBizOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const val = typeof v === "function" ? v(openMenu === "biz") : v;
+    setOpenMenu(val ? "biz" : null);
+  };
+  const setLangOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const val = typeof v === "function" ? v(openMenu === "lang") : v;
+    setOpenMenu(val ? "lang" : null);
+  };
+  const setCreditsOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const val = typeof v === "function" ? v(openMenu === "credits") : v;
+    setOpenMenu(val ? "credits" : null);
+  };
   const [walkinOpen, setWalkinOpen] = useState(false);
-  const [creditsOpen, setCreditsOpen] = useState(false);
   const TOTAL_CREDITS = 10000; // 10,000 minutes (demo)
   const [addShopOpen, setAddShopOpen] = useState(false);
 
   // Close dropdowns on Escape
   useEffect(() => {
-    if (!bizOpen && !langOpen && !creditsOpen) return;
+    if (!openMenu) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setBizOpen(false);
-        setLangOpen(false);
-        setCreditsOpen(false);
+        setOpenMenu(null);
       }
     };
     document.addEventListener("keydown", handler);
@@ -9291,7 +9304,10 @@ export default function DashboardPage() {
                 )}
 
                 <button
-                  onClick={() => setSettingsOpen(true)}
+                  onClick={() => {
+                    setSettingsOpen(true);
+                    setOpenMenu(null);
+                  }}
                   title="Settings"
                   className="gbf-btn gbf-icon-btn"
                   style={{
