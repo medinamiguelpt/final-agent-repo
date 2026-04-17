@@ -1652,7 +1652,7 @@ const RESPONSIVE_CSS = `
   @media(max-width:768px){
     .gbf-call-fab{bottom:20px!important;right:16px!important}
 
-    .gbf-header           { padding:0 16px; overflow:hidden; }
+    .gbf-header           { padding:0 16px; }
     .gbf-header-inner     { height:56px; }
     .gbf-header-date      { display:none; }
     .gbf-header-live-text { display:none; }
@@ -2362,12 +2362,6 @@ function SettingsPanel({
   const DashboardSection = () => (
     <div>
       {section("Data", "Configure how the dashboard fetches and displays live data")}
-      {toggle(
-        "Auto-refresh",
-        "Refreshes appointments and stats every 30 s. The live call feed always updates every 10 s regardless.",
-        settings.autoRefresh,
-        (v) => onUpdate({ autoRefresh: v }),
-      )}
       <div
         style={{
           marginTop: 20,
@@ -4242,10 +4236,14 @@ function HubTab({
       feedType = "LIVE";
       feedColor = C.red;
       feedBg = C.redLight;
-    } else if (b.status === "failed" || b.message_count === 0) {
+    } else if (b.message_count === 0) {
       feedType = "NO ANSWER";
       feedColor = C.textFaint;
       feedBg = C.borderFaint;
+    } else if (b.status === "failed" && (b.message_count ?? 0) <= 1 && (b.duration_secs ?? 0) < 20) {
+      feedType = "DROPPED";
+      feedColor = C.amber;
+      feedBg = C.amberLight;
     } else if (b.call_status === "error") {
       feedType = "MISSED";
       feedColor = C.textFaint;
@@ -4269,8 +4267,10 @@ function HubTab({
     }
     return { ...b, feedType, feedColor, feedBg };
   });
-  const noAnswerCount = allFeedEntries.filter((e) => e.feedType === "NO ANSWER").length;
-  const feedEntries = hideNoAnswer ? allFeedEntries.filter((e) => e.feedType !== "NO ANSWER") : allFeedEntries;
+  const noAnswerCount = allFeedEntries.filter((e) => e.feedType === "NO ANSWER" || e.feedType === "DROPPED").length;
+  const feedEntries = hideNoAnswer
+    ? allFeedEntries.filter((e) => e.feedType !== "NO ANSWER" && e.feedType !== "DROPPED")
+    : allFeedEntries;
 
   const isAllShops = currentBiz === null && (businesses?.length ?? 0) > 1;
 
@@ -5302,6 +5302,13 @@ function LedgerTab({
 }) {
   const t = useT();
   const tStatus = (s: string) => t(STATUS_I18N[s] ?? s);
+  const statusLabel = (a: UnifiedEntry) => {
+    if (a.status === "failed" && a.isAiCall) {
+      if ((a.message_count ?? 0) === 0) return "No Answer";
+      if ((a.message_count ?? 0) <= 1 && (a.duration_secs ?? 0) < 20) return "Dropped";
+    }
+    return tStatus(a.status);
+  };
   const [filterDate, setFilterDate] = useState("all");
   const [filterBarber, setFilterBarber] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -5313,12 +5320,12 @@ function LedgerTab({
   // ── Sort state ─────────────────────────────────────────────────────────────
   type SortCol = "client" | "service" | "barber" | "datetime" | "price" | "status";
   const [sortCol, setSortCol] = useState<SortCol>("datetime");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   function toggleSort(col: SortCol) {
     if (sortCol === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
       setSortCol(col);
-      setSortDir(col === "price" ? "desc" : "asc");
+      setSortDir(col === "datetime" || col === "price" ? "desc" : "asc");
     }
   }
 
@@ -5520,6 +5527,7 @@ function LedgerTab({
     start_time_unix_secs?: number;
     call_status?: string;
     message_count?: number;
+    duration_secs?: number;
     business_id?: string;
     business_name?: string;
     services?: ServiceLine[];
@@ -5556,6 +5564,7 @@ function LedgerTab({
     start_time_unix_secs: b.start_time_unix_secs,
     call_status: b.call_status,
     message_count: b.message_count,
+    duration_secs: b.duration_secs,
     business_id: b.business_id,
     business_name: b.business_name,
     call_language: b.call_language,
@@ -5572,7 +5581,7 @@ function LedgerTab({
   const allEntriesWithLocal = allEntries.map((a) => (cancelled[a.id] ? { ...a, status: "cancelled" } : a));
 
   const isNoAnswer = (a: UnifiedEntry) =>
-    a.isAiCall === true && (a.status === "failed" || (a.message_count ?? 0) === 0);
+    a.isAiCall === true && (a.status === "failed" || (a.message_count ?? 0) === 0) && (a.service === "—" || !a.service);
   const noAnswerCount = allEntriesWithLocal.filter(isNoAnswer).length;
   const filtered = allEntriesWithLocal.filter(
     (a) =>
@@ -5586,17 +5595,12 @@ function LedgerTab({
   // ── Sort filtered entries ────────────────────────────────────────────────
   const STATUS_ORDER: Record<string, number> = { confirmed: 0, "in-progress": 1, pending: 2, cancelled: 3, failed: 4 };
 
-  // Proximity-based date sort: today → future (ascending) → past (most recent first)
-  function dateProximityKey(d: string, t: string): number {
+  // Chronological key from date (dd/mm) + time (hh:mm) — used when start_time_unix_secs is missing
+  function dateTimeKey(d: string, t: string): number {
     const [dd, mm] = (d || "00/00").split("/").map(Number);
     const [hh, mi] = (t || "00:00").split(":").map(Number);
-    const nowD = new Date();
-    const entry = new Date(nowD.getFullYear(), (mm || 1) - 1, dd || 1);
-    const today = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
-    const diffDays = Math.round((entry.getTime() - today.getTime()) / 86400000);
-    const timeVal = (hh || 0) * 60 + (mi || 0);
-    if (diffDays >= 0) return diffDays * 1440 + timeVal; // today=0..1439, tomorrow=1440..2879, …
-    return 1000000 + -diffDays * 1440 + timeVal; // past pushed to end
+    // mm*100_0000 + dd*10000 + hh*100 + mi  gives a monotonic key
+    return (mm || 0) * 1_000_000 + (dd || 0) * 10_000 + (hh || 0) * 100 + (mi || 0);
   }
 
   const sorted = [...filtered].sort((a, b) => {
@@ -5612,7 +5616,10 @@ function LedgerTab({
         cmp = (a.barber || "").localeCompare(b.barber || "");
         break;
       case "datetime":
-        cmp = dateProximityKey(a.date, a.time) - dateProximityKey(b.date, b.time);
+        // Prefer unix timestamp (precise); fall back to parsed date/time string
+        cmp =
+          (a.start_time_unix_secs ?? dateTimeKey(a.date, a.time)) -
+          (b.start_time_unix_secs ?? dateTimeKey(b.date, b.time));
         break;
       case "price":
         cmp = a.price - b.price;
@@ -6575,7 +6582,7 @@ function LedgerTab({
                         </td>
                         <td style={{ padding: pad.row, borderBottom: `1px solid ${C.borderFaint}` }}>
                           <div style={{ display: "flex", gap: 5, alignItems: "center", flexWrap: "wrap" }}>
-                            <Badge status={a.status} label={tStatus(a.status)} C={C} />
+                            <Badge status={a.status} label={statusLabel(a)} C={C} />
                             {cancelled[a.id] && (
                               <span
                                 title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
@@ -6949,7 +6956,7 @@ function LedgerTab({
                         </span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <Badge status={a.status} label={tStatus(a.status)} C={C} />
+                        <Badge status={a.status} label={statusLabel(a)} C={C} />
                         {cancelled[a.id] && (
                           <span
                             title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
@@ -8243,22 +8250,13 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Live call feed: always polls every 10 s regardless of autoRefresh setting
+  // Live status poll: checks for in-progress calls every 30 s (Supabase Realtime handles data refresh)
   useEffect(() => {
     const iv = setInterval(() => {
       if (!document.hidden) fetchLiveStatus();
-    }, 10_000);
-    return () => clearInterval(iv);
-  }, [fetchLiveStatus]);
-
-  // Dashboard auto-refresh: full data every 30 s when enabled
-  useEffect(() => {
-    if (!settings.autoRefresh) return;
-    const iv = setInterval(() => {
-      if (!document.hidden) fetchDashboardData();
     }, 30_000);
     return () => clearInterval(iv);
-  }, [settings.autoRefresh, fetchDashboardData]);
+  }, [fetchLiveStatus]);
 
   // ── Realtime: refresh on new calls/appointments ──
   useEffect(() => {

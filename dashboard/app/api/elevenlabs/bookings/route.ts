@@ -517,10 +517,33 @@ function buildBooking(conv: ConvSummary, detail: ConvDetail | null) {
       duration_secs: conv.call_duration_secs,
       start_time_unix_secs: conv.start_time_unix_secs,
       message_count: 0,
-      summary: "",
+      summary: "No answer — silent call",
       first_user_message: "",
       call_status: conv.status,
-      call_language: "",
+      call_language: conv.main_language ?? "",
+    };
+  }
+
+  // ── Dropped / abandoned calls (agent greeted but caller hung up immediately) ──
+  const isDropped = conv.message_count <= 1 && conv.call_duration_secs < 20;
+  if (isDropped) {
+    return {
+      conversation_id: conv.conversation_id,
+      source: "ai-call" as const,
+      status: "failed",
+      client_name: "—",
+      service: "—",
+      barber: "—",
+      date: fallbackDate,
+      time: fallbackTime,
+      price: 0,
+      duration_secs: conv.call_duration_secs,
+      start_time_unix_secs: conv.start_time_unix_secs,
+      message_count: conv.message_count,
+      summary: "Dropped call — caller hung up immediately",
+      first_user_message: "",
+      call_status: conv.status,
+      call_language: conv.main_language ?? "",
     };
   }
 
@@ -725,12 +748,7 @@ export async function GET(req: Request) {
                   return false;
                 }
                 seen.add(c.conversation_id);
-                const title = c.call_summary_title ?? "";
-                const isTrivial =
-                  c.message_count <= 1 &&
-                  c.call_duration_secs < 20 &&
-                  (!title || /^greek barber festival/i.test(title));
-                return !isTrivial;
+                return true;
               });
             const toEnrich = allConvs.slice(0, 15);
             const details = await Promise.all(toEnrich.map((c) => getConversation(c.conversation_id)));
@@ -775,10 +793,7 @@ export async function GET(req: Request) {
       .filter((c) => {
         if (seen.has(c.conversation_id)) return false;
         seen.add(c.conversation_id);
-        const title = c.call_summary_title ?? "";
-        const isTrivial =
-          c.message_count <= 1 && c.call_duration_secs < 20 && (!title || /^greek barber festival/i.test(title));
-        return !isTrivial;
+        return true;
       });
 
     const toEnrich = allConvs.slice(0, 15);
