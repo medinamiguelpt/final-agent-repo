@@ -4190,9 +4190,12 @@ function HubTab({
 }) {
   const t = useT();
   const [hideNoAnswer, setHideNoAnswer] = useState(false);
-  const transcriptEndRef = useRef<HTMLDivElement>(null);
+  const transcriptScrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Scroll only the transcript container — never the page.
+    // (scrollIntoView on a child bubbles up and can scroll the whole window.)
+    const el = transcriptScrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, [liveTranscript]);
   const languages = agent?.languages ?? ["el", "en", "es", "pt", "fr", "de", "ar"];
 
@@ -4541,6 +4544,7 @@ function HubTab({
 
               {/* Transcript scroll area */}
               <div
+                ref={transcriptScrollRef}
                 style={{
                   flex: 1,
                   overflowY: "auto",
@@ -4597,7 +4601,6 @@ function HubTab({
                     </div>
                   ))
                 )}
-                <div ref={transcriptEndRef} />
               </div>
 
               {/* Human Takeover button */}
