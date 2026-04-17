@@ -1503,8 +1503,6 @@ const RESPONSIVE_CSS = `
 
   /* ── Mob-only / mob-hide ──────────────────────────────────────────────────── */
   .gbf-mob-only{display:none!important}
-  .gbf-live-banner-short{display:none}
-  .gbf-live-banner-long{display:inline}
   .gbf-tab-icon{display:none;align-items:center}
 
   /* ── Swipe hint ───────────────────────────────────────────────────────────── */
@@ -1672,8 +1670,6 @@ const RESPONSIVE_CSS = `
     .gbf-footer           { padding:14px 16px; flex-wrap:wrap; gap:4px; font-size:11px; }
     .gbf-mob-only         { display:block!important; }
     .gbf-mob-flex         { display:flex!important; }
-    .gbf-live-banner-short{ display:inline; }
-    .gbf-live-banner-long { display:none; }
 
     /* Settings — bottom sheet */
     .gbf-settings-drawer{top:auto;right:0;bottom:0;left:0;width:100%;border-radius:20px 20px 0 0;max-height:94vh;animation:gbf-slideU .3s cubic-bezier(.32,.72,0,1) both}
@@ -9360,61 +9356,6 @@ export default function DashboardPage() {
               </div>
             </div>
           </header>
-
-          {/* Live call banner */}
-          {liveCall && (
-            <div
-              style={{
-                background: C.red,
-                color: "#fff",
-                padding: "8px 20px",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                fontSize: 13,
-                fontWeight: 600,
-                flexWrap: "wrap",
-              }}
-            >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: "#fff",
-                  display: "inline-block",
-                  animation: "gbf-pulse 1s infinite",
-                  flexShrink: 0,
-                }}
-              />
-              <span className="gbf-live-banner-long">Live call in progress — dashboard updates every 10 s</span>
-              <span className="gbf-live-banner-short">Live call in progress</span>
-              <button
-                onClick={() => setTab("analytics")}
-                style={{
-                  marginLeft: "auto",
-                  fontSize: 11,
-                  fontWeight: 700,
-                  opacity: 0.9,
-                  background: "rgba(255,255,255,.18)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "4px 12px",
-                  borderRadius: 99,
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                  flexShrink: 0,
-                }}
-              >
-                View Analytics{" "}
-                <ArrowRight
-                  size={11}
-                  strokeWidth={2.5}
-                  style={{ display: "inline", verticalAlign: "middle", marginLeft: 2 }}
-                />
-              </button>
-            </div>
-          )}
 
           {/* Tabs — top position: sticky below header; hidden when bottom nav active */}
           {!navBottom && (
