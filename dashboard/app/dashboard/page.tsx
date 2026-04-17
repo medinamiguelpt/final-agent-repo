@@ -5451,8 +5451,8 @@ function LedgerTab({
   }
 
   // ── Fetch transcript (no toggle behaviour) ────────────────────────────────
-  const fetchTranscript = useCallback(async (id: string, summary?: string) => {
-    if (transcriptsRef.current[id]) return;
+  const fetchTranscript = useCallback(async (id: string, summary?: string, forceRefresh = false) => {
+    if (!forceRefresh && transcriptsRef.current[id]) return;
     if (id.startsWith("demo_")) {
       setTranscripts((prev) => {
         const next = {
@@ -5494,6 +5494,20 @@ function LedgerTab({
     scrollAndCenter(selectedConvId, true);
     onConvSelected?.();
   }, [selectedConvId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Poll the live call's transcript every 2 s while the call is in progress ──
+  const liveConvId = aiBookings.find(
+    (b) => b.call_status === "in-progress" || b.call_status === "processing",
+  )?.conversation_id;
+  useEffect(() => {
+    if (!liveConvId) return;
+    // Kick off immediately, then poll
+    fetchTranscript(liveConvId, undefined, true);
+    const iv = setInterval(() => {
+      if (!document.hidden) fetchTranscript(liveConvId, undefined, true);
+    }, 2_000);
+    return () => clearInterval(iv);
+  }, [liveConvId, fetchTranscript]);
 
   // ── User-click toggle: expand / collapse ─────────────────────────────────
   async function loadCallTranscript(id: string, summary?: string) {
@@ -8277,14 +8291,15 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Live status poll: checks ElevenLabs for call changes every 15 s.
+  // Live status poll: fast (2 s) when a call is in progress, slow (15 s) when idle.
   // When a call ends or a new one appears, triggers a full data refresh (see fetchLiveStatus).
   useEffect(() => {
+    const interval = liveCall ? 2_000 : 15_000;
     const iv = setInterval(() => {
       if (!document.hidden) fetchLiveStatus();
-    }, 15_000);
+    }, interval);
     return () => clearInterval(iv);
-  }, [fetchLiveStatus]);
+  }, [fetchLiveStatus, liveCall]);
 
   // ── Realtime: refresh on new calls/appointments ──
   useEffect(() => {
