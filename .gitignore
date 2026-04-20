@@ -29,3 +29,4 @@ dashboard/*.json
 dashboard/modal-test.js
 dashboard/modal-screenshots/
 dashboard/responsive-test-output/
+.vercel
