@@ -5043,7 +5043,9 @@ function HubTab({
                     }}
                     title="Click to view full transcript in Ledger"
                     style={{
-                      border: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderTop: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderRight: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderBottom: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
                       borderLeft: `4px solid ${entry.feedColor}`,
                       borderRadius: 10,
                       background: C.surface,
