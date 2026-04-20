@@ -2384,7 +2384,7 @@ function SettingsPanel({
           <Moon size={10} strokeWidth={2} /> DARK
         </span>
       </div>
-      {paletteRows(["cream", "slate", "teal"])}
+      {paletteRows(["calbliss", "cream", "slate", "teal"])}
       {toggle("Follow system", "Auto-switch with OS dark mode", settings.mode === "system", (v) =>
         onUpdate({ mode: v ? "system" : "light" }),
       )}
