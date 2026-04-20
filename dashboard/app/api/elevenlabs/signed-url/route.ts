@@ -25,16 +25,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "No active agents configured" }, { status: 500 });
   }
 
-  const res = await fetch(
-    `${EL_BASE}/convai/conversation/get_signed_url?agent_id=${agent.id}`,
-    { headers: { "xi-api-key": EL_KEY } }
-  );
+  const res = await fetch(`${EL_BASE}/convai/conversation/get_signed_url?agent_id=${agent.id}`, {
+    headers: { "xi-api-key": EL_KEY },
+  });
 
   if (!res.ok) {
     const err = await res.text();
     return NextResponse.json({ error: err }, { status: res.status });
   }
 
-  const { signed_url } = await res.json() as { signed_url: string };
+  const { signed_url } = (await res.json()) as { signed_url: string };
   return NextResponse.json({ signed_url, agentId: agent.id, agentName: agent.name });
 }

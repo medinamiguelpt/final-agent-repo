@@ -33,10 +33,10 @@ export async function configureAgentSchema(agentId: string): Promise<unknown> {
 
   const body = await res.json().catch(() => ({ _raw: "non-JSON response" }));
   if (!res.ok) {
-    throw Object.assign(
-      new Error(`ElevenLabs PATCH agent/${agentId} failed (HTTP ${res.status})`),
-      { status: res.status, body }
-    );
+    throw Object.assign(new Error(`ElevenLabs PATCH agent/${agentId} failed (HTTP ${res.status})`), {
+      status: res.status,
+      body,
+    });
   }
   return body;
 }
@@ -70,10 +70,7 @@ export interface ConvSummary {
 }
 
 /** List conversations for one agent (up to pageSize, most-recent first). */
-export async function listConversations(
-  agentId: string,
-  pageSize = 50,
-): Promise<ConvSummary[]> {
+export async function listConversations(agentId: string, pageSize = 50): Promise<ConvSummary[]> {
   const url = `${EL_BASE}/convai/conversations?agent_id=${agentId}&page_size=${pageSize}`;
   const res = await fetch(url, {
     headers: { "xi-api-key": apiKey() },
@@ -131,10 +128,7 @@ export async function getConversation(conversationId: string): Promise<ConvDetai
  * Pull a string value from data_collection_results by trying multiple identifier aliases.
  * Returns "" if none of the keys has a non-empty, non-null value.
  */
-export function dcr(
-  results: Record<string, DataCollectionValue> | undefined | null,
-  ...keys: string[]
-): string {
+export function dcr(results: Record<string, DataCollectionValue> | undefined | null, ...keys: string[]): string {
   if (!results) return "";
   for (const k of keys) {
     const entry = results[k];
@@ -158,10 +152,7 @@ export function dcr(
  * Store the webhook secret as ELEVENLABS_WEBHOOK_SECRET in your env.
  * Returns true if the signature matches (or if no secret is configured — for dev).
  */
-export function verifyWebhookSignature(
-  rawBody: string,
-  signatureHeader: string | null,
-): boolean {
+export function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
   const secret = process.env.ELEVENLABS_WEBHOOK_SECRET;
   if (!secret) {
     // No secret configured — allow in development, warn in production
@@ -181,9 +172,7 @@ export function verifyWebhookSignature(
     const { t: timestamp, v0: receivedHmac } = parts;
     if (!timestamp || !receivedHmac) return false;
 
-    const expected = createHmac("sha256", secret)
-      .update(`${timestamp}.${rawBody}`)
-      .digest("hex");
+    const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
 
     // timingSafeEqual requires equal-length buffers
     const a = Buffer.from(receivedHmac.padEnd(64, "0"), "hex");

@@ -8,23 +8,20 @@ export async function GET(req: Request) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabaseAdmin() as any;
-  const { data: { user }, error: authErr } = await db.auth.getUser(token);
+  const {
+    data: { user },
+    error: authErr,
+  } = await db.auth.getUser(token);
   console.log("[GET /api/businesses] user:", user?.id ?? "null", authErr?.message ?? "");
   if (!user) return Response.json({ businesses: [] });
 
-  const { data: members } = await db
-    .from("business_members")
-    .select("business_id")
-    .eq("user_id", user.id);
+  const { data: members } = await db.from("business_members").select("business_id").eq("user_id", user.id);
 
   const ids = (members ?? []).map((m: { business_id: string }) => m.business_id);
   console.log("[GET /api/businesses] member ids:", ids);
   if (ids.length === 0) return Response.json({ businesses: [] });
 
-  const { data: bizData, error: bizErr } = await db
-    .from("businesses")
-    .select("id, name, plan")
-    .in("id", ids);
+  const { data: bizData, error: bizErr } = await db.from("businesses").select("id, name, plan").in("id", ids);
 
   console.log("[GET /api/businesses] returning", bizData?.length ?? 0, "businesses, err:", bizErr?.message ?? "none");
   return Response.json({ businesses: bizData ?? [] });
@@ -37,24 +34,31 @@ export async function POST(req: Request) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabaseAdmin() as any;
-  const { data: { user }, error: authErr } = await db.auth.getUser(token);
+  const {
+    data: { user },
+    error: authErr,
+  } = await db.auth.getUser(token);
   if (authErr || !user) return Response.json({ error: "Unauthorised" }, { status: 401 });
 
   // ── Validate body ───────────────────────────────────────────────────────────
   const body = await req.json().catch(() => ({}));
-  const name     = (body.name     ?? "").trim();
+  const name = (body.name ?? "").trim();
   const timezone = (body.timezone ?? "").trim();
-  if (!name)     return Response.json({ error: "Name is required" },     { status: 400 });
+  if (!name) return Response.json({ error: "Name is required" }, { status: 400 });
   if (!timezone) return Response.json({ error: "Timezone is required" }, { status: 400 });
   if (!body.phone?.trim() && !body.email?.trim()) {
     return Response.json({ error: "Phone or email is required" }, { status: 400 });
   }
 
-  const slug = name.toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 60) + "-" + Date.now().toString(36);
+  const slug =
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 60) +
+    "-" +
+    Date.now().toString(36);
 
   // ── Insert business ─────────────────────────────────────────────────────────
   const { data: biz, error: bizErr } = await db
@@ -62,18 +66,18 @@ export async function POST(req: Request) {
     .insert({
       name,
       slug,
-      phone:             body.phone             ?? null,
-      email:             body.email             ?? null,
-      address:           body.address           ?? null,
-      city:              body.city              ?? null,
-      country:           body.country           ?? null,
-      website:           body.website           ?? null,
-      description:       body.description       ?? null,
-      hours:             body.hours ? JSON.stringify(body.hours) : null,
+      phone: body.phone ?? null,
+      email: body.email ?? null,
+      address: body.address ?? null,
+      city: body.city ?? null,
+      country: body.country ?? null,
+      website: body.website ?? null,
+      description: body.description ?? null,
+      hours: body.hours ? JSON.stringify(body.hours) : null,
       timezone,
-      owner_id:          user.id,
-      approved:          true,
-      plan:              body.plan              ?? "free",
+      owner_id: user.id,
+      approved: true,
+      plan: body.plan ?? "free",
     })
     .select("id, name, plan")
     .single();
@@ -83,20 +87,20 @@ export async function POST(req: Request) {
   // ── Add owner as member ─────────────────────────────────────────────────────
   await db.from("business_members").insert({
     business_id: biz.id,
-    user_id:     user.id,
-    role:        "owner",
+    user_id: user.id,
+    role: "owner",
   });
 
   // ── Link shared ElevenLabs agent (optional) ─────────────────────────────────
-  const agentId   = (body.agent_id   ?? "").trim();
+  const agentId = (body.agent_id ?? "").trim();
   const agentName = (body.agent_name ?? "").trim();
   if (agentId) {
     await db.from("agents").insert({
-      business_id:         biz.id,
+      business_id: biz.id,
       elevenlabs_agent_id: agentId,
-      name:                agentName || agentId,
-      active:              true,
-      calendar_config:     {},
+      name: agentName || agentId,
+      active: true,
+      calendar_config: {},
     });
   }
 
@@ -104,11 +108,11 @@ export async function POST(req: Request) {
   const extraAgentId = (body.extra_agent_id ?? "").trim();
   if (extraAgentId) {
     await db.from("agents").insert({
-      business_id:         biz.id,
+      business_id: biz.id,
       elevenlabs_agent_id: extraAgentId,
-      name:                `Imported (${extraAgentId.slice(0, 14)}…)`,
-      active:              true,
-      calendar_config:     {},
+      name: `Imported (${extraAgentId.slice(0, 14)}…)`,
+      active: true,
+      calendar_config: {},
     });
   }
 

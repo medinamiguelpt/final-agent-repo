@@ -115,7 +115,7 @@ interface AiBooking {
   business_id?: string;
   business_name?: string;
 }
-type PaletteKey = "slate" | "cream" | "teal" | "contrast" | "lowvision";
+type PaletteKey = "slate" | "cream" | "teal" | "contrast" | "lowvision" | "calbliss";
 type ModeKey = "light" | "dark" | "system";
 type DensityKey = "compact" | "comfortable" | "spacious";
 type SettingsSection = "profile" | "appearance" | "dashboard" | "display" | "language" | "account" | "security";
@@ -405,12 +405,58 @@ const PALETTES: Record<PaletteKey, { name: string; swatch: string; light: Colors
       overlay: "rgba(0,0,0,0.65)",
     },
   },
+  calbliss: {
+    name: "CalBliss Purple",
+    swatch: "#7C3AED",
+    light: {
+      bg: "#FAFAFF",
+      surface: "#F0EBFF",
+      surfaceAlt: "#EDE9FE",
+      border: "#E4DCFF",
+      borderFaint: "#EDE9FE",
+      accent: "#7C3AED",
+      accentMid: "#A78BFA",
+      accentLight: "#EDE9FE",
+      text: "#1A1027",
+      textMuted: "#6B6880",
+      textFaint: "#9B95B0",
+      green: "#16A34A",
+      greenLight: "#DCFCE7",
+      amber: "#F5A623",
+      amberLight: "#FEF3C7",
+      red: "#EF4444",
+      redLight: "#FEE2E2",
+      row: "#F5F0FF",
+      overlay: "rgba(26,16,39,0.5)",
+    },
+    dark: {
+      bg: "#0D0714",
+      surface: "#16102A",
+      surfaceAlt: "#1E1535",
+      border: "#2D1F4E",
+      borderFaint: "#1E1535",
+      accent: "#A78BFA",
+      accentMid: "#7C3AED",
+      accentLight: "#2D1F4E",
+      text: "#F0EEFF",
+      textMuted: "#9B95B0",
+      textFaint: "#6B6880",
+      green: "#4ADE80",
+      greenLight: "#052E16",
+      amber: "#F5A623",
+      amberLight: "#422006",
+      red: "#F87171",
+      redLight: "#450A0A",
+      row: "#110A1E",
+      overlay: "rgba(0,0,0,0.75)",
+    },
+  },
 };
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 const DEFAULT_SETTINGS: Settings = {
-  mode: "light",
-  palette: "cream",
+  mode: "dark",
+  palette: "calbliss",
   defaultTab: "hub",
   density: "comfortable",
   autoRefresh: true,
@@ -2338,7 +2384,7 @@ function SettingsPanel({
           <Moon size={10} strokeWidth={2} /> DARK
         </span>
       </div>
-      {paletteRows(["cream", "slate", "teal"])}
+      {paletteRows(["calbliss", "cream", "slate", "teal"])}
       {toggle("Follow system", "Auto-switch with OS dark mode", settings.mode === "system", (v) =>
         onUpdate({ mode: v ? "system" : "light" }),
       )}
@@ -2501,28 +2547,29 @@ function SettingsPanel({
       name: "Demo",
       price: "Free",
       color: "#9AAABB",
-      features: ["1 AI Agent", "60 min/month", "Basic analytics"],
+      features: [],
+      desc: "You're in the demo phase — calls are free and unlimited. Add as many barbershops as you like and explore everything the platform has to offer.",
     },
     {
       id: "starter",
       name: "Starter",
       price: "€79/mo",
       color: "#3D7A50",
-      features: ["1 AI Agent", "200 min/month", "Full analytics", "Email support"],
+      features: ["200 min/month"],
     },
     {
       id: "professional",
       name: "Professional",
       price: "€149/mo",
       color: "#1B5EBE",
-      features: ["3 AI Agents", "500 min/month", "Custom branding", "Priority support"],
+      features: ["500 min/month"],
     },
     {
       id: "enterprise",
       name: "Enterprise",
       price: "€299/mo",
       color: "#6747C7",
-      features: ["Unlimited agents", "Unlimited min/month", "White-label", "Dedicated SLA"],
+      features: ["1,200 min/month"],
     },
   ];
   const initials = (profile.ownerName || profile.businessName).slice(0, 2).toUpperCase();
@@ -2948,25 +2995,29 @@ function SettingsPanel({
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.price}</span>
+                {!current && <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.price}</span>}
               </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {plan.features.map((f) => (
-                  <span
-                    key={f}
-                    style={{
-                      fontSize: 11,
-                      color: C.textMuted,
-                      background: C.surfaceAlt,
-                      padding: "2px 8px",
-                      borderRadius: 99,
-                      border: `1px solid ${C.borderFaint}`,
-                    }}
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
+              {"desc" in plan ? (
+                <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{plan.desc}</p>
+              ) : (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {plan.features.map((f) => (
+                    <span
+                      key={f}
+                      style={{
+                        fontSize: 11,
+                        color: C.textMuted,
+                        background: C.surfaceAlt,
+                        padding: "2px 8px",
+                        borderRadius: 99,
+                        border: `1px solid ${C.borderFaint}`,
+                      }}
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              )}
               {!current && (
                 <button
                   className="gbf-btn"
@@ -4997,7 +5048,9 @@ function HubTab({
                     }}
                     title="Click to view full transcript in Ledger"
                     style={{
-                      border: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderTop: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderRight: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
+                      borderBottom: `1px solid ${isLiveEntry ? entry.feedColor + "44" : C.borderFaint}`,
                       borderLeft: `4px solid ${entry.feedColor}`,
                       borderRadius: 10,
                       background: C.surface,

@@ -27,10 +27,7 @@ export async function POST(req: NextRequest) {
   // If neither is set as a header, still allow if the request comes from the same
   // Vercel deployment (x-vercel-deployment-url header present).
   const adminKey = req.headers.get("x-admin-key");
-  const validKeys = [
-    process.env.ELEVENLABS_API_KEY,
-    process.env.CONFIGURE_ADMIN_KEY,
-  ].filter(Boolean);
+  const validKeys = [process.env.ELEVENLABS_API_KEY, process.env.CONFIGURE_ADMIN_KEY].filter(Boolean);
   const isVercelInternal = !!req.headers.get("x-vercel-deployment-url");
   if (!isVercelInternal && !validKeys.includes(adminKey ?? "")) {
     return NextResponse.json({ error: "Unauthorized — set x-admin-key header" }, { status: 401 });
@@ -38,14 +35,18 @@ export async function POST(req: NextRequest) {
 
   // ── Decide which agents to configure ─────────────────────────────────────
   let body: { agentId?: string } = {};
-  try { body = await req.json(); } catch { /* empty body is fine */ }
+  try {
+    body = await req.json();
+  } catch {
+    /* empty body is fine */
+  }
 
   const targets = body.agentId
     ? (() => {
         // Could be a registry key ("greek_barber") or a raw ElevenLabs ID
-        const byKey   = AGENTS[body.agentId!];
-        const byId    = Object.values(AGENTS).find(a => a.id === body.agentId);
-        const found   = byKey ?? byId;
+        const byKey = AGENTS[body.agentId!];
+        const byId = Object.values(AGENTS).find((a) => a.id === body.agentId);
+        const found = byKey ?? byId;
         return found ? [found] : [{ id: body.agentId!, name: body.agentId!, active: true }];
       })()
     : ACTIVE_AGENTS;
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
           httpStatus: e.status,
         };
       }
-    })
+    }),
   );
 
   // ── Derive webhook URL from the request host ──────────────────────────────
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
     : req.nextUrl.origin;
   const webhookUrl = `${origin}/api/elevenlabs/webhook`;
 
-  const allOk = results.every(r => r.ok);
+  const allOk = results.every((r) => r.ok);
   return NextResponse.json(
     {
       results,
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
           ]
         : ["Fix the errors above and retry"],
     },
-    { status: allOk ? 200 : 207 }
+    { status: allOk ? 200 : 207 },
   );
 }
 
@@ -109,9 +110,7 @@ export async function GET(req: NextRequest) {
   }
 
   const agentId = req.nextUrl.searchParams.get("agentId");
-  const targets = agentId
-    ? [{ id: agentId, name: agentId }]
-    : ACTIVE_AGENTS;
+  const targets = agentId ? [{ id: agentId, name: agentId }] : ACTIVE_AGENTS;
 
   const configs = await Promise.all(
     targets.map(async (agent) => {
@@ -121,7 +120,7 @@ export async function GET(req: NextRequest) {
       } catch (err) {
         return { agentId: agent.id, name: agent.name, ok: false, error: String(err) };
       }
-    })
+    }),
   );
 
   return NextResponse.json({ agents: configs, schemaFields: Object.keys(BARBER_SCHEMA) });

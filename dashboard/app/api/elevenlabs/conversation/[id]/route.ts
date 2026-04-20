@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 
 const BASE = "https://api.elevenlabs.io/v1";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const EL_KEY = process.env.ELEVENLABS_API_KEY;
   if (!EL_KEY) return NextResponse.json({ error: "No API key" }, { status: 500 });
 
