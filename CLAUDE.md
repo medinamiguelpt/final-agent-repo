@@ -22,7 +22,6 @@ Quick commands:
 cd agent
 export ELEVENLABS_API_KEY="..."
 bash scripts/deploy.sh agent.json    # Deploy agent config
-python3 scripts/push-tests.py        # Push + attach tests (deletes old ones first)
 ```
 
 ## Dashboard
