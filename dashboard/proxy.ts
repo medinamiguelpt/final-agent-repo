@@ -13,19 +13,13 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-          Object.entries(headers).forEach(([key, value]) =>
-            supabaseResponse.headers.set(key, value)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
+          Object.entries(headers).forEach(([key, value]) => supabaseResponse.headers.set(key, value));
         },
       },
-    }
+    },
   );
 
   const {
@@ -34,11 +28,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  if (
-    pathname.startsWith("/dashboard/login") ||
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/api/")
-  ) {
+  if (pathname.startsWith("/dashboard/login") || pathname.startsWith("/auth") || pathname.startsWith("/api/")) {
     return supabaseResponse;
   }
 
@@ -54,9 +44,7 @@ export async function proxy(request: NextRequest) {
       .single<{ approved: boolean }>();
 
     if (!profile?.approved) {
-      return NextResponse.redirect(
-        new URL("/dashboard/login?pending=1", request.url)
-      );
+      return NextResponse.redirect(new URL("/dashboard/login?pending=1", request.url));
     }
   }
 
@@ -64,7 +52,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

@@ -15,14 +15,12 @@ import type { Profile } from "@/lib/supabase/types";
 export async function POST(req: NextRequest) {
   // Auth check — caller must be signed in and approved
   const caller = await createClient();
-  const { data: { user } } = await caller.auth.getUser();
+  const {
+    data: { user },
+  } = await caller.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: callerProfileRaw } = await caller
-    .from("profiles")
-    .select("approved, role")
-    .eq("id", user.id)
-    .single();
+  const { data: callerProfileRaw } = await caller.from("profiles").select("approved, role").eq("id", user.id).single();
   const callerProfile = callerProfileRaw as Pick<Profile, "approved" | "role"> | null;
 
   if (!callerProfile?.approved) {
@@ -63,14 +61,12 @@ export async function POST(req: NextRequest) {
  */
 export async function GET(req: NextRequest) {
   const caller = await createClient();
-  const { data: { user } } = await caller.auth.getUser();
+  const {
+    data: { user },
+  } = await caller.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: callerProfileRaw2 } = await caller
-    .from("profiles")
-    .select("approved, role")
-    .eq("id", user.id)
-    .single();
+  const { data: callerProfileRaw2 } = await caller.from("profiles").select("approved, role").eq("id", user.id).single();
   const callerProfile2 = callerProfileRaw2 as Pick<Profile, "approved" | "role"> | null;
 
   if (!callerProfile2?.approved || !["admin", "owner"].includes(callerProfile2.role ?? "")) {
@@ -81,7 +77,10 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const filter = searchParams.get("filter") ?? "pending"; // "pending" | "all"
 
-  let query = db.from("profiles").select("id, full_name, email, role, approved, created_at").order("created_at", { ascending: false });
+  let query = db
+    .from("profiles")
+    .select("id, full_name, email, role, approved, created_at")
+    .order("created_at", { ascending: false });
   if (filter === "pending") query = query.eq("approved", false);
 
   const { data, error } = await query;

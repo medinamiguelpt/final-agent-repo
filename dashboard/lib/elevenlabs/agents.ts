@@ -32,7 +32,7 @@ export interface AgentConfig {
 //   Uncomment and fill in the entries below. Set active: false to disable
 //   an agent without removing it from the registry.
 // ─────────────────────────────────────────────────────────────────────────────
-const envAgentId   = process.env.ELEVENLABS_AGENT_ID;
+const envAgentId = process.env.ELEVENLABS_AGENT_ID;
 const envAgentName = process.env.ELEVENLABS_AGENT_NAME ?? "AI Barber";
 
 export const AGENTS: Record<string, AgentConfig> = {};
@@ -51,12 +51,12 @@ if (envAgentId) {
 // };
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const ACTIVE_AGENTS: AgentConfig[] = Object.values(AGENTS).filter(a => a.active);
+export const ACTIVE_AGENTS: AgentConfig[] = Object.values(AGENTS).filter((a) => a.active);
 
 /** First active agent — used as the default for signed-URL calls */
 export const PRIMARY_AGENT: AgentConfig = ACTIVE_AGENTS[0];
 
 /** Look up a registered agent by its ElevenLabs ID */
 export function getAgentById(id: string): AgentConfig | undefined {
-  return Object.values(AGENTS).find(a => a.id === id);
+  return Object.values(AGENTS).find((a) => a.id === id);
 }

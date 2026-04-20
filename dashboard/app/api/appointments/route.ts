@@ -29,7 +29,10 @@ export async function GET(req: NextRequest) {
   const db = supabaseAdmin();
 
   // Resolve user from token
-  const { data: { user }, error: userErr } = await db.auth.getUser(token);
+  const {
+    data: { user },
+    error: userErr,
+  } = await db.auth.getUser(token);
   if (userErr || !user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
@@ -79,15 +82,20 @@ export async function GET(req: NextRequest) {
   // Map DB source strings to frontend SourceKey values
   function mapSource(raw: string | null): "ai-call" | "walk-in" | "human-call" | "website" | "manual" {
     switch (raw) {
-      case "walk-in":    return "walk-in";
-      case "human-call": return "human-call";
-      case "website":    return "website";
-      case "manual":     return "manual";
-      default:           return "manual";
+      case "walk-in":
+        return "walk-in";
+      case "human-call":
+        return "human-call";
+      case "website":
+        return "website";
+      case "manual":
+        return "manual";
+      default:
+        return "manual";
     }
   }
 
-  const bookings = (rows as ApptRow[]).map(row => {
+  const bookings = (rows as ApptRow[]).map((row) => {
     const svcArr = Array.isArray(row.services) ? (row.services as ServiceItem[]) : null;
 
     // Format date as DD/MM from YYYY-MM-DD
@@ -101,8 +109,8 @@ export async function GET(req: NextRequest) {
     const time = row.appointment_time ? row.appointment_time.slice(0, 5) : "";
 
     const service = svcArr?.[0]?.service ?? row.service_type ?? "—";
-    const barber  = svcArr?.[0]?.barber  ?? row.barber_name  ?? "TBD";
-    const price   = row.price ?? (svcArr ? svcArr.reduce((s, l) => s + (l.price ?? 0), 0) : 0);
+    const barber = svcArr?.[0]?.barber ?? row.barber_name ?? "TBD";
+    const price = row.price ?? (svcArr ? svcArr.reduce((s, l) => s + (l.price ?? 0), 0) : 0);
 
     // Derive unix timestamp from appointment_date + appointment_time for sorting
     let start_time_unix_secs = 0;
@@ -112,24 +120,24 @@ export async function GET(req: NextRequest) {
     }
 
     return {
-      id:                    row.id,
-      conversation_id:       `manual-${row.id}`,
-      source:                mapSource(row.source),
-      status:                row.status ?? "confirmed",
-      client_name:           row.client_name ?? "Unknown",
+      id: row.id,
+      conversation_id: `manual-${row.id}`,
+      source: mapSource(row.source),
+      status: row.status ?? "confirmed",
+      client_name: row.client_name ?? "Unknown",
       service,
       barber,
-      services:              svcArr ?? undefined,
+      services: svcArr ?? undefined,
       date,
       time,
       price,
-      duration_secs:         0,
+      duration_secs: 0,
       start_time_unix_secs,
-      message_count:         0,
-      summary:               "",
-      call_status:           "done",
-      business_id:           row.business_id,
-      call_language:         "",
+      message_count: 0,
+      summary: "",
+      call_status: "done",
+      business_id: row.business_id,
+      call_language: "",
     };
   });
 
@@ -146,15 +154,27 @@ export async function POST(req: NextRequest) {
 
   const db = supabaseAdmin();
 
-  const { data: { user }, error: userErr } = await db.auth.getUser(token);
+  const {
+    data: { user },
+    error: userErr,
+  } = await db.auth.getUser(token);
   if (userErr || !user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
   const body = await req.json().catch(() => ({}));
   const {
-    business_id, client_name, phone_number, service_type, barber_name,
-    appointment_date, appointment_time, duration_minutes, price, notes, source,
+    business_id,
+    client_name,
+    phone_number,
+    service_type,
+    barber_name,
+    appointment_date,
+    appointment_time,
+    duration_minutes,
+    price,
+    notes,
+    source,
     services,
   } = body;
 
@@ -177,18 +197,18 @@ export async function POST(req: NextRequest) {
     .from("appointments")
     .insert({
       business_id,
-      source:           source ?? "walk-in",
-      client_name:      client_name ?? null,
-      phone_number:     phone_number ?? null,
-      service_type:     service_type ?? null,
-      barber_name:      barber_name ?? null,
+      source: source ?? "walk-in",
+      client_name: client_name ?? null,
+      phone_number: phone_number ?? null,
+      service_type: service_type ?? null,
+      barber_name: barber_name ?? null,
       appointment_date: appointment_date ?? null,
       appointment_time: appointment_time ?? null,
       duration_minutes: duration_minutes ?? null,
-      price:            price ?? null,
-      notes:            notes ?? null,
-      status:           "confirmed",
-      services:         services ?? null,
+      price: price ?? null,
+      notes: notes ?? null,
+      status: "confirmed",
+      services: services ?? null,
     })
     .select("id")
     .single();

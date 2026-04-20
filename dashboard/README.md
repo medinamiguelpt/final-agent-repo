@@ -4,12 +4,12 @@ AI-powered booking dashboard for barbershops. Connects ElevenLabs Conversational
 
 ## Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 16 (App Router) + React 19 |
-| Database | Supabase (PostgreSQL + Auth + RLS) |
-| AI Calls | ElevenLabs Conversational AI |
-| Deployment | Vercel |
+| Layer      | Technology                         |
+| ---------- | ---------------------------------- |
+| Frontend   | Next.js 16 (App Router) + React 19 |
+| Database   | Supabase (PostgreSQL + Auth + RLS) |
+| AI Calls   | ElevenLabs Conversational AI       |
+| Deployment | Vercel                             |
 
 ---
 
@@ -113,15 +113,15 @@ Then re-run `/api/elevenlabs/configure` to push the schema to all active agents.
 
 ## Environment variables reference
 
-| Variable | Required | Description |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | Supabase service role key (server-only) |
-| `ELEVENLABS_API_KEY` | ✅ | ElevenLabs API key |
-| `ELEVENLABS_AGENT_ID` | ✅ | ElevenLabs agent ID (server-side) |
-| `ELEVENLABS_AGENT_NAME` | ✅ | Agent display name (server-side) |
-| `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` | ✅ | Same agent ID, exposed to browser |
-| `NEXT_PUBLIC_ELEVENLABS_AGENT_NAME` | ✅ | Same agent name, exposed to browser |
-| `ELEVENLABS_WEBHOOK_SECRET` | ✅ | Webhook HMAC secret from ElevenLabs |
-| `CONFIGURE_ADMIN_KEY` | Optional | Alternative admin key for `/api/elevenlabs/configure` |
+| Variable                               | Required | Description                                           |
+| -------------------------------------- | -------- | ----------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | ✅       | Supabase project URL                                  |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅       | Supabase anon key                                     |
+| `SUPABASE_SERVICE_ROLE_KEY`            | ✅       | Supabase service role key (server-only)               |
+| `ELEVENLABS_API_KEY`                   | ✅       | ElevenLabs API key                                    |
+| `ELEVENLABS_AGENT_ID`                  | ✅       | ElevenLabs agent ID (server-side)                     |
+| `ELEVENLABS_AGENT_NAME`                | ✅       | Agent display name (server-side)                      |
+| `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`      | ✅       | Same agent ID, exposed to browser                     |
+| `NEXT_PUBLIC_ELEVENLABS_AGENT_NAME`    | ✅       | Same agent name, exposed to browser                   |
+| `ELEVENLABS_WEBHOOK_SECRET`            | ✅       | Webhook HMAC secret from ElevenLabs                   |
+| `CONFIGURE_ADMIN_KEY`                  | Optional | Alternative admin key for `/api/elevenlabs/configure` |

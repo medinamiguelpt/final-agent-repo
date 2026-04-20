@@ -22,8 +22,7 @@ export const BARBER_SCHEMA: DataCollectionDict = {
   phone_number: {
     type: "string",
     description:
-      "The client's phone number as spoken. Remove spaces and dashes — digits only. " +
-      "Return null if not mentioned.",
+      "The client's phone number as spoken. Remove spaces and dashes — digits only. " + "Return null if not mentioned.",
   },
   service_type: {
     type: "string",
@@ -90,8 +89,6 @@ export const BARBER_SCHEMA: DataCollectionDict = {
   },
   callback_requested: {
     type: "boolean",
-    description:
-      "true if the client asked for a callback or if the agent promised to call back. " +
-      "false otherwise.",
+    description: "true if the client asked for a callback or if the agent promised to call back. " + "false otherwise.",
   },
 };
