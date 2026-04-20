@@ -6591,17 +6591,21 @@ function LedgerTab({
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: pad.row, borderBottom: `1px solid ${C.borderFaint}` }}>
-                          <div style={{ display: "flex", gap: 5, alignItems: "center", flexWrap: "wrap" }}>
-                            <Badge status={a.status} label={statusLabel(a)} C={C} />
-                            {cancelled[a.id] && (
-                              <span
-                                title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
-                                style={{ fontSize: 10, color: C.textFaint, cursor: "help" }}
-                              >
-                                ℹ
-                              </span>
-                            )}
+                        <td style={{ padding: pad.row, borderBottom: `1px solid ${C.borderFaint}`, minWidth: 160 }}>
+                          <div
+                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                              <Badge status={a.status} label={statusLabel(a)} C={C} />
+                              {cancelled[a.id] && (
+                                <span
+                                  title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
+                                  style={{ fontSize: 10, color: C.textFaint, cursor: "help" }}
+                                >
+                                  ℹ
+                                </span>
+                              )}
+                            </div>
                             {a.status !== "cancelled" && a.call_status !== "error" && (
                               <button
                                 onClick={(e) => {
@@ -6966,16 +6970,27 @@ function LedgerTab({
                           {a.date} · {a.time}
                         </span>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <Badge status={a.status} label={statusLabel(a)} C={C} />
-                        {cancelled[a.id] && (
-                          <span
-                            title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
-                            style={{ fontSize: 11, color: C.textFaint, cursor: "help" }}
-                          >
-                            ℹ
-                          </span>
-                        )}
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 8,
+                          flexShrink: 0,
+                          minWidth: 140,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <Badge status={a.status} label={statusLabel(a)} C={C} />
+                          {cancelled[a.id] && (
+                            <span
+                              title={`${cancelled[a.id].reason}${cancelled[a.id].note ? ` — ${cancelled[a.id].note}` : ""}`}
+                              style={{ fontSize: 11, color: C.textFaint, cursor: "help" }}
+                            >
+                              ℹ
+                            </span>
+                          )}
+                        </div>
                         {a.status !== "cancelled" && a.call_status !== "error" && (
                           <button
                             onClick={(e) => {
