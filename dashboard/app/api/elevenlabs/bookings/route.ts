@@ -398,7 +398,7 @@ function extractName(transcript: { role: string; message: string }[], summary: s
     }
   }
 
-  // 2. Agent asks for name → next user reply
+  // 2. Agent asks for name → next user reply. Capture up to 2 words (first + last).
   for (let i = 0; i < transcript.length - 1; i++) {
     if (transcript[i].role !== "agent") continue;
     if (!NAME_REQUEST_RE.test(transcript[i].message.replace(/<[^>]+>/g, " "))) continue;
@@ -408,10 +408,17 @@ function extractName(transcript: { role: string; message: string }[], summary: s
         .trim()
         .replace(/[.,!?;]+$/, "")
         .split(/\s+/);
-      if (words.length <= 3) {
-        const c = words[0];
-        if (c.length >= 2 && !NON_NAMES.has(c.toLowerCase()) && !KNOWN_BARBERS.has(c.toLowerCase()))
-          return capitalise(c);
+      if (words.length >= 1 && words.length <= 4) {
+        const first = words[0];
+        if (first.length >= 2 && !NON_NAMES.has(first.toLowerCase()) && !KNOWN_BARBERS.has(first.toLowerCase())) {
+          // If a plausible second word exists (2+ chars, alphabetic), include it as a last name
+          const second = words[1];
+          const isWord = (w?: string) => !!w && /^[A-Za-zÀ-Öà-ö\u00C0-\u024F\u0370-\u03FF]{2,}$/.test(w);
+          if (isWord(second) && !NON_NAMES.has(second.toLowerCase())) {
+            return `${capitalise(first)} ${capitalise(second)}`;
+          }
+          return capitalise(first);
+        }
       }
       break;
     }

@@ -3962,7 +3962,7 @@ function WalkInModal({
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
+                placeholder="First and last name"
                 required
                 style={inp}
                 autoFocus
