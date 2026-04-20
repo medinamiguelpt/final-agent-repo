@@ -2547,28 +2547,29 @@ function SettingsPanel({
       name: "Demo",
       price: "Free",
       color: "#9AAABB",
-      features: ["1 AI Agent", "60 min/month", "Basic analytics"],
+      features: [],
+      desc: "You're in the demo phase — calls are free and unlimited. Add as many barbershops as you like and explore everything the platform has to offer.",
     },
     {
       id: "starter",
       name: "Starter",
       price: "€79/mo",
       color: "#3D7A50",
-      features: ["1 AI Agent", "200 min/month", "Full analytics", "Email support"],
+      features: ["200 min/month"],
     },
     {
       id: "professional",
       name: "Professional",
       price: "€149/mo",
       color: "#1B5EBE",
-      features: ["3 AI Agents", "500 min/month", "Custom branding", "Priority support"],
+      features: ["500 min/month"],
     },
     {
       id: "enterprise",
       name: "Enterprise",
       price: "€299/mo",
       color: "#6747C7",
-      features: ["Unlimited agents", "Unlimited min/month", "White-label", "Dedicated SLA"],
+      features: ["1,200 min/month"],
     },
   ];
   const initials = (profile.ownerName || profile.businessName).slice(0, 2).toUpperCase();
@@ -2994,25 +2995,29 @@ function SettingsPanel({
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.price}</span>
+                {!current && <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.price}</span>}
               </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {plan.features.map((f) => (
-                  <span
-                    key={f}
-                    style={{
-                      fontSize: 11,
-                      color: C.textMuted,
-                      background: C.surfaceAlt,
-                      padding: "2px 8px",
-                      borderRadius: 99,
-                      border: `1px solid ${C.borderFaint}`,
-                    }}
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
+              {"desc" in plan ? (
+                <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{plan.desc}</p>
+              ) : (
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {plan.features.map((f) => (
+                    <span
+                      key={f}
+                      style={{
+                        fontSize: 11,
+                        color: C.textMuted,
+                        background: C.surfaceAlt,
+                        padding: "2px 8px",
+                        borderRadius: 99,
+                        border: `1px solid ${C.borderFaint}`,
+                      }}
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              )}
               {!current && (
                 <button
                   className="gbf-btn"
