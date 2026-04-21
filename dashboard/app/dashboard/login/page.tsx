@@ -4,26 +4,212 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Sparkles, ArrowRight, Scissors, Clock, Eye, EyeOff } from "lucide-react";
 
-const C = {
-  bg: "#FAFAF7",
-  surface: "#FFFFFF",
-  surfaceAlt: "#F5F0E8",
-  border: "#E7DFD0",
-  accent: "#D97706",
-  accentMid: "#F59E0B",
-  accentLight: "#FEF3C7",
-  text: "#1C1917",
-  textMuted: "#78716C",
-  textFaint: "#A8A29E",
-  red: "#DC2626",
-  redLight: "#FEE2E2",
+// ── Theme palette map (mirrors PALETTES in dashboard/page.tsx) ────────────────
+const PALETTES = {
+  calbliss: {
+    light: {
+      bg: "#FAFAFF",
+      surface: "#F0EBFF",
+      surfaceAlt: "#EDE9FE",
+      border: "#E4DCFF",
+      accent: "#7C3AED",
+      accentMid: "#A78BFA",
+      accentLight: "#EDE9FE",
+      text: "#1A1027",
+      textMuted: "#6B6880",
+      textFaint: "#9B95B0",
+      red: "#EF4444",
+      redLight: "#FEE2E2",
+    },
+    dark: {
+      bg: "#0D0714",
+      surface: "#16102A",
+      surfaceAlt: "#1E1535",
+      border: "#2D1F4E",
+      accent: "#A78BFA",
+      accentMid: "#7C3AED",
+      accentLight: "#2D1F4E",
+      text: "#F0EEFF",
+      textMuted: "#9B95B0",
+      textFaint: "#6B6880",
+      red: "#F87171",
+      redLight: "#450A0A",
+    },
+  },
+  cream: {
+    light: {
+      bg: "#FAFAF7",
+      surface: "#FFFFFF",
+      surfaceAlt: "#F5F0E8",
+      border: "#E7DFD0",
+      accent: "#D97706",
+      accentMid: "#F59E0B",
+      accentLight: "#FEF3C7",
+      text: "#1C1917",
+      textMuted: "#78716C",
+      textFaint: "#A8A29E",
+      red: "#DC2626",
+      redLight: "#FEE2E2",
+    },
+    dark: {
+      bg: "#1C1510",
+      surface: "#2C201A",
+      surfaceAlt: "#352A20",
+      border: "#3D2E24",
+      accent: "#F59E0B",
+      accentMid: "#FCD34D",
+      accentLight: "#3D2008",
+      text: "#FEF3C7",
+      textMuted: "#A8917A",
+      textFaint: "#6B5C4A",
+      red: "#F87171",
+      redLight: "#450A0A",
+    },
+  },
+  slate: {
+    light: {
+      bg: "#F8FAFC",
+      surface: "#FFFFFF",
+      surfaceAlt: "#F1F5F9",
+      border: "#E2E8F0",
+      accent: "#6366F1",
+      accentMid: "#A5B4FC",
+      accentLight: "#EEF2FF",
+      text: "#1E293B",
+      textMuted: "#64748B",
+      textFaint: "#94A3B8",
+      red: "#DC2626",
+      redLight: "#FEE2E2",
+    },
+    dark: {
+      bg: "#0F172A",
+      surface: "#1E293B",
+      surfaceAlt: "#283548",
+      border: "#334155",
+      accent: "#818CF8",
+      accentMid: "#6366F1",
+      accentLight: "#1E1B4B",
+      text: "#E2E8F0",
+      textMuted: "#94A3B8",
+      textFaint: "#475569",
+      red: "#F87171",
+      redLight: "#450A0A",
+    },
+  },
+  teal: {
+    light: {
+      bg: "#F0FDFA",
+      surface: "#FFFFFF",
+      surfaceAlt: "#CCFBF1",
+      border: "#99F6E4",
+      accent: "#0D9488",
+      accentMid: "#14B8A6",
+      accentLight: "#CCFBF1",
+      text: "#134E4A",
+      textMuted: "#3B7A74",
+      textFaint: "#6DA8A0",
+      red: "#DC2626",
+      redLight: "#FEE2E2",
+    },
+    dark: {
+      bg: "#0D1F22",
+      surface: "#142D32",
+      surfaceAlt: "#1A363D",
+      border: "#1F4246",
+      accent: "#14B8A6",
+      accentMid: "#5EEAD4",
+      accentLight: "#0D332E",
+      text: "#F0FDFA",
+      textMuted: "#7CC4BC",
+      textFaint: "#3A7068",
+      red: "#F87171",
+      redLight: "#450A0A",
+    },
+  },
+  contrast: {
+    light: {
+      bg: "#F3F3F3",
+      surface: "#FFFFFF",
+      surfaceAlt: "#F3F3F3",
+      border: "#CCCCCC",
+      accent: "#1A56DB",
+      accentMid: "#3B82F6",
+      accentLight: "#E8F0FE",
+      text: "#111111",
+      textMuted: "#444444",
+      textFaint: "#777777",
+      red: "#DC2626",
+      redLight: "#FEE2E2",
+    },
+    dark: {
+      bg: "#0A0A0A",
+      surface: "#1A1A1A",
+      surfaceAlt: "#222222",
+      border: "#333333",
+      accent: "#60A5FA",
+      accentMid: "#93C5FD",
+      accentLight: "#1E3A5F",
+      text: "#F9FAFB",
+      textMuted: "#999999",
+      textFaint: "#555555",
+      red: "#F87171",
+      redLight: "#450A0A",
+    },
+  },
+  lowvision: {
+    light: {
+      bg: "#F2F0ED",
+      surface: "#ECEAE5",
+      surfaceAlt: "#E5E2DC",
+      border: "#D0CCC4",
+      accent: "#3D5A99",
+      accentMid: "#7B96CC",
+      accentLight: "#D8E0F0",
+      text: "#1A1A1A",
+      textMuted: "#6B6560",
+      textFaint: "#918C86",
+      red: "#B04040",
+      redLight: "#F5E0E0",
+    },
+    dark: {
+      bg: "#1E1E20",
+      surface: "#2A2A2E",
+      surfaceAlt: "#323236",
+      border: "#3A3A40",
+      accent: "#7B96CC",
+      accentMid: "#B8C4DE",
+      accentLight: "#28304A",
+      text: "#E8E8EA",
+      textMuted: "#8A8A90",
+      textFaint: "#5A5A62",
+      red: "#D08080",
+      redLight: "#2E1818",
+    },
+  },
 };
+
+const DEFAULT_C = PALETTES.calbliss.dark;
+
+function resolveTheme() {
+  try {
+    const saved = localStorage.getItem("gbf-settings");
+    if (!saved) return DEFAULT_C;
+    const { palette, mode } = JSON.parse(saved);
+    const p = PALETTES[palette as keyof typeof PALETTES] ?? PALETTES.calbliss;
+    const effectiveMode =
+      mode === "system" ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : mode;
+    return effectiveMode === "dark" ? p.dark : p.light;
+  } catch {
+    return DEFAULT_C;
+  }
+}
 
 type View = "login" | "signup" | "pending" | "forgot";
 
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
+  const [C] = useState(resolveTheme);
   const [view, setView] = useState<View>(params.get("pending") ? "pending" : "login");
   const [email, setEmail] = useState("");
   const [password, setPass] = useState("");
