@@ -9074,6 +9074,32 @@ export default function DashboardPage() {
                     {loading ? t("loading") : t("live")}
                   </span>
                 </div>
+                {/* Dark / light mode toggle */}
+                <button
+                  onClick={() => updateSettings({ mode: resolveMode(settings.mode) === "dark" ? "light" : "dark" })}
+                  className="gbf-btn gbf-icon-btn"
+                  title={resolveMode(settings.mode) === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 40,
+                    height: 40,
+                    borderRadius: 10,
+                    border: `1px solid ${C.border}`,
+                    background: C.surfaceAlt,
+                    cursor: "pointer",
+                    color: C.textMuted,
+                    flexShrink: 0,
+                    transition: "all .15s",
+                  }}
+                >
+                  {resolveMode(settings.mode) === "dark" ? (
+                    <Sun size={15} strokeWidth={2} />
+                  ) : (
+                    <Moon size={15} strokeWidth={2} />
+                  )}
+                </button>
                 {/* Language picker */}
                 <div style={{ position: "relative", flexShrink: 0 }}>
                   <button
