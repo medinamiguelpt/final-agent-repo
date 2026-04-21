@@ -9121,13 +9121,7 @@ export default function DashboardPage() {
                       transition: "all .15s",
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>{LANG_META[langSettings.lang].flag}</span>
-                    <span
-                      className="gbf-lang-label"
-                      style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: C.textMuted }}
-                    >
-                      {langSettings.lang.toUpperCase()}
-                    </span>
+                    <span style={{ fontSize: 20 }}>{LANG_META[langSettings.lang].flag}</span>
                   </button>
                   {langOpen && (
                     <>
