@@ -9036,6 +9036,28 @@ export default function DashboardPage() {
                 className="gbf-header-right"
                 style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 1, minWidth: 0 }}
               >
+                <a
+                  href="https://calbliss.vercel.app"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: C.textMuted,
+                    textDecoration: "none",
+                    padding: "5px 10px",
+                    borderRadius: 8,
+                    border: `1px solid ${C.border}`,
+                    background: C.surfaceAlt,
+                    transition: "color .15s, background .15s",
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.text; (e.currentTarget as HTMLAnchorElement).style.background = C.surface; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.textMuted; (e.currentTarget as HTMLAnchorElement).style.background = C.surfaceAlt; }}
+                >
+                  ← Website
+                </a>
                 <span className="gbf-header-date" style={{ fontSize: 13, color: C.textMuted }}>
                   {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
                 </span>
