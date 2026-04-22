@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseAdmin } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/supabase/types";
+import { AdminApproveSchema, parseJson } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
   // Auth check — caller must be signed in and approved
@@ -30,17 +31,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Admin or owner role required" }, { status: 403 });
   }
 
-  let body: { user_id?: string; approved?: boolean };
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const { user_id, approved } = body;
-  if (!user_id || typeof approved !== "boolean") {
-    return NextResponse.json({ error: "user_id (string) and approved (boolean) required" }, { status: 400 });
-  }
+  const parsed = await parseJson(req, AdminApproveSchema);
+  if (!parsed.ok) return parsed.response;
+  const { user_id, approved } = parsed.data;
 
   const db = supabaseAdmin();
   const { error } = await db

@@ -16,6 +16,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature, dcr, DataCollectionValue } from "@/lib/elevenlabs/client";
 import { supabaseAdmin } from "@/lib/supabase/client";
+import { ElevenLabsWebhookSchema } from "@/lib/validation";
 
 // ── Payload types ─────────────────────────────────────────────────────────────
 
@@ -103,12 +104,25 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  let payload: PostCallPayload;
+  // Parse + validate with Zod before trusting any field. The HMAC check above
+  // authenticates the source; Zod guards against malformed / unexpected shapes.
+  let rawPayload: unknown;
   try {
-    payload = JSON.parse(rawBody) as PostCallPayload;
+    rawPayload = JSON.parse(rawBody);
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  const validated = ElevenLabsWebhookSchema.safeParse(rawPayload);
+  if (!validated.success) {
+    console.error("[webhook] Payload failed validation:", validated.error.issues.slice(0, 3));
+    return NextResponse.json(
+      { error: "Payload validation failed", issues: validated.error.issues.slice(0, 5) },
+      { status: 400 },
+    );
+  }
+  // Internal type stays the existing PostCallPayload — Zod guards the boundary;
+  // we still treat downstream fields with the existing defensively-typed code.
+  const payload = validated.data as unknown as PostCallPayload;
 
   const { type, data } = payload;
   console.log(`[webhook] ${type} conv=${data.conversation_id} agent=${data.agent_id}`);

@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/client";
 import { SERVICE_CATALOGUE, BARBER_NAME_POOL, rInt, pick, pickN } from "@/lib/barbers";
+import { DemoBookingsRequestSchema, parseJson } from "@/lib/validation";
 
 // Durations (minutes) for each catalogue service — server-only concern
 const SERVICE_DURATIONS: Record<string, number> = {
@@ -134,28 +135,22 @@ function fallbackBarbers(shopName: string): string[] {
 }
 
 // ── POST: generate demo bookings for a business ───────────────────────────────
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const token = req.headers.get("Authorization")?.replace("Bearer ", "").trim();
   if (!token) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
 
+  const parsed = await parseJson(req, DemoBookingsRequestSchema);
+  if (!parsed.ok) return parsed.response;
+  const { business_id: businessId, shop_name: shopName = "", regenerate = false, barber_names = [] } = parsed.data;
+  const providedBarbers: string[] = barber_names;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabaseAdmin() as any;
-  const [
-    {
-      data: { user },
-      error: authErr,
-    },
-    body,
-  ] = await Promise.all([db.auth.getUser(token), req.json().catch(() => ({}))]);
+  const {
+    data: { user },
+    error: authErr,
+  } = await db.auth.getUser(token);
   if (authErr || !user) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
-
-  const businessId = (body.business_id ?? "").trim();
-  const shopName = (body.shop_name ?? "").trim();
-  const regenerate = !!body.regenerate;
-  const providedBarbers: string[] = Array.isArray(body.barber_names)
-    ? body.barber_names.map((n: unknown) => String(n).trim()).filter((n: string) => n.length >= 2)
-    : [];
-  if (!businessId) return NextResponse.json({ error: "business_id is required" }, { status: 400 });
 
   // Confirm the user is a member of this business
   const { data: membership } = await db

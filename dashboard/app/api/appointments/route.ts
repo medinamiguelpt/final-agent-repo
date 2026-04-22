@@ -7,16 +7,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase/client";
+import { AppointmentCreateSchema, BusinessIdQuerySchema, parseJson, parseSearchParams } from "@/lib/validation";
 
 type ServiceItem = { service: string; barber?: string; price?: number; duration_minutes?: number };
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const business_id = searchParams.get("business_id");
-
-  if (!business_id) {
-    return NextResponse.json({ error: "business_id is required" }, { status: 400 });
-  }
+  const parsedQuery = parseSearchParams(req, BusinessIdQuerySchema);
+  if (!parsedQuery.ok) return parsedQuery.response;
+  const { business_id } = parsedQuery.data;
 
   // Verify the caller is a member of this business via Bearer token
   const authHeader = req.headers.get("authorization") ?? "";
@@ -162,7 +160,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({}));
+  const parsed = await parseJson(req, AppointmentCreateSchema);
+  if (!parsed.ok) return parsed.response;
   const {
     business_id,
     client_name,
@@ -176,11 +175,7 @@ export async function POST(req: NextRequest) {
     notes,
     source,
     services,
-  } = body;
-
-  if (!business_id) {
-    return NextResponse.json({ error: "business_id is required" }, { status: 400 });
-  }
+  } = parsed.data;
 
   const { data: member } = await db
     .from("business_members")
