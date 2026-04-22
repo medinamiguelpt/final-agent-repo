@@ -178,13 +178,32 @@ Never conflate `processing` with `in-progress`.
 - Header dropdowns use a single `openMenu` state so only one is open at a time
 - Language badges in feed + ledger cover el, en, es, pt, fr, de, ar
 
-**Pricing tiers (source of truth)**
+**Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-| Tier | Price | Minutes |
-|---|---:|---:|
-| Starter | €79/mo | 200 min/month |
-| Professional | €149/mo | 500 min/month |
-| Enterprise | €299/mo | 1,200 min/month |
+Set to maintain ≥80% operating margin **per tier** at modelled production costs. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+
+| Tier | Monthly | Yearly (−20%) | Minutes | Overage |
+|---|---:|---:|---:|---:|
+| Starter | €229/mo | €2,199/yr (€184/mo equiv.) | 200 min/mo | €0.60/min |
+| Professional ★ | €429/mo | €4,119/yr (€344/mo equiv.) | 500 min/mo | €0.60/min |
+| Enterprise | €859/mo | €8,249/yr (€688/mo equiv.) | 1,200 min/mo | €0.60/min |
+
+★ Most popular · All plans include unlimited dashboards, real-time transcripts, and all 7 supported languages.
+
+**Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
+
+**Holiday / seasonal sales** — declared as data in `HOLIDAY_PROMOS`. The active promo is auto-detected by date and stacks on top of the yearly discount. Default schedule:
+
+| Promo | Window | Discount | Applies to | Code |
+|---|---|---:|---|---|
+| Spring Refresh | Apr 1 – May 1 | 15% | both | `SPRING15` |
+| Easter Special | Apr 5 – Apr 20 | 20% | yearly | `PASCHA20` |
+| Summer Sale | Jul 15 – Aug 16 | 15% | monthly | `SUMMER15` |
+| Black Friday | Nov 24 – Dec 2 | 30% | yearly | `BF30` |
+| Christmas | Dec 1 – Jan 7 | 25% | yearly | `XMAS25` |
+| New Year | Jan 1 – Jan 16 | 20% | monthly | `NY20` |
+
+Add new sales by appending to `HOLIDAY_PROMOS` — no UI changes required.
 
 **Commands**
 ```bash

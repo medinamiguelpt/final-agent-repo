@@ -55,6 +55,16 @@ import { supabase } from "@/lib/supabase/client";
 import AddShopModal from "./AddShopModal";
 import { parseBarberNames } from "@/lib/barbers";
 import { DEFAULT_AGENT_ID } from "@/lib/config";
+import {
+  SUBSCRIPTION_TIERS,
+  YEARLY_DISCOUNT,
+  activeHolidayPromo,
+  displayPrice,
+  formatEuro,
+  yearlyMonthlyEquivalent,
+  yearlySavings,
+  type BillingCycle,
+} from "@/lib/pricing";
 
 const STATUS_I18N: Record<string, string> = { "in-progress": "inProgress" };
 
@@ -1937,6 +1947,7 @@ function SettingsPanel({
   const [profileSaved, setProfileSaved] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletingBiz, setDeletingBiz] = useState<{ id: string; name: string; inProgress?: boolean } | null>(null);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
   // Scroll lock
   useEffect(() => {
@@ -2541,37 +2552,13 @@ function SettingsPanel({
   );
 
   // ── Section: Account ──────────────────────────────────────────────────────
-  const PLANS = [
-    {
-      id: "demo",
-      name: "Demo",
-      price: "Free",
-      color: "#9AAABB",
-      features: [],
-      desc: "You're in the demo phase — calls are free and unlimited. Add as many barbershops as you like and explore everything the platform has to offer.",
-    },
-    {
-      id: "starter",
-      name: "Starter",
-      price: "€79/mo",
-      color: "#3D7A50",
-      features: ["200 min/month"],
-    },
-    {
-      id: "professional",
-      name: "Professional",
-      price: "€149/mo",
-      color: "#1B5EBE",
-      features: ["500 min/month"],
-    },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      price: "€299/mo",
-      color: "#6747C7",
-      features: ["1,200 min/month"],
-    },
-  ];
+  const DEMO_PLAN = {
+    id: "demo" as const,
+    name: "Demo",
+    color: "#9AAABB",
+    desc: "You're in the demo phase — calls are free and unlimited. Add as many barbershops as you like and explore everything the platform has to offer.",
+  };
+  const activePromo = activeHolidayPromo(billingCycle);
   const initials = (profile.ownerName || profile.businessName).slice(0, 2).toUpperCase();
 
   const AccountSection = () => (
@@ -2961,87 +2948,317 @@ function SettingsPanel({
       </div>
 
       {section("Subscription")}
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {PLANS.map((plan) => {
-          const current = plan.id === "demo";
-          return (
-            <div
-              key={plan.id}
+
+      {/* Demo (current) card */}
+      <div
+        style={{
+          border: `1.5px solid ${DEMO_PLAN.color}`,
+          borderRadius: 16,
+          padding: "14px 18px",
+          background: C.accentLight,
+          boxShadow: `0 2px 12px ${DEMO_PLAN.color}18`,
+          marginBottom: 12,
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: DEMO_PLAN.color }} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{DEMO_PLAN.name}</span>
+            <span
               style={{
-                border: `1.5px solid ${current ? plan.color : C.border}`,
-                borderRadius: 16,
-                padding: "14px 18px",
-                background: current ? C.accentLight : C.surface,
-                transition: "all .2s",
-                boxShadow: current ? `0 2px 12px ${plan.color}18` : "none",
+                fontSize: 10,
+                background: DEMO_PLAN.color,
+                color: "#fff",
+                padding: "2px 7px",
+                borderRadius: 99,
+                fontWeight: 700,
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: plan.color }} />
-                  <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{plan.name}</span>
-                  {current && (
-                    <span
-                      style={{
-                        fontSize: 10,
-                        background: plan.color,
-                        color: "#fff",
-                        padding: "2px 7px",
-                        borderRadius: 99,
-                        fontWeight: 700,
-                      }}
-                    >
-                      CURRENT
-                    </span>
-                  )}
-                </div>
-                {!current && <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.price}</span>}
-              </div>
-              {"desc" in plan ? (
-                <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{plan.desc}</p>
-              ) : (
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {plan.features.map((f) => (
-                    <span
-                      key={f}
-                      style={{
-                        fontSize: 11,
-                        color: C.textMuted,
-                        background: C.surfaceAlt,
-                        padding: "2px 8px",
-                        borderRadius: 99,
-                        border: `1px solid ${C.borderFaint}`,
-                      }}
-                    >
-                      {f}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {!current && (
-                <button
-                  className="gbf-btn"
+              CURRENT
+            </span>
+          </div>
+        </div>
+        <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{DEMO_PLAN.desc}</p>
+      </div>
+
+      {/* Holiday promo banner */}
+      {activePromo && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "12px 16px",
+            borderRadius: 14,
+            marginBottom: 12,
+            background: `linear-gradient(135deg, ${activePromo.color}15, ${activePromo.color}05)`,
+            border: `1.5px solid ${activePromo.color}55`,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: `${activePromo.color}20`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 20,
+              flexShrink: 0,
+            }}
+            aria-hidden
+          >
+            {activePromo.emoji}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                fontWeight: 700,
+                color: activePromo.color,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              {activePromo.name} · {Math.round(activePromo.discount * 100)}% OFF
+            </div>
+            <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2, lineHeight: 1.4 }}>{activePromo.tagline}</div>
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--gbf-font-mono, monospace)",
+              fontSize: 11,
+              fontWeight: 700,
+              padding: "6px 10px",
+              borderRadius: 8,
+              background: "#fff",
+              border: `1.5px dashed ${activePromo.color}`,
+              color: activePromo.color,
+              letterSpacing: "0.08em",
+              flexShrink: 0,
+            }}
+          >
+            {activePromo.code}
+          </div>
+        </div>
+      )}
+
+      {/* Monthly / Yearly toggle */}
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          padding: 4,
+          borderRadius: 12,
+          background: C.surfaceAlt,
+          border: `1px solid ${C.borderFaint}`,
+          marginBottom: 12,
+        }}
+        role="tablist"
+        aria-label="Billing cycle"
+      >
+        {(["monthly", "yearly"] as const).map((cycle) => {
+          const active = billingCycle === cycle;
+          return (
+            <button
+              key={cycle}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setBillingCycle(cycle)}
+              className="gbf-btn"
+              style={{
+                flex: 1,
+                padding: "8px 12px",
+                borderRadius: 9,
+                border: "none",
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: "var(--gbf-font-display)",
+                background: active ? C.surface : "transparent",
+                color: active ? C.text : C.textMuted,
+                boxShadow: active ? `0 1px 4px rgba(0,0,0,0.06)` : "none",
+                transition: "all .18s",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+              }}
+            >
+              {cycle === "monthly" ? "Monthly" : "Yearly"}
+              {cycle === "yearly" && (
+                <span
                   style={{
-                    marginTop: 10,
-                    width: "100%",
-                    padding: "9px",
-                    borderRadius: "var(--gbf-radius-xs)",
-                    background: plan.color,
+                    fontSize: 10,
+                    fontWeight: 800,
                     color: "#fff",
-                    fontSize: 13,
-                    fontWeight: 700,
-                    border: "none",
-                    cursor: "pointer",
-                    fontFamily: "var(--gbf-font-display)",
-                    letterSpacing: "-0.01em",
+                    background: "#2DA865",
+                    padding: "2px 6px",
+                    borderRadius: 99,
+                    letterSpacing: "0.03em",
                   }}
                 >
-                  Upgrade to {plan.name}
-                </button>
+                  −{Math.round(YEARLY_DISCOUNT * 100)}%
+                </span>
               )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {SUBSCRIPTION_TIERS.map((tier) => {
+          const price = displayPrice(tier, billingCycle);
+          const yearlyEq = yearlyMonthlyEquivalent(tier);
+          const annualSave = yearlySavings(tier);
+          return (
+            <div
+              key={tier.id}
+              style={{
+                border: `1.5px solid ${C.border}`,
+                borderRadius: 16,
+                padding: "14px 18px",
+                background: C.surface,
+                transition: "all .2s",
+                position: "relative",
+              }}
+            >
+              {tier.badge && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -9,
+                    left: 16,
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: "0.05em",
+                    color: "#fff",
+                    background: tier.color,
+                    padding: "3px 9px",
+                    borderRadius: 99,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {tier.badge}
+                </span>
+              )}
+              <div
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: tier.color }} />
+                  <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{tier.name}</span>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  {price.promo && (
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: C.textFaint,
+                        textDecoration: "line-through",
+                        textDecorationColor: C.textFaint,
+                        marginBottom: 2,
+                      }}
+                    >
+                      {formatEuro(price.preHolidayBaseline)}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 3, justifyContent: "flex-end" }}>
+                    <span
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 800,
+                        color: tier.color,
+                        fontFamily: "var(--gbf-font-display)",
+                      }}
+                    >
+                      {formatEuro(price.effective)}
+                    </span>
+                    <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 600 }}>/{price.per}</span>
+                  </div>
+                  {billingCycle === "yearly" && (
+                    <div style={{ fontSize: 10, color: C.textMuted, marginTop: 2 }}>
+                      {formatEuro(yearlyEq)}/mo billed annually
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {billingCycle === "yearly" && (
+                <div
+                  style={{
+                    display: "inline-block",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#2DA865",
+                    background: "#2DA86515",
+                    padding: "3px 8px",
+                    borderRadius: 99,
+                    marginBottom: 8,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Save {formatEuro(annualSave)}/yr
+                  {price.promo ? ` · +${Math.round(price.promo.discount * 100)}% holiday off` : ""}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+                {tier.features.map((f) => (
+                  <span
+                    key={f}
+                    style={{
+                      fontSize: 11,
+                      color: C.textMuted,
+                      background: C.surfaceAlt,
+                      padding: "2px 8px",
+                      borderRadius: 99,
+                      border: `1px solid ${C.borderFaint}`,
+                    }}
+                  >
+                    {f}
+                  </span>
+                ))}
+              </div>
+
+              <button
+                className="gbf-btn"
+                style={{
+                  marginTop: 10,
+                  width: "100%",
+                  padding: "9px",
+                  borderRadius: "var(--gbf-radius-xs)",
+                  background: tier.color,
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  border: "none",
+                  cursor: "pointer",
+                  fontFamily: "var(--gbf-font-display)",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Upgrade to {tier.name}
+              </button>
             </div>
           );
         })}
+      </div>
+
+      <div
+        style={{
+          fontSize: 11,
+          color: C.textFaint,
+          marginTop: 10,
+          lineHeight: 1.5,
+        }}
+      >
+        All plans include unlimited dashboards, real-time call transcripts, and Greek + English + 5 more languages.
+        Overage billed at €0.60/min. Prices exclude VAT.
       </div>
     </div>
   );
