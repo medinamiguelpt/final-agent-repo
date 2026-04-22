@@ -406,7 +406,7 @@ const PALETTES: Record<PaletteKey, { name: string; swatch: string; light: Colors
     },
   },
   calbliss: {
-    name: "CalBliss Purple",
+    name: "TimeBookingPro Purple",
     swatch: "#7C3AED",
     light: {
       bg: "#FAFAFF",
@@ -9037,7 +9037,7 @@ export default function DashboardPage() {
                 style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 1, minWidth: 0 }}
               >
                 <a
-                  href="https://calbliss.vercel.app"
+                  href="https://timebookingpro.com"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -9053,8 +9053,14 @@ export default function DashboardPage() {
                     transition: "color .15s, background .15s",
                     flexShrink: 0,
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.text; (e.currentTarget as HTMLAnchorElement).style.background = C.surface; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.color = C.textMuted; (e.currentTarget as HTMLAnchorElement).style.background = C.surfaceAlt; }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = C.text;
+                    (e.currentTarget as HTMLAnchorElement).style.background = C.surface;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color = C.textMuted;
+                    (e.currentTarget as HTMLAnchorElement).style.background = C.surfaceAlt;
+                  }}
                 >
                   ← Website
                 </a>
