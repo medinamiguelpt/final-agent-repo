@@ -367,22 +367,33 @@ const NON_NAMES = new Set([
   "before",
 ]);
 
+// Capitalise a potentially-multi-word name: "john smith" → "John Smith".
 function capitalise(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  return s
+    .split(/\s+/)
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w))
+    .join(" ")
+    .trim();
 }
+
+// Name-word pattern: one capitalised word (Latin or Greek), 2-20 chars.
+// The capturing group optionally extends to a second (and rarely third)
+// word so we return full names like "Maria Papadopoulou" / "John Michael Smith".
+const NAME_WORD = "[A-ZÀ-Ö\\u00C0-\\u024F\\u0370-\\u03FF][a-zA-ZÀ-Öà-ö\\u00C0-\\u024F\\u0370-\\u03FF]{1,20}";
+const FULL_NAME = `${NAME_WORD}(?:\\s+${NAME_WORD}){0,2}`;
 
 // Patterns specifically tuned to ElevenLabs' own summary style
 const SUMMARY_NAME_PATTERNS: RegExp[] = [
-  // "The user, identified as Jorge" / "identified as Miguel"
-  /\bidentified\s+as\s+([A-ZÀ-Ö\u00C0-\u024F][a-zA-ZÀ-Öà-ö\u00C0-\u024F]{1,20})/i,
-  // "The user, Miguel," / "The caller, Ana,"
-  /\b(?:user|caller|client|customer)[,\s]+([A-ZÀ-Ö\u00C0-\u024F][a-zA-ZÀ-Öà-ö\u00C0-\u024F]{1,20})[,\s]/i,
-  // "scheduled for Miguel" / "booked for Ana"
-  /\b(?:scheduled|booked|appointment)\s+for\s+([A-ZÀ-Ö\u00C0-\u024F][a-zA-ZÀ-Öà-ö\u00C0-\u024F]{1,20})\b/i,
-  // "Thank you, Miguel" / "Alright, Jorge" — agent echoing name
-  /\b(?:thank\s+you|alright|perfect|great|confirmed)[,!]\s+([A-ZÀ-Ö\u00C0-\u024F][a-zA-ZÀ-Öà-ö\u00C0-\u024F]{1,20})\b/i,
+  // "The user, identified as Jorge Papadopoulos" / "identified as Miguel"
+  new RegExp(`\\bidentified\\s+as\\s+(${FULL_NAME})`, "i"),
+  // "The user, Miguel Rodriguez," / "The caller, Ana Silva,"
+  new RegExp(`\\b(?:user|caller|client|customer)[,\\s]+(${FULL_NAME})[,.]`, "i"),
+  // "scheduled for Miguel Papadopoulos" / "booked for Ana Silva"
+  new RegExp(`\\b(?:scheduled|booked|appointment)\\s+for\\s+(${FULL_NAME})\\b`, "i"),
+  // "Thank you, Miguel" / "Alright, Jorge Papadopoulos" — agent echoing name
+  new RegExp(`\\b(?:thank\\s+you|alright|perfect|great|confirmed)[,!]\\s+(${FULL_NAME})\\b`, "i"),
   // Generic: "named X" / "name is X"
-  /\bnamed?\s+([A-ZÀ-Ö\u00C0-\u024F][a-zA-ZÀ-Öà-ö\u00C0-\u024F]{2,20})\b/i,
+  new RegExp(`\\bnamed?\\s+(${FULL_NAME})\\b`, "i"),
 ];
 
 const NAME_REQUEST_RE =
