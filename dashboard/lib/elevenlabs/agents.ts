@@ -53,8 +53,11 @@ if (envAgentId) {
 
 export const ACTIVE_AGENTS: AgentConfig[] = Object.values(AGENTS).filter((a) => a.active);
 
-/** First active agent — used as the default for signed-URL calls */
-export const PRIMARY_AGENT: AgentConfig = ACTIVE_AGENTS[0];
+/** First active agent — used as the default for signed-URL calls.
+ * Undefined at boot time if no active agent is configured; callers should
+ * guard with a 500 response rather than assume this is populated.
+ */
+export const PRIMARY_AGENT: AgentConfig | undefined = ACTIVE_AGENTS[0];
 
 /** Look up a registered agent by its ElevenLabs ID */
 export function getAgentById(id: string): AgentConfig | undefined {

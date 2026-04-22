@@ -50,20 +50,25 @@ export function rInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Pick one random item from an array. */
-export function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+/** Pick one random item from a non-empty array. Throws if empty. */
+export function pick<T>(arr: readonly T[]): T {
+  if (arr.length === 0) throw new Error("pick(): array is empty");
+  return arr[Math.floor(Math.random() * arr.length)] as T;
 }
 
 /** Picks `n` distinct items from `arr` using a partial Fisher-Yates shuffle. */
-export function pickN<T>(arr: T[], n: number): T[] {
-  const copy = [...arr];
+export function pickN<T>(arr: readonly T[], n: number): T[] {
+  const copy: T[] = [...arr];
   const out: T[] = [];
   const limit = Math.min(n, copy.length);
   for (let i = 0; i < limit; i++) {
     const idx = Math.floor(Math.random() * (copy.length - i)) + i;
-    [copy[i], copy[idx]] = [copy[idx], copy[i]];
-    out.push(copy[i]);
+    // swap — safe because both i and idx are valid indices into copy
+    const a = copy[i] as T;
+    const b = copy[idx] as T;
+    copy[i] = b;
+    copy[idx] = a;
+    out.push(copy[i] as T);
   }
   return out;
 }

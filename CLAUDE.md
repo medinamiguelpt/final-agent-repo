@@ -2,6 +2,41 @@
 
 AI voice receptionist (**Kostas**) + booking dashboard for the demo barbershop **Greek Barber Festival**.
 
+## 🔒 Committed stack — DO NOT substitute
+
+This product is built on one explicit technology stack. New surfaces, features, and tools MUST use the same stack unless there is a documented architectural reason to deviate. This is a deliberate commitment after evaluating alternatives (no-code tools, other frameworks, other runtimes); we lock it to prevent drift.
+
+| Layer | Choice | Version |
+|---|---|---|
+| **Build / dev runtime** | Bun | 1.3.9 (pinned via `packageManager`) |
+| **Production runtime** | Node.js LTS | 22.x (pinned via `engines`, Vercel `nodeVersion`) |
+| **Framework** | Next.js (App Router + Turbopack) | 16.2.2 |
+| **UI library** | React + React DOM | 19.2.4 |
+| **Language** | TypeScript, `strict: true` (enable `noUncheckedIndexedAccess` after splitting `dashboard/page.tsx`) | ^5 |
+| **AI coding assistant** | Claude Code | — (source of all LLM-assisted changes) |
+| **Runtime schema validation** | Zod | ^4.3.6 (at every `/api/*` boundary) |
+| **DB + Auth + Realtime** | Supabase | eu-west-2 |
+| **Voice platform** | ElevenLabs ConvAI | agent `agent_8701kn7p69jaf0frvsvwd6g2sq4e` |
+| **Hosting** | Vercel | (manual `vercel --prod` — no Git auto-deploy) |
+
+Not used (deliberate): Tailwind, shadcn/ui, framer-motion, next-intl (custom translations), Redux/Zustand, React Query/SWR, Storybook. If a feature genuinely needs one of these, discuss before adding.
+
+Not allowed without architectural review:
+- **No-code / low-code platforms** (Bubble, Retool, Webflow, etc.) for the customer-facing product
+- **Alternative frameworks** (Remix, Astro, SvelteKit) for new pages
+- **Alternative runtimes** (Deno, or running Bun in production)
+- **Alternative bundlers** (Webpack, Vite) — Next 16 + Turbopack only
+- **Alternative package managers** (npm, yarn, pnpm) — Bun only
+
+Complementary tools (SaaS — not custom) are fine for:
+- Marketing site / CMS → Framer (if/when needed)
+- Email → Resend
+- CRM → Attio / HubSpot
+- Analytics → Plausible / PostHog
+- Support → Plain / Crisp / Intercom
+- Automation / drip campaigns → n8n
+- Billing → Stripe
+
 ## Structure
 
 ```
@@ -199,3 +234,14 @@ Never let the two surfaces diverge.
 - **Supabase project:** https://supabase.com/dashboard/project/tghadldaxbooawjfsuzs
 - **GitHub repo:** https://github.com/medinamiguelpt/final-agent-repo
 - **ElevenLabs agent:** https://elevenlabs.io/app/conversational-ai/agents/agent_8701kn7p69jaf0frvsvwd6g2sq4e
+
+---
+
+## Planned quality work (in priority order)
+
+1. **Split `dashboard/app/dashboard/page.tsx` (9,650 lines) into per-tab modules** — biggest source of LLM hallucination risk; blocks several other flags.
+2. **Enable `noUncheckedIndexedAccess` in `tsconfig.json`** — 92 call sites to fix, mostly inside `page.tsx`. Do this as part of step 1.
+3. **Add Playwright E2E tests** for the 5 golden flows: login → dashboard, live call → ledger appears, walk-in form submit, cancel booking, language switch.
+4. **Supabase RLS fixes** — enable RLS on `public.agents`; tighten `businesses: owner insert` policy (currently `WITH CHECK (true)`).
+5. **Supabase Auth** — enable Leaked Password Protection.
+6. **Go private on GitHub** — repo currently public, agent prompt + IDs exposed.
