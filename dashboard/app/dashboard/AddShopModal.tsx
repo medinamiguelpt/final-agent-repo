@@ -589,14 +589,6 @@ export default function AddShopModal({ open, onClose, onCreated, C }: Props) {
       sub: "Upload a CSV or link your ElevenLabs agent to import past bookings.",
       badge: "Recommended",
     },
-    {
-      id: "demo",
-      Icon: BarChart2,
-      color: "#a855f7",
-      title: "Load demo data",
-      sub: "Populate with 30–40 realistic sample bookings: AI calls, walk-ins, cancellations and more.",
-      badge: "For testing",
-    },
   ];
 
   // ─────────────────────────────────────────────────────────────────────────────
