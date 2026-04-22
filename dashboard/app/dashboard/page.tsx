@@ -55,16 +55,9 @@ import { supabase } from "@/lib/supabase/client";
 import AddShopModal from "./AddShopModal";
 import { parseBarberNames } from "@/lib/barbers";
 import { DEFAULT_AGENT_ID } from "@/lib/config";
-import {
-  SUBSCRIPTION_TIERS,
-  YEARLY_DISCOUNT,
-  activeHolidayPromo,
-  displayPrice,
-  formatEuro,
-  yearlyMonthlyEquivalent,
-  yearlySavings,
-  type BillingCycle,
-} from "@/lib/pricing";
+import { SUBSCRIPTION_TIERS, YEARLY_DISCOUNT, activeHolidayPromo, quote, type BillingCycle } from "@/lib/pricing";
+import { CURRENCIES, CURRENCY_ORDER, formatMoney, type CurrencyCode } from "@/lib/currencies";
+import { COUNTRIES, COUNTRY_ORDER, isPlausibleVatId, VENDOR_COUNTRY, type CountryCode } from "@/lib/vat";
 
 const STATUS_I18N: Record<string, string> = { "in-progress": "inProgress" };
 
@@ -1948,6 +1941,10 @@ function SettingsPanel({
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletingBiz, setDeletingBiz] = useState<{ id: string; name: string; inProgress?: boolean } | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("EUR");
+  const [countryCode, setCountryCode] = useState<CountryCode>(VENDOR_COUNTRY);
+  const [isBusiness, setIsBusiness] = useState<boolean>(true);
+  const [vatId, setVatId] = useState<string>("");
 
   // Scroll lock
   useEffect(() => {
@@ -2981,6 +2978,164 @@ function SettingsPanel({
         <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{DEMO_PLAN.desc}</p>
       </div>
 
+      {/* Region / currency / VAT selector */}
+      {(() => {
+        const currency = CURRENCIES[currencyCode];
+        const country = COUNTRIES[countryCode];
+        const vatIdValid = isPlausibleVatId(country, vatId);
+        const showVatIdField = isBusiness && country.eu && country.code !== VENDOR_COUNTRY;
+        const selectStyle: React.CSSProperties = {
+          flex: 1,
+          minWidth: 0,
+          padding: "9px 12px",
+          borderRadius: 10,
+          border: `1px solid ${C.border}`,
+          background: C.surface,
+          color: C.text,
+          fontSize: 12,
+          fontWeight: 600,
+          fontFamily: "var(--gbf-font-sans)",
+          cursor: "pointer",
+          appearance: "none",
+          WebkitAppearance: "none",
+          backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23${C.textMuted.replace("#", "")}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right 10px center",
+          paddingRight: 28,
+        };
+        return (
+          <div
+            style={{
+              border: `1px solid ${C.borderFaint}`,
+              borderRadius: 14,
+              padding: 12,
+              background: C.surfaceAlt,
+              marginBottom: 12,
+              display: "flex",
+              flexDirection: "column",
+              gap: 10,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 800,
+                color: C.textMuted,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              Your region
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <label style={{ flex: "1 1 140px", minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>Currency</div>
+                <select
+                  value={currencyCode}
+                  onChange={(e) => setCurrencyCode(e.target.value as CurrencyCode)}
+                  style={selectStyle}
+                  aria-label="Currency"
+                >
+                  {CURRENCY_ORDER.map((code) => {
+                    const c = CURRENCIES[code];
+                    return (
+                      <option key={code} value={code}>
+                        {c.flag} {c.code} — {c.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label style={{ flex: "2 1 220px", minWidth: 0 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>
+                  Billing country
+                </div>
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value as CountryCode)}
+                  style={selectStyle}
+                  aria-label="Billing country"
+                >
+                  {COUNTRY_ORDER.map((code) => {
+                    const co = COUNTRIES[code];
+                    return (
+                      <option key={code} value={code}>
+                        {co.flag} {co.name} ·{" "}
+                        {co.vatRate === 0
+                          ? "no tax"
+                          : `${(co.vatRate * 100).toFixed(co.vatRate >= 0.1 ? 0 : 1)}% ${co.taxLabel}`}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </div>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 12,
+                color: C.text,
+                fontWeight: 600,
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={isBusiness}
+                onChange={(e) => setIsBusiness(e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: C.accent, cursor: "pointer" }}
+              />
+              <span>I&apos;m buying for a business</span>
+            </label>
+
+            {showVatIdField && (
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>
+                  EU VAT ID (for reverse charge)
+                </div>
+                <input
+                  type="text"
+                  value={vatId}
+                  onChange={(e) => setVatId(e.target.value)}
+                  placeholder={country.vatIdExample ?? `${country.code}…`}
+                  spellCheck={false}
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    borderRadius: 10,
+                    border: `1px solid ${vatId ? (vatIdValid ? "#2DA865" : "#C1272D") : C.border}`,
+                    background: C.surface,
+                    color: C.text,
+                    fontSize: 12,
+                    fontFamily: "var(--gbf-font-mono, ui-monospace, monospace)",
+                    letterSpacing: "0.04em",
+                    outline: "none",
+                  }}
+                />
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: vatId ? (vatIdValid ? "#2DA865" : "#C1272D") : C.textFaint,
+                    marginTop: 4,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {vatId
+                    ? vatIdValid
+                      ? "✓ Valid format — VAT will be reverse charged (0%)."
+                      : `Invalid format for ${country.name}. Expected: ${country.vatIdExample ?? "N/A"}.`
+                    : `Leave blank to be charged ${country.name} VAT at ${(country.vatRate * 100).toFixed(country.vatRate >= 0.1 ? 0 : 1)}%.`}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Holiday promo banner */}
       {activePromo && (
         <div
@@ -3111,10 +3266,20 @@ function SettingsPanel({
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {SUBSCRIPTION_TIERS.map((tier) => {
-          const price = displayPrice(tier, billingCycle);
-          const yearlyEq = yearlyMonthlyEquivalent(tier);
-          const annualSave = yearlySavings(tier);
+        {SUBSCRIPTION_TIERS.map((tier, idx) => {
+          const q = quote({
+            tier,
+            cycle: billingCycle,
+            currencyCode,
+            countryCode,
+            isBusiness,
+            hasValidVatId: isPlausibleVatId(COUNTRIES[countryCode], vatId),
+          });
+          const perMinute = q.currency.tierMonthly[tier.id] / tier.minutesPerMonth;
+          const overagePerMinute = q.currency.overageByTier[tier.id];
+          const prev = idx > 0 ? SUBSCRIPTION_TIERS[idx - 1] : null;
+          const prevPerMinute = prev ? q.currency.tierMonthly[prev.id] / prev.minutesPerMonth : null;
+          const savingsPct = prevPerMinute ? Math.round((1 - perMinute / prevPerMinute) * 100) : 0;
           return (
             <div
               key={tier.id}
@@ -3154,7 +3319,7 @@ function SettingsPanel({
                   <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{tier.name}</span>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  {price.promo && (
+                  {q.promo && (
                     <div
                       style={{
                         fontSize: 11,
@@ -3164,7 +3329,7 @@ function SettingsPanel({
                         marginBottom: 2,
                       }}
                     >
-                      {formatEuro(price.preHolidayBaseline)}
+                      {q.formatted.netPreHoliday}
                     </div>
                   )}
                   <div style={{ display: "flex", alignItems: "baseline", gap: 3, justifyContent: "flex-end" }}>
@@ -3176,15 +3341,64 @@ function SettingsPanel({
                         fontFamily: "var(--gbf-font-display)",
                       }}
                     >
-                      {formatEuro(price.effective)}
+                      {q.formatted.netEffective}
                     </span>
-                    <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 600 }}>/{price.per}</span>
+                    <span style={{ fontSize: 11, color: C.textMuted, fontWeight: 600 }}>/{q.per}</span>
                   </div>
                   {billingCycle === "yearly" && (
                     <div style={{ fontSize: 10, color: C.textMuted, marginTop: 2 }}>
-                      {formatEuro(yearlyEq)}/mo billed annually
+                      {q.formatted.monthlyEquivalent}/mo billed annually
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Tax / total breakdown */}
+              <div
+                style={{
+                  marginTop: 4,
+                  padding: "8px 10px",
+                  borderRadius: 10,
+                  background: C.surfaceAlt,
+                  border: `1px solid ${C.borderFaint}`,
+                  fontSize: 11,
+                  color: C.textMuted,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 3,
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>Net</span>
+                  <span style={{ color: C.text, fontVariantNumeric: "tabular-nums" }}>{q.formatted.netEffective}</span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    color: q.vat.reverseCharged ? "#2DA865" : C.textMuted,
+                  }}
+                >
+                  <span>{q.vat.label}</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                    {q.vat.reverseCharged ? "—" : q.vat.rate === 0 ? "—" : q.formatted.vatAmount}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontWeight: 700,
+                    color: C.text,
+                    paddingTop: 3,
+                    borderTop: `1px solid ${C.borderFaint}`,
+                  }}
+                >
+                  <span>Total due</span>
+                  <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                    {q.formatted.gross}
+                    <span style={{ color: C.textMuted, fontWeight: 500 }}> /{q.per}</span>
+                  </span>
                 </div>
               </div>
 
@@ -3198,16 +3412,16 @@ function SettingsPanel({
                     background: "#2DA86515",
                     padding: "3px 8px",
                     borderRadius: 99,
-                    marginBottom: 8,
+                    marginTop: 8,
                     letterSpacing: "0.02em",
                   }}
                 >
-                  Save {formatEuro(annualSave)}/yr
-                  {price.promo ? ` · +${Math.round(price.promo.discount * 100)}% holiday off` : ""}
+                  Save {q.formatted.annualSavings}/yr
+                  {q.promo ? ` · includes ${Math.round(q.promo.discount * 100)}% holiday off` : ""}
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
                 {tier.features.map((f) => (
                   <span
                     key={f}
@@ -3223,6 +3437,49 @@ function SettingsPanel({
                     {f}
                   </span>
                 ))}
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: tier.color,
+                    background: `${tier.color}12`,
+                    padding: "2px 8px",
+                    borderRadius: 99,
+                    border: `1px solid ${tier.color}33`,
+                    fontWeight: 700,
+                  }}
+                  title={`Effective cost per included minute at ${tier.name}`}
+                >
+                  {formatMoney(perMinute, q.currency)}/min
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: C.textMuted,
+                    background: C.surfaceAlt,
+                    padding: "2px 8px",
+                    borderRadius: 99,
+                    border: `1px solid ${C.borderFaint}`,
+                  }}
+                  title="Per-minute rate charged after your included bucket is consumed"
+                >
+                  Overage {formatMoney(overagePerMinute, q.currency)}/min
+                </span>
+                {savingsPct > 0 && prev && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: "#2DA865",
+                      background: "#2DA86515",
+                      padding: "2px 8px",
+                      borderRadius: 99,
+                      border: "1px solid #2DA86540",
+                    }}
+                    title={`${savingsPct}% cheaper per included minute vs. ${prev.name}`}
+                  >
+                    −{savingsPct}% /min vs. {prev.name}
+                  </span>
+                )}
               </div>
 
               <button
@@ -3258,7 +3515,9 @@ function SettingsPanel({
         }}
       >
         All plans include unlimited dashboards, real-time call transcripts, and Greek + English + 5 more languages.
-        Overage billed at €0.60/min. Prices exclude VAT.
+        Overage billed at the tier rate shown above. Taxes shown for {COUNTRIES[countryCode].flag}{" "}
+        {COUNTRIES[countryCode].name}
+        {COUNTRIES[countryCode].note ? ` — ${COUNTRIES[countryCode].note}` : "."}
       </div>
     </div>
   );
@@ -8993,15 +9252,22 @@ export default function DashboardPage() {
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    background: C.accentLight,
-                    border: `1px solid ${C.border}`,
+                    overflow: "hidden",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     flexShrink: 0,
+                    boxShadow: `0 0 0 1px ${C.border}`,
                   }}
                 >
-                  <Scissors size={18} style={{ color: C.accent }} strokeWidth={1.75} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/icon.svg"
+                    alt="TimeBookingPro"
+                    width={36}
+                    height={36}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  />
                 </div>
                 {businesses.length >= 1 ? (
                   <div style={{ position: "relative", minWidth: 0 }}>

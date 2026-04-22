@@ -15,9 +15,10 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
 });
 
+// Favicon is picked up automatically from app/icon.svg (Next file-based convention).
 export const metadata: Metadata = {
-  title: "AI Receptionist Dashboard — Greek Barber",
-  description: "Kostas AI Agent — live receptionist dashboard",
+  title: "TimeBookingPro — AI Receptionist Dashboard",
+  description: "AI voice receptionist and live booking dashboard",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

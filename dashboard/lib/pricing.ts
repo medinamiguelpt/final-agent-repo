@@ -38,6 +38,17 @@ export interface TierPricing {
 /** 20% off the monthly list price when paid annually — industry standard. */
 export const YEARLY_DISCOUNT = 0.2;
 
+/*
+ * Tier ladder is tuned so each upgrade is clearly worth it per minute.
+ * The step-up in included minutes outpaces the price step-up every time:
+ *
+ *   Starter → Professional: +€200/mo buys +400 min (€0.50/min incremental)
+ *   Professional → Enterprise: +€430/mo buys +1,000 min (€0.43/min incremental)
+ *
+ * Per-included-minute (list):
+ *   Starter  €1.145/min · Professional €0.715/min · Enterprise €0.537/min
+ *                        (−37% vs Starter)        (−25% vs Professional)
+ */
 export const SUBSCRIPTION_TIERS: TierPricing[] = [
   {
     id: "starter",
@@ -46,16 +57,16 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     monthly: 229,
     minutesPerMonth: 200,
     overageRatePerMinute: 0.6,
-    features: ["200 min/month included", "€0.60/min overage", "1 location", "Email support"],
+    features: ["200 min/month", "1 location", "Email support"],
   },
   {
     id: "professional",
     name: "Professional",
     color: "#1B5EBE",
     monthly: 429,
-    minutesPerMonth: 500,
-    overageRatePerMinute: 0.6,
-    features: ["500 min/month included", "€0.60/min overage", "Up to 3 locations", "Priority support"],
+    minutesPerMonth: 600,
+    overageRatePerMinute: 0.5,
+    features: ["600 min/month", "Up to 3 locations", "Priority support"],
     badge: "Most popular",
   },
   {
@@ -63,9 +74,9 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     name: "Enterprise",
     color: "#6747C7",
     monthly: 859,
-    minutesPerMonth: 1200,
-    overageRatePerMinute: 0.6,
-    features: ["1,200 min/month included", "€0.60/min overage", "Unlimited locations", "Dedicated success manager"],
+    minutesPerMonth: 1600,
+    overageRatePerMinute: 0.4,
+    features: ["1,600 min/month", "Unlimited locations", "Dedicated success manager"],
     badge: "Best value",
   },
 ];
@@ -245,4 +256,117 @@ export function displayPrice(tier: TierPricing, cycle: BillingCycle, now: Date =
 /** Format an integer EUR amount — "€229", "€2,199". */
 export function formatEuro(n: number): string {
   return `€${n.toLocaleString("en-US")}`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-currency + VAT quote
+// ─────────────────────────────────────────────────────────────────────────────
+
+import {
+  CURRENCIES,
+  applyDiscountLocal,
+  formatMoney,
+  yearlyLocal,
+  yearlyMonthlyEquivalentLocal,
+  yearlySavingsLocal,
+  type Currency,
+  type CurrencyCode,
+} from "./currencies";
+import { COUNTRIES, computeVat, type Country, type CountryCode, type VatComputation } from "./vat";
+
+export interface Quote {
+  tier: TierPricing;
+  currency: Currency;
+  country: Country;
+  cycle: BillingCycle;
+  promo: HolidayPromo | null;
+
+  /** Net list amount before any discount (local currency). */
+  netBaseline: number;
+  /** Net after yearly discount, before holiday promo. */
+  netPreHoliday: number;
+  /** Net after all discounts — this is what VAT is applied to. */
+  netEffective: number;
+
+  /** VAT / GST breakdown applied to `netEffective`. */
+  vat: VatComputation;
+
+  /** Annual savings in local currency when billed yearly. */
+  annualSavings: number;
+  /** Monthly-equivalent when billed yearly. */
+  monthlyEquivalent: number;
+
+  /** "month" or "year" for display. */
+  per: "month" | "year";
+
+  /** Formatted strings ready for display. */
+  formatted: {
+    netBaseline: string;
+    netPreHoliday: string;
+    netEffective: string;
+    vatAmount: string;
+    gross: string;
+    annualSavings: string;
+    monthlyEquivalent: string;
+  };
+}
+
+export interface QuoteInput {
+  tier: TierPricing;
+  cycle: BillingCycle;
+  currencyCode: CurrencyCode;
+  countryCode: CountryCode;
+  isBusiness: boolean;
+  hasValidVatId: boolean;
+  now?: Date;
+}
+
+/**
+ * One-stop pricing + tax quote. Combines tier × cycle × currency × country
+ * into a single, display-ready object.
+ */
+export function quote(input: QuoteInput): Quote {
+  const { tier, cycle, currencyCode, countryCode, isBusiness, hasValidVatId, now } = input;
+  const currency = CURRENCIES[currencyCode];
+  const country = COUNTRIES[countryCode];
+  const promo = activeHolidayPromo(cycle, now ?? new Date());
+
+  // Baseline + yearly discount in local currency
+  const netBaseline = cycle === "monthly" ? currency.tierMonthly[tier.id] : currency.tierMonthly[tier.id] * 12;
+  const netPreHoliday = cycle === "monthly" ? currency.tierMonthly[tier.id] : yearlyLocal(currency, tier.id);
+
+  // Holiday promo stack
+  const netEffective = promo ? applyDiscountLocal(netPreHoliday, promo.discount, currency.roundStep) : netPreHoliday;
+
+  // VAT on the effective net
+  const vat = computeVat({ net: netEffective, country, isBusiness, hasValidVatId });
+
+  // Cycle-specific extras
+  const annualSavings =
+    cycle === "yearly" ? yearlySavingsLocal(currency, tier.id) + (promo ? netPreHoliday - netEffective : 0) : 0;
+  const monthlyEquivalent = cycle === "yearly" ? yearlyMonthlyEquivalentLocal(currency, tier.id) : netEffective;
+
+  return {
+    tier,
+    currency,
+    country,
+    cycle,
+    promo,
+    netBaseline,
+    netPreHoliday,
+    netEffective,
+    vat,
+    annualSavings,
+    monthlyEquivalent,
+    per: cycle === "monthly" ? "month" : "year",
+    formatted: {
+      netBaseline: formatMoney(netBaseline, currency),
+      netPreHoliday: formatMoney(netPreHoliday, currency),
+      netEffective: formatMoney(netEffective, currency),
+      vatAmount: formatMoney(vat.amount, currency),
+      gross: formatMoney(vat.gross, currency),
+      annualSavings: formatMoney(annualSavings, currency),
+      monthlyEquivalent: formatMoney(monthlyEquivalent, currency),
+    },
+  };
 }

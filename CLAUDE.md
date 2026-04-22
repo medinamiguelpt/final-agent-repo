@@ -180,19 +180,23 @@ Never conflate `processing` with `in-progress`.
 
 **Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-Set to maintain ≥80% operating margin **per tier** at modelled production costs. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+Set to maintain ≥80% operating margin **per tier** at modelled production costs. The minute ladder is tuned so every upgrade is clearly better value per minute. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
 
-| Tier | Monthly | Yearly (−20%) | Minutes | Overage |
-|---|---:|---:|---:|---:|
-| Starter | €229/mo | €2,199/yr (€184/mo equiv.) | 200 min/mo | €0.60/min |
-| Professional ★ | €429/mo | €4,119/yr (€344/mo equiv.) | 500 min/mo | €0.60/min |
-| Enterprise | €859/mo | €8,249/yr (€688/mo equiv.) | 1,200 min/mo | €0.60/min |
+| Tier | Monthly | Yearly (−20%) | Minutes | Overage | € / included min |
+|---|---:|---:|---:|---:|---:|
+| Starter | €229/mo | €2,199/yr (€184/mo equiv.) | 200 min/mo | €0.60/min | €1.145 |
+| Professional ★ | €429/mo | €4,119/yr (€344/mo equiv.) | 600 min/mo | €0.50/min | €0.715 |
+| Enterprise | €859/mo | €8,249/yr (€688/mo equiv.) | 1,600 min/mo | €0.40/min | €0.537 |
 
 ★ Most popular · All plans include unlimited dashboards, real-time transcripts, and all 7 supported languages.
 
+Upgrade economics (incremental cost per marginal minute):
+- Starter → Professional: +€200/mo buys +400 min → **€0.50/min incremental**
+- Professional → Enterprise: +€430/mo buys +1,000 min → **€0.43/min incremental**
+
 **Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
 
-**Holiday / seasonal sales** — declared as data in `HOLIDAY_PROMOS`. The active promo is auto-detected by date and stacks on top of the yearly discount. Default schedule:
+**Holiday / seasonal sales** — declared as data in `HOLIDAY_PROMOS`. The active promo is auto-detected by date and stacks on top of the yearly discount.
 
 | Promo | Window | Discount | Applies to | Code |
 |---|---|---:|---|---|
@@ -204,6 +208,17 @@ Set to maintain ≥80% operating margin **per tier** at modelled production cost
 | New Year | Jan 1 – Jan 16 | 20% | monthly | `NY20` |
 
 Add new sales by appending to `HOLIDAY_PROMOS` — no UI changes required.
+
+**Multi-currency** — `dashboard/lib/currencies.ts` defines hand-rounded local prices per tier per currency (not runtime FX). Covers EUR, USD, GBP, CHF, CAD, AUD, SEK, NOK, DKK, PLN, AED, JPY. Each currency has its own `tierMonthly`, `overageByTier`, and locale-aware formatting via `Intl.NumberFormat`.
+
+**VAT / sales tax** — `dashboard/lib/vat.ts` declares rates for all 27 EU member states + UK, NO, CH, IS, US, CA, AU, NZ, AE, JP, SG. Vendor country is Greece (`VENDOR_COUNTRY = "GR"`). `computeVat()` handles:
+
+- **EU B2B with valid VAT ID** → reverse charge (0%, customer self-accounts under Article 196)
+- **EU B2C or EU B2B without VAT ID** → charge customer-country VAT (OSS)
+- **UK / NO / CH / non-EU** → charge local rate (assumes vendor registered)
+- **US** → 0% at platform level (state sales tax handled at checkout)
+
+The dashboard Subscription panel shows a region picker (currency + country + B2B toggle with VAT ID field) and renders a full net / VAT / gross breakdown on every tier card.
 
 **Commands**
 ```bash

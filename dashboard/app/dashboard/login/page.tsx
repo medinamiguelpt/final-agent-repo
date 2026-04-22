@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { Sparkles, ArrowRight, Scissors, Clock, Eye, EyeOff } from "lucide-react";
+import { Sparkles, ArrowRight, Clock, Eye, EyeOff } from "lucide-react";
 
 // ── Theme palette map (mirrors PALETTES in dashboard/page.tsx) ────────────────
 const PALETTES = {
@@ -353,19 +353,25 @@ function LoginInner() {
               width: 60,
               height: 60,
               borderRadius: 18,
-              background: C.surfaceAlt,
-              border: `1px solid ${C.border}`,
+              overflow: "hidden",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 14px",
-              boxShadow: `0 0 0 8px ${C.accent}12`,
+              boxShadow: `0 0 0 8px ${C.accent}12, 0 0 0 1px ${C.border}`,
             }}
           >
-            <Scissors size={26} style={{ color: C.accent }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/icon.svg"
+              alt="TimeBookingPro"
+              width={60}
+              height={60}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
           </div>
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, color: C.text }}>
-            Barber Dashboard
+            TimeBookingPro
           </div>
           <div
             style={{

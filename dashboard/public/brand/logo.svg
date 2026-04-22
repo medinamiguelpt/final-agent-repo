@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="48" viewBox="0 0 220 48">
+  <!-- Icon mark -->
+  <g transform="scale(0.5) translate(0, 8)">
+    <path d="M8 0 L0 18 L0 50 L32 64 L64 50 L64 18 L56 0 L32 22 Z" fill="#8B5CF6"/>
+    <path d="M17 11 L9 24 L9 44 L32 55 L55 44 L55 24 L47 11 L32 29 Z" fill="#A855F7"/>
+  </g>
+  <!-- Wordmark: TimeBooking bold + Pro light -->
+  <text x="42" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="700" fill="#111827">TimeBooking</text>
+  <text x="168" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="300" fill="#6B7280">Pro</text>
+</svg>
