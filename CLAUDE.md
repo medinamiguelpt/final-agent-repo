@@ -202,7 +202,7 @@ Agent-only product — no dashboard. Bookings sync to the customer's calendar (c
 | Busy | €299/mo | €2,870/yr (€239/mo equiv.) | 500 min/mo | €0.598 |
 | Heavy | €499/mo | €4,790/yr (€399/mo equiv.) | 1,000 min/mo | €0.499 |
 
-★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
+★ Most popular · All plans include bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), and all 7 supported languages. Minutes are a single pool the customer can use however they want — one shop, two shops, ten shops — we don't track or limit where they're spent. Don't frame this as a "feature" ("unlimited locations", "multi-shop support") on marketing surfaces; locations aren't a billable dimension, so mentioning them just invents a limit-shaped object in the customer's head. Just sell minutes.
 
 Typical shop profiles (for self-selection at sales time):
 - **Light** — quieter shop, ~3 calls/day
