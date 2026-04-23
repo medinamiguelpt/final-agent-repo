@@ -17,7 +17,7 @@ This product is built on one explicit technology stack. New surfaces, features, 
 | **Runtime schema validation** | Zod | ^4.3.6 (at every `/api/*` boundary) |
 | **DB + Auth + Realtime** | Supabase | eu-west-2 |
 | **Voice platform** | ElevenLabs ConvAI | agent `agent_8701kn7p69jaf0frvsvwd6g2sq4e` |
-| **Hosting** | Vercel | (manual `vercel --prod` — no Git auto-deploy) |
+| **Hosting** | Vercel | auto-deploy via GitHub Actions (`.github/workflows/deploy.yml`) on push to `main` after CI passes |
 
 Not used (deliberate): Tailwind, shadcn/ui, framer-motion, next-intl (custom translations), Redux/Zustand, React Query/SWR, Storybook. If a feature genuinely needs one of these, discuss before adding.
 
@@ -146,7 +146,7 @@ Next.js 16 booking management UI. Receives ElevenLabs post-call webhooks, extrac
 - Supabase (Postgres + Auth + RLS), project `tghadldaxbooawjfsuzs` (eu-west-2)
 - Supabase Realtime (event-driven on `calls` + `appointments`)
 - ElevenLabs ConvAI (WebSocket for live calls via JS SDK; REST for history + transcripts)
-- Deploy: Vercel (manual `vercel --prod` — Git integration not wired)
+- Deploy: Vercel — auto-deploys on push to `main` after CI passes, via `.github/workflows/deploy.yml`. Manual `npx vercel --prod` still works for out-of-band deploys.
 
 **Key files**
 ```
@@ -266,8 +266,11 @@ npm run dev            # http://localhost:3000
 curl -X POST http://localhost:3000/api/elevenlabs/configure \
   -H "x-admin-key: $ELEVENLABS_API_KEY"
 
-# Production deploy (git push does NOT auto-deploy — run manually)
-npx vercel --prod
+# Production deploys happen automatically on push to main (after CI passes)
+# via .github/workflows/deploy.yml. Requires VERCEL_TOKEN in repo secrets.
+# Out-of-band / manual deploy still available:
+npx vercel deploy --prod
+npx vercel alias set <new-deploy-url> dashboard-sooty-seven-64.vercel.app
 ```
 
 **Env (`dashboard/.env.local`)**
