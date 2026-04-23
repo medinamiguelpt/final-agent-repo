@@ -4,7 +4,13 @@
  * We do NOT convert EUR at runtime — every tier has a hand-picked, round
  * local price per currency. This mirrors how mature SaaS products handle
  * multi-currency (Linear, Notion, Vercel): psychologically clean numbers
- * in each market rather than FX output like €229 → $247.32.
+ * in each market rather than FX output like €229 → SEK 2,479.42.
+ *
+ * Scope (EU-only): we price in the 4 currencies actually used inside the
+ * EU — EUR for the eurozone, plus SEK / DKK / PLN for the 3 non-euro EU
+ * member states we carry hand-rounded tables for. EU member states whose
+ * native currency we don't price in (BGN, CZK, HUF, RON) fall back to
+ * EUR via COUNTRY_CURRENCY in ./vat.ts.
  *
  * To add a currency:
  *   1. Add a row below with a sensible rounded monthly price per tier
@@ -17,19 +23,7 @@
 
 import { YEARLY_DISCOUNT, type TierPricing } from "./pricing";
 
-export type CurrencyCode =
-  | "EUR"
-  | "USD"
-  | "GBP"
-  | "CHF"
-  | "CAD"
-  | "AUD"
-  | "SEK"
-  | "NOK"
-  | "DKK"
-  | "PLN"
-  | "AED"
-  | "JPY";
+export type CurrencyCode = "EUR" | "SEK" | "DKK" | "PLN";
 
 export interface Currency {
   code: CurrencyCode;
@@ -39,20 +33,19 @@ export interface Currency {
   name: string;
   /** Flag emoji for UI flourish */
   flag: string;
-  /** Decimal places (0 for JPY, 2 for the rest) */
+  /** Decimal places */
   decimals: 0 | 2;
   /**
    * Monthly list price per tier, hand-rounded for local psychology.
    * Keys must cover every tier in SUBSCRIPTION_TIERS.
    */
   tierMonthly: Record<TierPricing["id"], number>;
-  /** Monthly rounding step — 1 for JPY prices, 10 for SEK/NOK, etc. */
+  /** Monthly rounding step — 1 for EUR/PLN, 10 for SEK/DKK, etc. */
   roundStep: number;
 }
 
 // Rates-of-thumb used when picking the rounded numbers below (Apr 2026 ballpark):
-//   USD 1.08 · GBP 0.86 · CHF 0.97 · CAD 1.48 · AUD 1.63 · SEK 11.35
-//   NOK 11.55 · DKK 7.45 · PLN 4.30 · AED 3.97 · JPY 163
+//   SEK 11.35 · DKK 7.45 · PLN 4.30
 export const CURRENCIES: Record<CurrencyCode, Currency> = {
   EUR: {
     code: "EUR",
@@ -63,51 +56,6 @@ export const CURRENCIES: Record<CurrencyCode, Currency> = {
     tierMonthly: { light: 99, standard: 179, busy: 299, heavy: 499 },
     roundStep: 1,
   },
-  USD: {
-    code: "USD",
-    locale: "en-US",
-    name: "US Dollar",
-    flag: "🇺🇸",
-    decimals: 2,
-    tierMonthly: { light: 109, standard: 199, busy: 329, heavy: 549 },
-    roundStep: 1,
-  },
-  GBP: {
-    code: "GBP",
-    locale: "en-GB",
-    name: "British Pound",
-    flag: "🇬🇧",
-    decimals: 2,
-    tierMonthly: { light: 89, standard: 159, busy: 259, heavy: 429 },
-    roundStep: 1,
-  },
-  CHF: {
-    code: "CHF",
-    locale: "de-CH",
-    name: "Swiss Franc",
-    flag: "🇨🇭",
-    decimals: 2,
-    tierMonthly: { light: 99, standard: 179, busy: 289, heavy: 489 },
-    roundStep: 1,
-  },
-  CAD: {
-    code: "CAD",
-    locale: "en-CA",
-    name: "Canadian Dollar",
-    flag: "🇨🇦",
-    decimals: 2,
-    tierMonthly: { light: 149, standard: 269, busy: 449, heavy: 739 },
-    roundStep: 1,
-  },
-  AUD: {
-    code: "AUD",
-    locale: "en-AU",
-    name: "Australian Dollar",
-    flag: "🇦🇺",
-    decimals: 2,
-    tierMonthly: { light: 159, standard: 289, busy: 479, heavy: 799 },
-    roundStep: 1,
-  },
   SEK: {
     code: "SEK",
     locale: "sv-SE",
@@ -115,15 +63,6 @@ export const CURRENCIES: Record<CurrencyCode, Currency> = {
     flag: "🇸🇪",
     decimals: 2,
     tierMonthly: { light: 1099, standard: 1999, busy: 3299, heavy: 5699 },
-    roundStep: 10,
-  },
-  NOK: {
-    code: "NOK",
-    locale: "nb-NO",
-    name: "Norwegian Krone",
-    flag: "🇳🇴",
-    decimals: 2,
-    tierMonthly: { light: 1099, standard: 1999, busy: 3399, heavy: 5799 },
     roundStep: 10,
   },
   DKK: {
@@ -144,40 +83,9 @@ export const CURRENCIES: Record<CurrencyCode, Currency> = {
     tierMonthly: { light: 429, standard: 779, busy: 1299, heavy: 2149 },
     roundStep: 1,
   },
-  AED: {
-    code: "AED",
-    locale: "en-AE",
-    name: "UAE Dirham",
-    flag: "🇦🇪",
-    decimals: 2,
-    tierMonthly: { light: 399, standard: 729, busy: 1199, heavy: 1999 },
-    roundStep: 1,
-  },
-  JPY: {
-    code: "JPY",
-    locale: "ja-JP",
-    name: "Japanese Yen",
-    flag: "🇯🇵",
-    decimals: 0,
-    tierMonthly: { light: 16000, standard: 29000, busy: 48000, heavy: 81000 },
-    roundStep: 100,
-  },
 };
 
-export const CURRENCY_ORDER: CurrencyCode[] = [
-  "EUR",
-  "USD",
-  "GBP",
-  "CHF",
-  "CAD",
-  "AUD",
-  "SEK",
-  "NOK",
-  "DKK",
-  "PLN",
-  "AED",
-  "JPY",
-];
+export const CURRENCY_ORDER: CurrencyCode[] = ["EUR", "SEK", "DKK", "PLN"];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -193,7 +101,7 @@ function prettyLocal(value: number, step: number): number {
   return rounded - (step >= 10 ? 1 : step === 1 ? 1 : 0);
 }
 
-/** Format an amount using the currency's locale (e.g. "€229", "$249", "¥37,000"). */
+/** Format an amount using the currency's locale (e.g. "€229", "kr 2,479"). */
 export function formatMoney(amount: number, currency: Currency): string {
   return new Intl.NumberFormat(currency.locale, {
     style: "currency",

@@ -245,16 +245,14 @@ Every tier clears ≥80% gross and ≥70% net. OpEx dilutes hardest on Light (20
 
 Add new sales by appending to `HOLIDAY_PROMOS` — no UI changes required.
 
-**Multi-currency** — `dashboard/lib/currencies.ts` defines hand-rounded local prices per tier per currency (not runtime FX). Covers EUR, USD, GBP, CHF, CAD, AUD, SEK, NOK, DKK, PLN, AED, JPY. Each currency has its own `tierMonthly`, `overageByTier`, and locale-aware formatting via `Intl.NumberFormat`.
+**Multi-currency (EU-only)** — `dashboard/lib/currencies.ts` defines hand-rounded local prices per tier per currency (not runtime FX). Covers the 4 currencies used inside the EU: **EUR, SEK, DKK, PLN**. Each currency has its own `tierMonthly` and locale-aware formatting via `Intl.NumberFormat`. EU member states whose native currency we don't price in (BGN, CZK, HUF, RON) fall back to EUR via `COUNTRY_CURRENCY` in `vat.ts`.
 
-**VAT / sales tax** — `dashboard/lib/vat.ts` declares rates for all 27 EU member states + UK, NO, CH, IS, US, CA, AU, NZ, AE, JP, SG. Vendor country is Greece (`VENDOR_COUNTRY = "GR"`). `computeVat()` handles:
+**VAT (EU-only)** — `dashboard/lib/vat.ts` declares standard rates for all 27 EU member states. Non-EU markets (GB/NO/CH/IS/US/CA/AU/NZ/AE/JP/SG) were dropped — we're focused on selling into the EU at this stage. Vendor country is Greece (`VENDOR_COUNTRY = "GR"`). `computeVat()` handles:
 
 - **EU B2B with valid VAT ID** → reverse charge (0%, customer self-accounts under Article 196)
 - **EU B2C or EU B2B without VAT ID** → charge customer-country VAT (OSS)
-- **UK / NO / CH / non-EU** → charge local rate (assumes vendor registered)
-- **US** → 0% at platform level (state sales tax handled at checkout)
 
-The dashboard Subscription panel shows a region picker (currency + country + B2B toggle with VAT ID field) and renders a full net / VAT / gross breakdown on every tier card.
+The dashboard Subscription panel shows a combined country+currency picker (currency is implied by country) and renders a full net / VAT / gross breakdown on every tier card.
 
 **Commands**
 ```bash

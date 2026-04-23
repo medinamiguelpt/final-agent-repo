@@ -1,13 +1,10 @@
 /**
- * VAT / sales-tax rates by customer country.
+ * VAT rates by customer country — EU-only.
  *
- * Coverage:
- *   - All 27 EU member states (standard rates only; digital services are
- *     always at the standard rate, never reduced rates)
- *   - UK (post-Brexit, separate registration)
- *   - EEA + adjacent: Norway, Switzerland, Iceland
- *   - Key intl markets: USA (blended default), Canada (HST default),
- *     Australia (GST), UAE, Japan
+ * Scope: all 27 EU member states (standard rates only; digital services
+ * are always at the standard rate, never reduced rates). Non-EU markets
+ * were intentionally dropped — we're focused on selling into the EU at
+ * this stage.
  *
  * B2B with a valid VAT ID in an EU member state other than ours triggers
  * the OSS reverse-charge rule: we issue an invoice at 0% and the customer
@@ -21,7 +18,6 @@
  */
 
 export type CountryCode =
-  // EU-27
   | "AT"
   | "BE"
   | "BG"
@@ -48,35 +44,22 @@ export type CountryCode =
   | "SK"
   | "SI"
   | "ES"
-  | "SE"
-  // Non-EU Europe
-  | "GB"
-  | "NO"
-  | "CH"
-  | "IS"
-  // Other markets
-  | "US"
-  | "CA"
-  | "AU"
-  | "NZ"
-  | "AE"
-  | "JP"
-  | "SG";
+  | "SE";
 
 export interface Country {
   code: CountryCode;
   name: string;
   flag: string;
-  /** Standard VAT / GST / sales-tax rate, as a decimal (0.24 = 24%). */
+  /** Standard VAT rate, as a decimal (0.24 = 24%). */
   vatRate: number;
-  /** Label shown next to the rate — "VAT", "GST", "Sales tax", etc. */
-  taxLabel: "VAT" | "GST" | "Consumption tax" | "Sales tax";
-  /** True if in EU VAT zone (subject to OSS reverse-charge B2B rules). */
-  eu: boolean;
+  /** Always "VAT" inside the EU — kept as a field for future non-EU expansion. */
+  taxLabel: "VAT";
+  /** Always true at this scope — kept for future non-EU expansion. */
+  eu: true;
   /** Extra note shown under the VAT line, e.g. tax nuances. */
   note?: string;
   /** Simple regex for client-side VAT-ID plausibility. Real validation
-   * needs VIES (EU) or HMRC (UK). */
+   * needs VIES. */
   vatIdPattern?: RegExp;
   /** Example format shown in placeholder. */
   vatIdExample?: string;
@@ -90,8 +73,8 @@ export const VENDOR_COUNTRY: CountryCode = "GR";
  *
  * Drives the combined country+currency picker in the subscription panel.
  * Picking a country implies a currency — we don't make customers choose
- * twice. Countries whose native currency we don't price in (CZK, HUF, RON,
- * BGN, ISK, NZD, SGD) fall back to a neighbouring currency we do support.
+ * twice. EU countries whose native currency we don't price in (BGN, CZK,
+ * HUF, RON) fall back to EUR.
  */
 export const COUNTRY_CURRENCY: Record<CountryCode, import("./currencies").CurrencyCode> = {
   // Eurozone
@@ -115,7 +98,7 @@ export const COUNTRY_CURRENCY: Record<CountryCode, import("./currencies").Curren
   SI: "EUR",
   SK: "EUR",
   HR: "EUR",
-  // EU non-euro — fall back to EUR for markets we don't price in natively
+  // EU non-euro — fall back to EUR (no native price table)
   BG: "EUR",
   CZ: "EUR",
   HU: "EUR",
@@ -124,23 +107,9 @@ export const COUNTRY_CURRENCY: Record<CountryCode, import("./currencies").Curren
   DK: "DKK",
   PL: "PLN",
   SE: "SEK",
-  // Non-EU Europe
-  GB: "GBP",
-  NO: "NOK",
-  CH: "CHF",
-  IS: "EUR", // no ISK pricing table
-  // Other markets
-  US: "USD",
-  CA: "CAD",
-  AU: "AUD",
-  NZ: "AUD", // no NZD pricing table
-  AE: "AED",
-  JP: "JPY",
-  SG: "USD", // no SGD pricing table
 };
 
 export const COUNTRIES: Record<CountryCode, Country> = {
-  // ── EU ───────────────────────────────────────────────────────────────────
   AT: {
     code: "AT",
     name: "Austria",
@@ -412,95 +381,9 @@ export const COUNTRIES: Record<CountryCode, Country> = {
     vatIdPattern: /^SE\d{12}$/,
     vatIdExample: "SE123456789012",
   },
-
-  // ── Non-EU Europe ────────────────────────────────────────────────────────
-  GB: {
-    code: "GB",
-    name: "United Kingdom",
-    flag: "🇬🇧",
-    vatRate: 0.2,
-    taxLabel: "VAT",
-    eu: false,
-    vatIdPattern: /^GB\d{9}$/,
-    vatIdExample: "GB123456789",
-    note: "UK VAT registered separately from EU OSS.",
-  },
-  NO: {
-    code: "NO",
-    name: "Norway",
-    flag: "🇳🇴",
-    vatRate: 0.25,
-    taxLabel: "VAT",
-    eu: false,
-    vatIdPattern: /^NO\d{9}MVA$/,
-    vatIdExample: "NO123456789MVA",
-  },
-  CH: {
-    code: "CH",
-    name: "Switzerland",
-    flag: "🇨🇭",
-    vatRate: 0.081,
-    taxLabel: "VAT",
-    eu: false,
-    vatIdPattern: /^CHE-?\d{3}\.?\d{3}\.?\d{3}( MWST)?$/,
-    vatIdExample: "CHE-123.456.789",
-  },
-  IS: {
-    code: "IS",
-    name: "Iceland",
-    flag: "🇮🇸",
-    vatRate: 0.24,
-    taxLabel: "VAT",
-    eu: false,
-    vatIdPattern: /^IS\d{5,6}$/,
-    vatIdExample: "IS12345",
-  },
-
-  // ── Other markets ────────────────────────────────────────────────────────
-  US: {
-    code: "US",
-    name: "United States",
-    flag: "🇺🇸",
-    vatRate: 0,
-    taxLabel: "Sales tax",
-    eu: false,
-    note: "Sales tax varies by state and is calculated at checkout where applicable.",
-  },
-  CA: {
-    code: "CA",
-    name: "Canada",
-    flag: "🇨🇦",
-    vatRate: 0.13,
-    taxLabel: "GST",
-    eu: false,
-    note: "HST shown (Ontario default). Actual GST/HST/PST varies by province.",
-  },
-  AU: {
-    code: "AU",
-    name: "Australia",
-    flag: "🇦🇺",
-    vatRate: 0.1,
-    taxLabel: "GST",
-    eu: false,
-    vatIdPattern: /^\d{11}$/,
-    vatIdExample: "12345678901 (ABN)",
-  },
-  NZ: { code: "NZ", name: "New Zealand", flag: "🇳🇿", vatRate: 0.15, taxLabel: "GST", eu: false },
-  AE: {
-    code: "AE",
-    name: "United Arab Emirates",
-    flag: "🇦🇪",
-    vatRate: 0.05,
-    taxLabel: "VAT",
-    eu: false,
-    vatIdPattern: /^\d{15}$/,
-    vatIdExample: "100123456700003 (TRN)",
-  },
-  JP: { code: "JP", name: "Japan", flag: "🇯🇵", vatRate: 0.1, taxLabel: "Consumption tax", eu: false },
-  SG: { code: "SG", name: "Singapore", flag: "🇸🇬", vatRate: 0.09, taxLabel: "GST", eu: false },
 };
 
-/** Ordered for the UI — vendor country first, then EU alpha, then RoW. */
+/** Ordered for the UI — vendor country first, then EU alpha. */
 export const COUNTRY_ORDER: CountryCode[] = [
   "GR",
   "AT",
@@ -529,17 +412,6 @@ export const COUNTRY_ORDER: CountryCode[] = [
   "SI",
   "ES",
   "SE",
-  "GB",
-  "CH",
-  "NO",
-  "IS",
-  "US",
-  "CA",
-  "AU",
-  "NZ",
-  "AE",
-  "JP",
-  "SG",
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -547,15 +419,15 @@ export const COUNTRY_ORDER: CountryCode[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface VatComputation {
-  /** Effective rate applied (0 if reverse charged or no VAT). */
+  /** Effective rate applied (0 if reverse charged). */
   rate: number;
-  /** Absolute VAT / GST amount in the net's currency. */
+  /** Absolute VAT amount in the net's currency. */
   amount: number;
   /** Gross = net + amount */
   gross: number;
   /** True if this is an EU intra-community B2B supply with valid VAT ID. */
   reverseCharged: boolean;
-  /** Label for the tax line — "VAT (24%)", "GST (10%)", "Reverse charged", etc. */
+  /** Label for the tax line — "VAT (24%)", "Reverse charged", etc. */
   label: string;
   /** Short explanation shown in small print. */
   explanation: string;
@@ -565,12 +437,10 @@ export interface VatComputation {
  * Compute VAT for a net amount given the customer's country, whether they are
  * a business, and whether they supplied a plausible VAT ID.
  *
- * Rules applied:
+ * EU-only rules applied:
  *   - EU B2B with valid VAT ID in a country other than the vendor's →
  *     reverse charge (0% VAT, customer self-accounts)
  *   - EU B2C or EU B2B without a VAT ID → charge customer-country VAT (OSS)
- *   - UK / NO / CH / etc. → charge local rate (we're assumed registered)
- *   - US → 0% at platform level (sales tax handled at checkout per state)
  */
 export function computeVat({
   net,
@@ -583,8 +453,8 @@ export function computeVat({
   isBusiness: boolean;
   hasValidVatId: boolean;
 }): VatComputation {
-  // EU reverse-charge: B2B, customer in EU, different country from vendor, valid VAT ID
-  const reverseCharged = country.eu && isBusiness && hasValidVatId && country.code !== VENDOR_COUNTRY;
+  // EU reverse-charge: B2B, different country from vendor, valid VAT ID
+  const reverseCharged = isBusiness && hasValidVatId && country.code !== VENDOR_COUNTRY;
   if (reverseCharged) {
     return {
       rate: 0,
@@ -593,17 +463,6 @@ export function computeVat({
       reverseCharged: true,
       label: "Reverse charged",
       explanation: "EU intra-community supply — you self-account for VAT under Article 196 of the VAT Directive.",
-    };
-  }
-
-  if (country.vatRate === 0) {
-    return {
-      rate: 0,
-      amount: 0,
-      gross: net,
-      reverseCharged: false,
-      label: "No tax added",
-      explanation: country.note ?? "No platform-level tax added for this country.",
     };
   }
 
@@ -616,8 +475,8 @@ export function computeVat({
     amount,
     gross,
     reverseCharged: false,
-    label: `${country.taxLabel} (${pct}%)`,
-    explanation: country.note ?? `${country.taxLabel} charged at the rate applicable in ${country.name}.`,
+    label: `VAT (${pct}%)`,
+    explanation: country.note ?? `VAT charged at the rate applicable in ${country.name}.`,
   };
 }
 
