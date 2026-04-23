@@ -2985,9 +2985,15 @@ function SettingsPanel({
         const vatIdValid = isPlausibleVatId(country, vatId);
         const showVatIdField = isBusiness && country.eu && country.code !== VENDOR_COUNTRY;
         const selectStyle: React.CSSProperties = {
-          flex: 1,
+          // Must pin to parent width; native selects otherwise grow to the
+          // widest <option> text and overflow their flex container.
+          width: "100%",
           minWidth: 0,
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          display: "block",
           padding: "9px 12px",
+          paddingRight: 28,
           borderRadius: 10,
           border: `1px solid ${C.border}`,
           background: C.surface,
@@ -2998,10 +3004,12 @@ function SettingsPanel({
           cursor: "pointer",
           appearance: "none",
           WebkitAppearance: "none",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
           backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23${C.textMuted.replace("#", "")}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")`,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right 10px center",
-          paddingRight: 28,
         };
         return (
           <div
