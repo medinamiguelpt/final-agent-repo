@@ -51,32 +51,39 @@ export const YEARLY_DISCOUNT = 0.2;
 /*
  * Agent-only product (no dashboard). Bookings sync to the customer's calendar
  * (cal.com on launch, Google Calendar fast-follow) and a weekly performance
- * email replaces the live dashboard surface. Three tiers, named by usage
- * volume so a barbershop owner can self-match to their call load:
+ * email replaces the live dashboard surface. Every tier can buy extra minutes
+ * at its overage rate WITHOUT upgrading — but the ladder is tuned so any
+ * shop that's consistently in overage is better off upgrading.
  *
+ * CRITICAL INVARIANT — "upgrade beats extra credits":
+ *   (Standard − Light)  / (200 − 100)  < Light overage   (€0.50 < €0.60 ✓)
+ *   (Heavy    − Standard) / (1000 − 200) < Standard overage (€0.4375 < €0.50 ✓)
+ * If this rule breaks, you've priced a tier that nobody should upgrade into.
+ *
+ * Tier profiles (name matches usage volume so owners self-select):
  *   Light    —  quieter shop, ~3 calls/day    (100 min/mo · €0.60 overage)
- *   Standard —  busy shop, ~20 calls/day      (600 min/mo · €0.50 overage)
- *   Heavy    —  multi-shop / high volume      (1,600 min/mo · €0.40 overage)
+ *   Standard —  busy shop, ~7 calls/day       (200 min/mo · €0.50 overage)
+ *   Heavy    —  multi-shop / high volume      (1,000 min/mo · €0.40 overage)
  *
- * Tier ladder is tuned so each upgrade is clearly worth it per minute and
- * every tier clears a ≥80% gross margin at the modelled ~€0.10/min blended
- * voice cost (ConvAI + TTS + ASR):
+ * Gross margin at modelled ~€0.10/min blended voice cost (ConvAI + TTS + ASR):
+ *   Light €99     → cost 100 × €0.10 = €10   → 90% margin
+ *   Standard €149 → cost 200 × €0.10 = €20   → 87% margin
+ *   Heavy €499    → cost 1,000 × €0.10 = €100 → 80% margin
  *
- *   Light €99  → cost 100 × €0.10 = €10  → 90% margin
- *   Standard €329 → cost 600 × €0.10 = €60  → 82% margin
- *   Heavy €799 → cost 1,600 × €0.10 = €160 → 80% margin
- *
- * Incremental cost per marginal minute (each upgrade beats its own overage):
- *   Light → Standard: +€230/mo buys +500 min → €0.46/min incremental
- *   Standard → Heavy: +€470/mo buys +1,000 min → €0.47/min incremental
+ * Incremental upgrade cost per marginal minute (always beats own overage):
+ *   Light → Standard: +€50/mo buys +100 min → €0.50/min   (vs €0.60 overage)
+ *   Standard → Heavy: +€350/mo buys +800 min → €0.4375/min (vs €0.50 overage)
  *
  * Per-included-minute (list):
- *   Light €0.990/min · Standard €0.548/min · Heavy €0.499/min
- *                    (−45% vs Light)       (−9% vs Standard)
+ *   Light €0.990/min · Standard €0.745/min · Heavy €0.499/min
+ *                    (−25% vs Light)       (−33% vs Standard)
  *
- * Breakeven — when a tier stops being cheaper than the one below plus overage:
- *   Light vs Standard: Standard wins past ~483 min/mo (~16 min/day)
- *   Standard vs Heavy: Heavy wins past ~1,540 min/mo (~51 min/day)
+ * Breakeven — when the upgrade becomes cheaper than staying put + overage:
+ *   Light vs Standard: Standard wins past ~183 min/mo (~6 min/day)
+ *   Standard vs Heavy: Heavy wins past ~900 min/mo   (~30 min/day)
+ * Both breakevens fall BEFORE the next tier's included bucket, so the
+ * self-select story is clean:
+ *   <183 min → Light · 183–900 min → Standard · >900 min → Heavy
  */
 export const SUBSCRIPTION_TIERS: TierPricing[] = [
   {
@@ -88,6 +95,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     overageRatePerMinute: 0.6,
     features: [
       "100 min/month",
+      "Extra minutes at €0.60/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",
@@ -98,11 +106,12 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     id: "standard",
     name: "Standard",
     color: "#1B5EBE",
-    monthly: 329,
-    minutesPerMonth: 600,
+    monthly: 149,
+    minutesPerMonth: 200,
     overageRatePerMinute: 0.5,
     features: [
-      "600 min/month",
+      "200 min/month",
+      "Extra minutes at €0.50/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",
@@ -114,11 +123,12 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     id: "heavy",
     name: "Heavy",
     color: "#6747C7",
-    monthly: 799,
-    minutesPerMonth: 1600,
+    monthly: 499,
+    minutesPerMonth: 1000,
     overageRatePerMinute: 0.4,
     features: [
-      "1,600 min/month",
+      "1,000 min/month",
+      "Extra minutes at €0.40/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",

@@ -189,28 +189,32 @@ Never conflate `processing` with `in-progress`.
 
 **Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Three tiers, named by usage volume so a barbershop owner can self-match to their call load. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Three tiers, named by usage volume so a barbershop owner can self-match to their call load. **Every tier can buy extra minutes at its overage rate without upgrading** — but the ladder is math-tuned so any shop consistently running over their included bucket saves money by upgrading. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
 
 | Tier | Monthly | Yearly (−20%) | Minutes | Overage | € / included min |
 |---|---:|---:|---:|---:|---:|
 | Light | €99/mo | €949/yr (€79/mo equiv.) | 100 min/mo | €0.60/min | €0.990 |
-| Standard ★ | €329/mo | €3,159/yr (€263/mo equiv.) | 600 min/mo | €0.50/min | €0.548 |
-| Heavy | €799/mo | €7,669/yr (€639/mo equiv.) | 1,600 min/mo | €0.40/min | €0.499 |
+| Standard ★ | €149/mo | €1,429/yr (€119/mo equiv.) | 200 min/mo | €0.50/min | €0.745 |
+| Heavy | €499/mo | €4,789/yr (€399/mo equiv.) | 1,000 min/mo | €0.40/min | €0.499 |
 
-★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
+★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), all 7 supported languages, and the ability to buy extra minutes without upgrading. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
 
 Typical shop profiles (for self-selection at sales time):
 - **Light** — quieter shop, ~3 calls/day
-- **Standard** — busy shop, ~20 calls/day
-- **Heavy** — multi-shop or high volume, ~55 calls/day
+- **Standard** — busy shop, ~7 calls/day
+- **Heavy** — multi-shop or high volume, ~30+ calls/day
 
-Upgrade economics (incremental cost per marginal minute — each upgrade beats its own overage):
-- Light → Standard: +€230/mo buys +500 min → **€0.46/min incremental**
-- Standard → Heavy: +€470/mo buys +1,000 min → **€0.47/min incremental**
+Critical invariant — **"upgrade always beats buying extra credits"** (enforced by the price-delta / minute-delta math):
+- Light → Standard: +€50/mo buys +100 min → **€0.50/min incremental** (vs €0.60 Light overage → 17% cheaper)
+- Standard → Heavy: +€350/mo buys +800 min → **€0.4375/min incremental** (vs €0.50 Standard overage → 12.5% cheaper)
 
-Breakeven (when the next tier becomes cheaper than staying put + overage):
-- Light vs Standard: Standard wins past **~483 min/mo** (~16 min/day)
-- Standard vs Heavy: Heavy wins past **~1,540 min/mo** (~51 min/day)
+If a future price change breaks this invariant (incremental €/min ≥ lower tier's overage), nobody should rationally upgrade — re-validate before merging.
+
+Breakeven (when the upgrade becomes cheaper than staying put + overage):
+- Light vs Standard: Standard wins past **~183 min/mo** (~6 min/day)
+- Standard vs Heavy: Heavy wins past **~900 min/mo** (~30 min/day)
+
+Both breakevens fall before the next tier's included bucket, so the self-select story is clean: under 183 min → Light; 183–900 min → Standard; over 900 min → Heavy.
 
 **Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
 
