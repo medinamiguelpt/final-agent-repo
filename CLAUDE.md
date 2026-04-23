@@ -189,16 +189,18 @@ Never conflate `processing` with `in-progress`.
 
 **Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Four tiers, named by usage volume so a barbershop owner can self-match to their call load. **Every tier can buy extra minutes at its overage rate without upgrading** — but the ladder is math-tuned so any shop consistently running over their included bucket saves money by upgrading. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Four tiers, named by usage volume so a barbershop owner can self-match to their call load. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
 
-| Tier | Monthly | Yearly (−20%) | Minutes | Overage | € / included min |
-|---|---:|---:|---:|---:|---:|
-| Light | €99/mo | €950/yr (€79/mo equiv.) | 100 min/mo | €0.60/min | €0.990 |
-| Standard ★ | €179/mo | €1,718/yr (€143/mo equiv.) | 250 min/mo | €0.50/min | €0.716 |
-| Busy | €299/mo | €2,870/yr (€239/mo equiv.) | 500 min/mo | €0.45/min | €0.598 |
-| Heavy | €499/mo | €4,790/yr (€399/mo equiv.) | 1,000 min/mo | €0.40/min | €0.499 |
+**Hard-cap model — no overage, no top-ups.** A customer gets exactly the minutes they bought. When the bucket is spent, the agent stops taking new calls and incoming calls route to voicemail until the next billing cycle or an upgrade. Bill is flat and predictable — no surprise charges, no telco-style overage guilt. The trade-off: a shop that misjudges usage loses booking capacity mid-month, so **mid-month usage alerts** and **one-click upgrade from the weekly email** are load-bearing UX (see planned work below).
 
-★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), all 7 supported languages, and the ability to buy extra minutes without upgrading. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
+| Tier | Monthly | Yearly (−20%) | Minutes | € / included min |
+|---|---:|---:|---:|---:|
+| Light | €99/mo | €950/yr (€79/mo equiv.) | 100 min/mo | €0.990 |
+| Standard ★ | €179/mo | €1,718/yr (€143/mo equiv.) | 250 min/mo | €0.716 |
+| Busy | €299/mo | €2,870/yr (€239/mo equiv.) | 500 min/mo | €0.598 |
+| Heavy | €499/mo | €4,790/yr (€399/mo equiv.) | 1,000 min/mo | €0.499 |
+
+★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
 
 Typical shop profiles (for self-selection at sales time):
 - **Light** — quieter shop, ~3 calls/day
@@ -206,19 +208,23 @@ Typical shop profiles (for self-selection at sales time):
 - **Busy** — high-volume or small multi-shop, ~15 calls/day
 - **Heavy** — multi-shop or very high volume, ~30+ calls/day
 
-Critical invariant — **"upgrade always beats buying extra credits"** (enforced by the price-delta / minute-delta math). For each step, incremental €/min of the upgrade must be strictly cheaper than the lower tier's overage:
-- Light → Standard: +€80/mo buys +150 min → **€0.533/min incremental** (vs €0.60 Light overage → 11% cheaper)
-- Standard → Busy: +€120/mo buys +250 min → **€0.480/min incremental** (vs €0.50 Standard overage → 4% cheaper)
-- Busy → Heavy: +€200/mo buys +500 min → **€0.400/min incremental** (vs €0.45 Busy overage → 11% cheaper)
+Per-included-minute cost drops at every step (upgrading is always cheaper per minute than staying on a lower tier): Light €0.990 → Standard €0.716 (−28%) → Busy €0.598 (−16%) → Heavy €0.499 (−17%).
 
-If a future price change breaks this invariant (incremental €/min ≥ lower tier's overage), nobody should rationally upgrade — re-validate before merging.
+Self-select by expected monthly minutes: **<100 → Light · 100–250 → Standard · 250–500 → Busy · 500–1,000 → Heavy**. A shop regularly near the top of their bucket should upgrade — they'll run out of capacity otherwise.
 
-Breakeven (when the upgrade becomes cheaper than staying put + overage):
-- Light vs Standard: Standard wins past **~233 min/mo** (~8 min/day)
-- Standard vs Busy: Busy wins past **~490 min/mo** (~16 min/day)
-- Busy vs Heavy: Heavy wins past **~944 min/mo** (~31 min/day)
+**Cap behaviour / usage alerts (load-bearing UX for the hard cap):**
+- **75% used** — informational email ("you've used 75 of your 100 minutes this month")
+- **90% used** — amber alert with upgrade CTA ("~10 min left this cycle — upgrade to Standard for ×2.5 the capacity at €0.716/min")
+- **100% used** — red alert + agent stops answering; calls route to carrier voicemail until next cycle or upgrade (one-click upgrade in the email, prorated to the remainder of the cycle)
 
-Every breakeven falls before the next tier's included bucket (233 < 250; 490 < 500; 944 < 1000), so the self-select story is clean: under 233 → Light; 233–490 → Standard; 490–944 → Busy; over 944 → Heavy.
+Unit economics at full bucket utilisation (voice cost €0.10/min + €30.70/mo fixed OpEx per customer):
+
+| Tier | Voice cost | Gross | Gross % | OpEx | Net | Net % |
+|---|---:|---:|---:|---:|---:|---:|
+| Light | €10 | €89 | 89.9% | €30.70 | €58.30 | 58.9% |
+| Standard | €25 | €154 | 86.0% | €30.70 | €123.30 | 68.9% |
+| Busy | €50 | €249 | 83.3% | €30.70 | €218.30 | 73.0% |
+| Heavy | €100 | €399 | 80.0% | €30.70 | €368.30 | 73.8% |
 
 **Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
 

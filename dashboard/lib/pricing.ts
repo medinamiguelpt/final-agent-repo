@@ -25,10 +25,8 @@ export interface TierPricing {
   color: string;
   /** Monthly list price in EUR */
   monthly: number;
-  /** Included voice minutes per month */
+  /** Included voice minutes per month — HARD CAP, no overage */
   minutesPerMonth: number;
-  /** Per-minute rate charged after the included bucket is consumed */
-  overageRatePerMinute: number;
   /** Short value-prop bullets (besides the minutes line) */
   features: string[];
   /** Marketing badge, optional */
@@ -51,44 +49,38 @@ export const YEARLY_DISCOUNT = 0.2;
 /*
  * Agent-only product (no dashboard). Bookings sync to the customer's calendar
  * (cal.com on launch, Google Calendar fast-follow) and a weekly performance
- * email replaces the live dashboard surface. Every tier can buy extra minutes
- * at its overage rate WITHOUT upgrading — but the ladder is tuned so any
- * shop that's consistently in overage is better off upgrading.
+ * email replaces the live dashboard surface.
  *
- * CRITICAL INVARIANT — "upgrade beats extra credits" (must hold at every step):
- *   (Standard − Light)  / (250 − 100)  < Light overage    (€0.533 < €0.60 ✓)
- *   (Busy     − Standard) / (500 − 250) < Standard overage (€0.480 < €0.50 ✓)
- *   (Heavy    − Busy)    / (1000 − 500) < Busy overage    (€0.400 < €0.45 ✓)
- * If any of these break, you've priced a tier that nobody should upgrade into.
+ * HARD-CAP MODEL (no overage, no top-ups, no "extra credits"):
+ * A customer gets exactly what they bought. When the included bucket is spent,
+ * the agent stops taking new calls until the next billing cycle or an upgrade.
+ * Bill is flat and predictable — no surprise charges, no telco-style overage
+ * guilt. The trade-off: a shop that misjudges usage and runs out mid-month
+ * loses booking capacity, so mid-month usage alerts + one-click upgrade from
+ * the weekly email are load-bearing UX (see planned work in CLAUDE.md).
  *
  * Tier profiles (name matches usage volume so owners self-select):
- *   Light    —  quieter shop, ~1 call/day       (100   min/mo · €0.60 overage)
- *   Standard —  busy shop, ~3 calls/day         (250   min/mo · €0.50 overage)
- *   Busy     —  very busy shop, ~6 calls/day    (500   min/mo · €0.45 overage)
- *   Heavy    —  multi-shop / high volume        (1,000 min/mo · €0.40 overage)
+ *   Light    —  quieter shop, ~3 calls/day       (100   min/mo)
+ *   Standard —  busy shop, ~8 calls/day          (250   min/mo)
+ *   Busy     —  high-volume / small multi-shop   (500   min/mo)
+ *   Heavy    —  multi-shop or very high volume   (1,000 min/mo)
  *
  * Gross margin at modelled ~€0.10/min blended voice cost (ConvAI + TTS + ASR):
- *   Light €99     → cost 100   × €0.10 = €10   → 90% margin
- *   Standard €179 → cost 250   × €0.10 = €25   → 86% margin
- *   Busy €299     → cost 500   × €0.10 = €50   → 83% margin
- *   Heavy €499    → cost 1,000 × €0.10 = €100  → 80% margin
- *
- * Incremental upgrade cost per marginal minute (always beats own overage):
- *   Light → Standard: +€80/mo  buys +150 min → €0.533/min (vs €0.60 overage, 11% cheaper)
- *   Standard → Busy:  +€120/mo buys +250 min → €0.480/min (vs €0.50 overage,  4% cheaper)
- *   Busy → Heavy:     +€200/mo buys +500 min → €0.400/min (vs €0.45 overage, 11% cheaper)
+ *   Light €99     → cost 100   × €0.10 = €10   → 89.9% margin
+ *   Standard €179 → cost 250   × €0.10 = €25   → 86.0% margin
+ *   Busy €299     → cost 500   × €0.10 = €50   → 83.3% margin
+ *   Heavy €499    → cost 1,000 × €0.10 = €100  → 80.0% margin
  *
  * Per-included-minute (list):
  *   Light €0.990 · Standard €0.716 · Busy €0.598 · Heavy €0.499
  *                (−28% vs Light)  (−16% vs Std) (−17% vs Busy)
+ * Effective per-minute drops at every step — upgrading is always cheaper per
+ * minute than staying on a lower tier.
  *
- * Breakeven — when the upgrade becomes cheaper than staying put + overage
- * (every threshold falls BEFORE the next tier's included bucket ✓):
- *   Light → Standard: 233 min/mo (< Standard's 250)
- *   Standard → Busy:  490 min/mo (< Busy's 500)
- *   Busy → Heavy:     944 min/mo (< Heavy's 1,000)
- * Clean self-select:
- *   <233 → Light · 233–490 → Standard · 490–944 → Busy · >944 → Heavy
+ * Self-select by expected monthly minutes:
+ *   <100 → Light · 100–250 → Standard · 250–500 → Busy · 500–1000 → Heavy
+ * A shop regularly near the top of their bucket should upgrade — they'll run
+ * out of capacity otherwise.
  */
 export const SUBSCRIPTION_TIERS: TierPricing[] = [
   {
@@ -97,10 +89,8 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#3D7A50",
     monthly: 99,
     minutesPerMonth: 100,
-    overageRatePerMinute: 0.6,
     features: [
       "100 min/month",
-      "Extra minutes at €0.60/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",
@@ -113,10 +103,8 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#1B5EBE",
     monthly: 179,
     minutesPerMonth: 250,
-    overageRatePerMinute: 0.5,
     features: [
       "250 min/month",
-      "Extra minutes at €0.50/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",
@@ -130,10 +118,8 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#4F46E5",
     monthly: 299,
     minutesPerMonth: 500,
-    overageRatePerMinute: 0.45,
     features: [
       "500 min/month",
-      "Extra minutes at €0.45/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",
@@ -146,10 +132,8 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#6747C7",
     monthly: 499,
     minutesPerMonth: 1000,
-    overageRatePerMinute: 0.4,
     features: [
       "1,000 min/month",
-      "Extra minutes at €0.40/min (no upgrade required)",
       "Unlimited locations",
       "Bookings sync to your calendar",
       "Weekly performance email",

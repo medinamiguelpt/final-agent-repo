@@ -3284,7 +3284,6 @@ function SettingsPanel({
             hasValidVatId: isPlausibleVatId(COUNTRIES[countryCode], vatId),
           });
           const perMinute = q.currency.tierMonthly[tier.id] / tier.minutesPerMonth;
-          const overagePerMinute = q.currency.overageByTier[tier.id];
           const prev = idx > 0 ? SUBSCRIPTION_TIERS[idx - 1] : null;
           const prevPerMinute = prev ? q.currency.tierMonthly[prev.id] / prev.minutesPerMonth : null;
           const savingsPct = prevPerMinute ? Math.round((1 - perMinute / prevPerMinute) * 100) : 0;
@@ -3459,19 +3458,6 @@ function SettingsPanel({
                 >
                   {formatMoney(perMinute, q.currency)}/min
                 </span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    color: C.textMuted,
-                    background: C.surfaceAlt,
-                    padding: "2px 8px",
-                    borderRadius: 99,
-                    border: `1px solid ${C.borderFaint}`,
-                  }}
-                  title="Per-minute rate charged after your included bucket is consumed"
-                >
-                  Overage {formatMoney(overagePerMinute, q.currency)}/min
-                </span>
                 {savingsPct > 0 && prev && (
                   <span
                     style={{
@@ -3523,8 +3509,8 @@ function SettingsPanel({
         }}
       >
         All plans include unlimited dashboards, real-time call transcripts, and Greek + English + 5 more languages.
-        Overage billed at the tier rate shown above. Taxes shown for {COUNTRIES[countryCode].flag}{" "}
-        {COUNTRIES[countryCode].name}
+        Minutes are a hard monthly cap — calls route to voicemail once the bucket is spent until the next billing cycle
+        or an upgrade. Taxes shown for {COUNTRIES[countryCode].flag} {COUNTRIES[countryCode].name}
         {COUNTRIES[countryCode].note ? ` — ${COUNTRIES[countryCode].note}` : "."}
       </div>
     </div>
