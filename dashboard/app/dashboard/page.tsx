@@ -56,8 +56,8 @@ import AddShopModal from "./AddShopModal";
 import { parseBarberNames } from "@/lib/barbers";
 import { DEFAULT_AGENT_ID } from "@/lib/config";
 import { SUBSCRIPTION_TIERS, YEARLY_DISCOUNT, activeHolidayPromo, quote, type BillingCycle } from "@/lib/pricing";
-import { CURRENCIES, CURRENCY_ORDER, formatMoney, type CurrencyCode } from "@/lib/currencies";
-import { COUNTRIES, COUNTRY_ORDER, isPlausibleVatId, VENDOR_COUNTRY, type CountryCode } from "@/lib/vat";
+import { CURRENCIES, formatMoney, type CurrencyCode } from "@/lib/currencies";
+import { COUNTRIES, COUNTRY_ORDER, COUNTRY_CURRENCY, VENDOR_COUNTRY, type CountryCode } from "@/lib/vat";
 
 const STATUS_I18N: Record<string, string> = { "in-progress": "inProgress" };
 
@@ -1941,10 +1941,9 @@ function SettingsPanel({
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deletingBiz, setDeletingBiz] = useState<{ id: string; name: string; inProgress?: boolean } | null>(null);
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
-  const [currencyCode, setCurrencyCode] = useState<CurrencyCode>("EUR");
   const [countryCode, setCountryCode] = useState<CountryCode>(VENDOR_COUNTRY);
-  const [isBusiness, setIsBusiness] = useState<boolean>(true);
-  const [vatId, setVatId] = useState<string>("");
+  // Currency is derived from the country — customers never pick it separately.
+  const currencyCode: CurrencyCode = COUNTRY_CURRENCY[countryCode];
 
   // Scroll lock
   useEffect(() => {
@@ -2978,12 +2977,8 @@ function SettingsPanel({
         <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, margin: 0 }}>{DEMO_PLAN.desc}</p>
       </div>
 
-      {/* Region / currency / VAT selector */}
+      {/* Combined country + currency picker (currency implied by country) */}
       {(() => {
-        const currency = CURRENCIES[currencyCode];
-        const country = COUNTRIES[countryCode];
-        const vatIdValid = isPlausibleVatId(country, vatId);
-        const showVatIdField = isBusiness && country.eu && country.code !== VENDOR_COUNTRY;
         const selectStyle: React.CSSProperties = {
           // Must pin to parent width; native selects otherwise grow to the
           // widest <option> text and overflow their flex container.
@@ -3021,7 +3016,7 @@ function SettingsPanel({
               marginBottom: 14,
               display: "flex",
               flexDirection: "column",
-              gap: 10,
+              gap: 8,
             }}
           >
             <div
@@ -3033,113 +3028,24 @@ function SettingsPanel({
                 textTransform: "uppercase",
               }}
             >
-              Your region
+              Your country
             </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <label style={{ flex: "1 1 140px", minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>Currency</div>
-                <select
-                  value={currencyCode}
-                  onChange={(e) => setCurrencyCode(e.target.value as CurrencyCode)}
-                  style={selectStyle}
-                  aria-label="Currency"
-                >
-                  {CURRENCY_ORDER.map((code) => {
-                    const c = CURRENCIES[code];
-                    return (
-                      <option key={code} value={code}>
-                        {c.flag} {c.code} — {c.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              </label>
-              <label style={{ flex: "2 1 220px", minWidth: 0 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>
-                  Billing country
-                </div>
-                <select
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value as CountryCode)}
-                  style={selectStyle}
-                  aria-label="Billing country"
-                >
-                  {COUNTRY_ORDER.map((code) => {
-                    const co = COUNTRIES[code];
-                    return (
-                      <option key={code} value={code}>
-                        {co.flag} {co.name} ·{" "}
-                        {co.vatRate === 0
-                          ? "no tax"
-                          : `${(co.vatRate * 100).toFixed(co.vatRate >= 0.1 ? 0 : 1)}% ${co.taxLabel}`}
-                      </option>
-                    );
-                  })}
-                </select>
-              </label>
-            </div>
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 12,
-                color: C.text,
-                fontWeight: 600,
-                cursor: "pointer",
-                userSelect: "none",
-              }}
+            <select
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value as CountryCode)}
+              style={selectStyle}
+              aria-label="Country"
             >
-              <input
-                type="checkbox"
-                checked={isBusiness}
-                onChange={(e) => setIsBusiness(e.target.checked)}
-                style={{ width: 16, height: 16, accentColor: C.accent, cursor: "pointer" }}
-              />
-              <span>I&apos;m buying for a business</span>
-            </label>
-
-            {showVatIdField && (
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, marginBottom: 4 }}>
-                  EU VAT ID (for reverse charge)
-                </div>
-                <input
-                  type="text"
-                  value={vatId}
-                  onChange={(e) => setVatId(e.target.value)}
-                  placeholder={country.vatIdExample ?? `${country.code}…`}
-                  spellCheck={false}
-                  style={{
-                    width: "100%",
-                    padding: "9px 12px",
-                    borderRadius: 10,
-                    border: `1px solid ${vatId ? (vatIdValid ? "#2DA865" : "#C1272D") : C.border}`,
-                    background: C.surface,
-                    color: C.text,
-                    fontSize: 12,
-                    fontFamily: "var(--gbf-font-mono, ui-monospace, monospace)",
-                    letterSpacing: "0.04em",
-                    outline: "none",
-                  }}
-                />
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: vatId ? (vatIdValid ? "#2DA865" : "#C1272D") : C.textFaint,
-                    marginTop: 4,
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {vatId
-                    ? vatIdValid
-                      ? "✓ Valid format — VAT will be reverse charged (0%)."
-                      : `Invalid format for ${country.name}. Expected: ${country.vatIdExample ?? "N/A"}.`
-                    : `Leave blank to be charged ${country.name} VAT at ${(country.vatRate * 100).toFixed(country.vatRate >= 0.1 ? 0 : 1)}%.`}
-                </div>
-              </div>
-            )}
+              {COUNTRY_ORDER.map((code) => {
+                const co = COUNTRIES[code];
+                const curr = CURRENCIES[COUNTRY_CURRENCY[code]];
+                return (
+                  <option key={code} value={code}>
+                    {co.flag} {co.name} · {curr.code}
+                  </option>
+                );
+              })}
+            </select>
           </div>
         );
       })()}
@@ -3280,8 +3186,10 @@ function SettingsPanel({
             cycle: billingCycle,
             currencyCode,
             countryCode,
-            isBusiness,
-            hasValidVatId: isPlausibleVatId(COUNTRIES[countryCode], vatId),
+            // B2C default — simpler demo UX. Reverse-charge for EU B2B
+            // customers is handled at Stripe checkout once we wire it up.
+            isBusiness: false,
+            hasValidVatId: false,
           });
           const perMinute = q.currency.tierMonthly[tier.id] / tier.minutesPerMonth;
           const prev = idx > 0 ? SUBSCRIPTION_TIERS[idx - 1] : null;
@@ -3508,9 +3416,10 @@ function SettingsPanel({
           lineHeight: 1.5,
         }}
       >
-        All plans include unlimited dashboards, real-time call transcripts, and Greek + English + 5 more languages.
-        Minutes are a hard monthly cap — calls route to voicemail once the bucket is spent until the next billing cycle
-        or an upgrade. Taxes shown for {COUNTRIES[countryCode].flag} {COUNTRIES[countryCode].name}
+        All plans include bookings synced to your calendar, a weekly performance email, call recordings on demand, and
+        all 7 supported languages. Minutes are a hard monthly cap — calls route to voicemail once the bucket is spent
+        until the next billing cycle or an upgrade. Taxes calculated at checkout for {COUNTRIES[countryCode].flag}{" "}
+        {COUNTRIES[countryCode].name}
         {COUNTRIES[countryCode].note ? ` — ${COUNTRIES[countryCode].note}` : "."}
       </div>
     </div>

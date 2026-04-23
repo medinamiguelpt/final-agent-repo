@@ -85,6 +85,60 @@ export interface Country {
 /** Vendor's country of establishment — drives reverse-charge logic. */
 export const VENDOR_COUNTRY: CountryCode = "GR";
 
+/**
+ * Country → default pricing currency.
+ *
+ * Drives the combined country+currency picker in the subscription panel.
+ * Picking a country implies a currency — we don't make customers choose
+ * twice. Countries whose native currency we don't price in (CZK, HUF, RON,
+ * BGN, ISK, NZD, SGD) fall back to a neighbouring currency we do support.
+ */
+export const COUNTRY_CURRENCY: Record<CountryCode, import("./currencies").CurrencyCode> = {
+  // Eurozone
+  AT: "EUR",
+  BE: "EUR",
+  CY: "EUR",
+  DE: "EUR",
+  EE: "EUR",
+  ES: "EUR",
+  FI: "EUR",
+  FR: "EUR",
+  GR: "EUR",
+  IE: "EUR",
+  IT: "EUR",
+  LU: "EUR",
+  LV: "EUR",
+  LT: "EUR",
+  MT: "EUR",
+  NL: "EUR",
+  PT: "EUR",
+  SI: "EUR",
+  SK: "EUR",
+  HR: "EUR",
+  // EU non-euro — fall back to EUR for markets we don't price in natively
+  BG: "EUR",
+  CZ: "EUR",
+  HU: "EUR",
+  RO: "EUR",
+  // EU non-euro — native currency supported
+  DK: "DKK",
+  PL: "PLN",
+  SE: "SEK",
+  // Non-EU Europe
+  GB: "GBP",
+  NO: "NOK",
+  CH: "CHF",
+  IS: "EUR", // no ISK pricing table
+  // Other markets
+  US: "USD",
+  CA: "CAD",
+  AU: "AUD",
+  NZ: "AUD", // no NZD pricing table
+  AE: "AED",
+  JP: "JPY",
+  SG: "USD", // no SGD pricing table
+};
+
 export const COUNTRIES: Record<CountryCode, Country> = {
   // ── EU ───────────────────────────────────────────────────────────────────
   AT: {
