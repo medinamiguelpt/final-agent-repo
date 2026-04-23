@@ -197,7 +197,7 @@ Set to maintain ≥80% operating margin **per tier** at modelled production cost
 | Professional ★ | €429/mo | €4,119/yr (€344/mo equiv.) | 600 min/mo | €0.50/min | €0.715 |
 | Enterprise | €859/mo | €8,249/yr (€688/mo equiv.) | 1,600 min/mo | €0.40/min | €0.537 |
 
-★ Most popular · All plans include unlimited dashboards, real-time transcripts, and all 7 supported languages.
+★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), real-time transcripts, and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
 
 Upgrade economics (incremental cost per marginal minute):
 - Starter → Professional: +€200/mo buys +400 min → **€0.50/min incremental**

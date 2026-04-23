@@ -39,6 +39,16 @@ export interface TierPricing {
 export const YEARLY_DISCOUNT = 0.2;
 
 /*
+ * Location policy: we do NOT charge per location. A subscription covers
+ * UNLIMITED locations/shops for the same customer; included minutes are a
+ * single shared pool across every shop they run. Adding a second (or tenth)
+ * shop does not increase the bill unless it pushes total minutes past the
+ * included bucket, at which point standard overage applies. Every tier's
+ * feature list must say "Unlimited locations" — never "1 location",
+ * "up to 3 locations", "per location", etc.
+ */
+
+/*
  * Tier ladder is tuned so each upgrade is clearly worth it per minute.
  * The step-up in included minutes outpaces the price step-up every time:
  *
@@ -57,7 +67,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     monthly: 229,
     minutesPerMonth: 200,
     overageRatePerMinute: 0.6,
-    features: ["200 min/month", "1 location", "Email support"],
+    features: ["200 min/month", "Unlimited locations", "Email support"],
   },
   {
     id: "professional",
@@ -66,7 +76,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     monthly: 429,
     minutesPerMonth: 600,
     overageRatePerMinute: 0.5,
-    features: ["600 min/month", "Up to 3 locations", "Priority support"],
+    features: ["600 min/month", "Unlimited locations", "Priority support"],
     badge: "Most popular",
   },
   {
