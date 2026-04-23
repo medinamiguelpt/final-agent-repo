@@ -95,15 +95,24 @@ Greek Barber Festival, Kifissou 42, Egaleo, Athens. **Tue–Sat 10:00–20:00** 
 
 **Services (source of truth)**
 
+Adult services (12+):
+
 | Service | Price | Duration |
 |---|---|---|
 | Haircut | €15 | 30 min |
 | Beard Trim | €10 | 20 min |
 | Full Shave | €12 | 25 min |
 | Haircut + Beard Combo | €22 | 45 min |
-| Kids Cut (under 12) | €10 | 20 min |
 | Hair Styling | €20 | 40 min |
 | Eyebrow Grooming | €5 | 10 min |
+
+Kids (under 12) — only one service offered:
+
+| Service | Price | Duration |
+|---|---|---|
+| Kids Cut | €10 | 20 min |
+
+Kids rule: children under 12 can ONLY book the Kids Cut. Beard/shave/combo/styling/eyebrow are adult-only. Kostas asks the age if unclear before assigning a service.
 
 **Booking flow:** Greet → ask service → (if multi-person) together or separate? → ask time → ALWAYS ask barber preference → ask first + last name → final confirmation → neutral "anything else?" → farewell + end_call (atomic).
 
