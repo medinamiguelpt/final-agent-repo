@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Kostas — Pricing Handoff (for Claude Code)</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 16mm 14mm 18mm;
+      }
+      :root {
+        --ink: #0f1114;
+        --muted: #6a6f78;
+        --faint: #9aa0a8;
+        --rule: #e4e6ea;
+        --rule-strong: #111418;
+        --accent: #1b5ebe;
+        --light: #3d7a50;
+        --standard: #1b5ebe;
+        --busy: #4f46e5;
+        --heavy: #6747c7;
+        --bg-alt: #f7f7f5;
+        --bg-tint: #f1f4fb;
+        --code-bg: #0f1114;
+        --code-ink: #e6e6e6;
+        --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        color: var(--ink);
+        font-family:
+          "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, -apple-system,
+          sans-serif;
+        font-size: 10pt;
+        line-height: 1.45;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Crimson Pro", "Source Serif Pro", Georgia, serif;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+      h1 {
+        font-size: 24pt;
+        line-height: 1.05;
+      }
+      h2 {
+        font-size: 13pt;
+        margin: 18px 0 6px;
+        padding-bottom: 4px;
+        border-bottom: 1px solid var(--rule);
+      }
+      h3 {
+        font-size: 9.5pt;
+        margin: 10px 0 3px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-family: Inter, sans-serif;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      p {
+        margin: 4px 0;
+      }
+      .kicker {
+        font-size: 8.5pt;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 11pt;
+        margin-top: 4px;
+      }
+      .meta {
+        margin-top: 8px;
+        font-size: 8.5pt;
+        color: var(--faint);
+      }
+      .lede {
+        font-size: 10pt;
+        line-height: 1.5;
+        margin-top: 10px;
+      }
+      code,
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.92em;
+      }
+      .pill {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 99px;
+        background: var(--bg-alt);
+        color: var(--muted);
+        font-size: 8.5pt;
+        font-weight: 600;
+      }
+      .pill.mono {
+        font-family: var(--mono);
+        letter-spacing: 0.03em;
+      }
+
+      /* Claude-instruction block */
+      .claude-block {
+        background: var(--code-bg);
+        color: var(--code-ink);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-family: var(--mono);
+        font-size: 8.8pt;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        margin: 8px 0;
+      }
+      .claude-block .hl {
+        color: #f0a500;
+      }
+      .claude-block .c {
+        color: #8a8f98;
+      }
+
+      .callout {
+        background: var(--bg-tint);
+        border: 1px solid #d7e0f3;
+        border-left: 4px solid var(--accent);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 9.5pt;
+        margin: 6px 0;
+      }
+      .callout b {
+        color: var(--accent);
+      }
+
+      /* tier table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9pt;
+        margin-top: 4px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 5px 7px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        font-weight: 700;
+        font-size: 8pt;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        border-bottom: 1.5px solid var(--rule-strong);
+      }
+      td.num,
+      th.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        font-family: var(--mono);
+      }
+      td.name-cell b {
+        font-family: "Crimson Pro", serif;
+        font-size: 12pt;
+        font-weight: 600;
+      }
+      .dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+        transform: translateY(-1px);
+      }
+      .d-light {
+        background: var(--light);
+      }
+      .d-std {
+        background: var(--standard);
+      }
+      .d-busy {
+        background: var(--busy);
+      }
+      .d-heavy {
+        background: var(--heavy);
+      }
+      .badge-inline {
+        display: inline-block;
+        font-size: 7.5pt;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 1px 6px;
+        border-radius: 99px;
+        border: 1px solid currentColor;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .badge-std {
+        color: var(--standard);
+      }
+      .badge-heavy {
+        color: var(--heavy);
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      ul.tight {
+        margin: 2px 0 2px 0;
+        padding-left: 16px;
+      }
+      ul.tight li {
+        margin: 2px 0;
+      }
+
+      .do-dont {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 4px;
+      }
+      .do-dont .card {
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 9pt;
+      }
+      .do-dont .card.do {
+        border-top: 3px solid #2da865;
+      }
+      .do-dont .card.dont {
+        border-top: 3px solid #c1272d;
+      }
+      .do-dont h4 {
+        margin: 0 0 4px 0;
+        font-size: 8.5pt;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 800;
+      }
+      .do-dont ul {
+        margin: 0;
+        padding-left: 16px;
+      }
+      .do-dont li {
+        margin: 2px 0;
+      }
+
+      .footer {
+        margin-top: 18px;
+        padding-top: 8px;
+        border-top: 1px solid var(--rule);
+        font-size: 8pt;
+        color: var(--faint);
+        line-height: 1.45;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .avoid-break {
+        page-break-inside: avoid;
+      }
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .chip {
+        border: 1px solid var(--rule);
+        border-radius: 5px;
+        padding: 2px 7px;
+        font-size: 8.5pt;
+        background: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="kicker">Pricing handoff · brief for your Claude Code</div>
+      <h1>Kostas — landing-page spec</h1>
+      <div class="subtitle">Everything another Claude needs to ship the pricing section without asking us.</div>
+      <div class="meta">v2 · 23 Apr 2026 · Canonical source: <span class="pill mono">dashboard/lib/pricing.ts</span> (ours)</div>
+    </header>
+
+    <div class="callout avoid-break" style="margin-top: 10px">
+      <b>For the Claude Code picking this up:</b> all tier data, copy strings, and guardrails
+      below are load-bearing. The <i>exact strings</i> in quoted blocks are meant to be used
+      verbatim. The <span class="mono">PRICING_JSON</span> block on page 2 is machine-readable —
+      parse that, don't retype the numbers. If a value here ever disagrees with our live app at
+      <span class="mono">https://dashboard-sooty-seven-64.vercel.app/dashboard</span> → Settings
+      → Subscription, the <b>app wins</b> — flag it and we'll reissue.
+    </div>
+
+    <section class="avoid-break">
+      <h2>What we sell (one sentence)</h2>
+      <p class="lede">
+        <b>Kostas</b> is an AI voice receptionist for barbershops — the shop forwards their phone
+        line to us, Kostas answers in 7 languages, takes the booking, and drops it into the
+        owner's calendar. We bill flat monthly by <b>included voice minutes</b>, in 4 tiers. No
+        overage, no top-ups, no per-location fee.
+      </p>
+    </section>
+
+    <section class="avoid-break">
+      <h2>The 4 tiers</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th class="num">Monthly</th>
+            <th class="num">Yearly (−20%)</th>
+            <th class="num">Yearly as /mo</th>
+            <th class="num">Minutes / mo</th>
+            <th class="num">€ / min</th>
+            <th>Self-select profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name-cell"><span class="dot d-light"></span><b>Light</b></td>
+            <td class="num">€99</td>
+            <td class="num">€950</td>
+            <td class="num">€79</td>
+            <td class="num">100</td>
+            <td class="num">€0.990</td>
+            <td>Quieter shop — ~3 calls/day.</td>
+          </tr>
+          <tr>
+            <td class="name-cell"><span class="dot d-std"></span><b>Standard</b><span class="badge-inline badge-std">Most popular</span></td>
+            <td class="num">€179</td>
+            <td class="num">€1,718</td>
+            <td class="num">€143</td>
+            <td class="num">250</td>
+            <td class="num">€0.716</td>
+            <td>Busy shop — ~8 calls/day.</td>
+          </tr>
+          <tr>
+            <td class="name-cell"><span class="dot d-busy"></span><b>Busy</b></td>
+            <td class="num">€299</td>
+            <td class="num">€2,870</td>
+            <td class="num">€239</td>
+            <td class="num">500</td>
+            <td class="num">€0.598</td>
+            <td>High-volume or small multi-shop — ~15 calls/day.</td>
+          </tr>
+          <tr>
+            <td class="name-cell"><span class="dot d-heavy"></span><b>Heavy</b><span class="badge-inline badge-heavy">Best value</span></td>
+            <td class="num">€499</td>
+            <td class="num">€4,790</td>
+            <td class="num">€399</td>
+            <td class="num">1,000</td>
+            <td class="num">€0.499</td>
+            <td>Multi-shop or very high volume — ~30+ calls/day.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted" style="font-size: 9pt; margin-top: 4px">
+        Per-minute price drops at every step. Yearly = flat 20% off monthly. Show prices <b>ex-VAT</b>
+        with the microcopy <i>"+ tax calculated at checkout"</i>. Default display currency = EUR;
+        see the multi-currency table below if you want geo-swap.
+      </p>
+    </section>
+
+    <section class="avoid-break">
+      <h2>Copy strings to lift verbatim</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 26%">Surface</th>
+            <th>Copy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Hero headline (option A)</td>
+            <td>Your barbershop's phone, answered.</td>
+          </tr>
+          <tr>
+            <td>Hero headline (option B)</td>
+            <td>Never miss a booking again.</td>
+          </tr>
+          <tr>
+            <td>Hero sub</td>
+            <td>Kostas answers your phone in 7 languages, takes bookings, and drops them straight into your calendar. Flat monthly bill. No surprise charges.</td>
+          </tr>
+          <tr>
+            <td>Primary CTA</td>
+            <td>Try Kostas live <span class="muted">(opens the ElevenLabs widget — see "Widget embed" below)</span></td>
+          </tr>
+          <tr>
+            <td>Secondary CTA</td>
+            <td>See plans</td>
+          </tr>
+          <tr>
+            <td>Pricing section title</td>
+            <td>One flat bill. Exactly the minutes you need.</td>
+          </tr>
+          <tr>
+            <td>Pricing section sub</td>
+            <td>Pick the plan that matches your call volume. Upgrade any time from the weekly email.</td>
+          </tr>
+          <tr>
+            <td>Per-tier CTA</td>
+            <td>Start with <i>{Plan}</i> <span class="muted">— link to Stripe Checkout (coming, see "Integration")</span></td>
+          </tr>
+          <tr>
+            <td>Under the grid (microcopy)</td>
+            <td>All plans include bookings synced to your calendar, a weekly performance email, call recordings on demand, and all 7 supported languages. Prices shown ex-VAT — tax calculated at checkout.</td>
+          </tr>
+          <tr>
+            <td>Hard-cap explainer (FAQ)</td>
+            <td><b>Q:</b> What happens when I run out of minutes? <b>A:</b> Your bill stays flat — we don't charge overage. New calls route to voicemail until the next billing cycle or an upgrade. You'll get email alerts at 75% and 90% of your bucket so you're never surprised.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="avoid-break">
+      <h2>Copy guardrails (instructions to your Claude)</h2>
+      <div class="do-dont">
+        <div class="card do">
+          <h4>Do</h4>
+          <ul>
+            <li>Lead with <b>calls answered, bookings made</b>, not "minutes."</li>
+            <li>Name tiers by volume (<i>Light / Standard / Busy / Heavy</i>) so owners self-match.</li>
+            <li>Frame the hard cap as a <b>feature</b> ("flat bill, no surprises").</li>
+            <li>Mention the 7 languages — real wedge in Athens / tourist zones.</li>
+            <li>Badge Standard = <b>Most popular</b>, Heavy = <b>Best value</b>.</li>
+          </ul>
+        </div>
+        <div class="card dont">
+          <h4>Don't</h4>
+          <ul>
+            <li><b>Don't</b> mention "unlimited locations" or "multi-shop support" — locations aren't a billable dimension, mentioning it invents a limit-shaped worry.</li>
+            <li><b>Don't</b> promise overage, top-ups, or pay-as-you-go. The cap is deliberate.</li>
+            <li><b>Don't</b> show a per-call price. We sell minutes.</li>
+            <li><b>Don't</b> write "up to 100 minutes" — write <b>"100 min/month"</b>. "Up to" reads like a cap the customer won't actually hit.</li>
+            <li><b>Don't</b> invent your own discount — promos are in the canonical JSON, only use those codes.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="avoid-break">
+      <h2>Machine-readable pricing (parse this, don't retype)</h2>
+      <div class="claude-block"><span class="c">// PRICING_JSON — authoritative as of v2 / 23 Apr 2026.</span>
+<span class="c">// Fields match dashboard/lib/pricing.ts and currencies.ts exactly.</span>
+{
+  <span class="hl">"currency"</span>: <span class="hl">"EUR"</span>,
+  <span class="hl">"yearlyDiscount"</span>: 0.20,
+  <span class="hl">"tiers"</span>: [
+    { <span class="hl">"id"</span>: <span class="hl">"light"</span>,    <span class="hl">"name"</span>: <span class="hl">"Light"</span>,    <span class="hl">"monthly"</span>: 99,  <span class="hl">"yearly"</span>: 950,   <span class="hl">"yearlyAsMonthly"</span>: 79,  <span class="hl">"minutes"</span>: 100,  <span class="hl">"perMin"</span>: 0.990, <span class="hl">"color"</span>: <span class="hl">"#3D7A50"</span>, <span class="hl">"badge"</span>: null },
+    { <span class="hl">"id"</span>: <span class="hl">"standard"</span>, <span class="hl">"name"</span>: <span class="hl">"Standard"</span>, <span class="hl">"monthly"</span>: 179, <span class="hl">"yearly"</span>: 1718,  <span class="hl">"yearlyAsMonthly"</span>: 143, <span class="hl">"minutes"</span>: 250,  <span class="hl">"perMin"</span>: 0.716, <span class="hl">"color"</span>: <span class="hl">"#1B5EBE"</span>, <span class="hl">"badge"</span>: <span class="hl">"Most popular"</span> },
+    { <span class="hl">"id"</span>: <span class="hl">"busy"</span>,     <span class="hl">"name"</span>: <span class="hl">"Busy"</span>,     <span class="hl">"monthly"</span>: 299, <span class="hl">"yearly"</span>: 2870,  <span class="hl">"yearlyAsMonthly"</span>: 239, <span class="hl">"minutes"</span>: 500,  <span class="hl">"perMin"</span>: 0.598, <span class="hl">"color"</span>: <span class="hl">"#4F46E5"</span>, <span class="hl">"badge"</span>: null },
+    { <span class="hl">"id"</span>: <span class="hl">"heavy"</span>,    <span class="hl">"name"</span>: <span class="hl">"Heavy"</span>,    <span class="hl">"monthly"</span>: 499, <span class="hl">"yearly"</span>: 4790,  <span class="hl">"yearlyAsMonthly"</span>: 399, <span class="hl">"minutes"</span>: 1000, <span class="hl">"perMin"</span>: 0.499, <span class="hl">"color"</span>: <span class="hl">"#6747C7"</span>, <span class="hl">"badge"</span>: <span class="hl">"Best value"</span> }
+  ],
+  <span class="hl">"promos"</span>: [
+    { <span class="hl">"code"</span>: <span class="hl">"SPRING15"</span>,  <span class="hl">"off"</span>: 0.15, <span class="hl">"starts"</span>: <span class="hl">"2026-04-01"</span>, <span class="hl">"ends"</span>: <span class="hl">"2026-05-01"</span>, <span class="hl">"applies"</span>: <span class="hl">"both"</span>,    <span class="hl">"emoji"</span>: <span class="hl">"🌱"</span>, <span class="hl">"name"</span>: <span class="hl">"Spring Refresh"</span> },
+    { <span class="hl">"code"</span>: <span class="hl">"PASCHA20"</span>,  <span class="hl">"off"</span>: 0.20, <span class="hl">"starts"</span>: <span class="hl">"2026-04-05"</span>, <span class="hl">"ends"</span>: <span class="hl">"2026-04-20"</span>, <span class="hl">"applies"</span>: <span class="hl">"yearly"</span>,  <span class="hl">"emoji"</span>: <span class="hl">"🐇"</span>, <span class="hl">"name"</span>: <span class="hl">"Easter Special"</span> },
+    { <span class="hl">"code"</span>: <span class="hl">"SUMMER15"</span>,  <span class="hl">"off"</span>: 0.15, <span class="hl">"starts"</span>: <span class="hl">"2026-07-15"</span>, <span class="hl">"ends"</span>: <span class="hl">"2026-08-16"</span>, <span class="hl">"applies"</span>: <span class="hl">"monthly"</span>, <span class="hl">"emoji"</span>: <span class="hl">"☀️"</span>, <span class="hl">"name"</span>: <span class="hl">"Summer Sale"</span> },
+    { <span class="hl">"code"</span>: <span class="hl">"BF30"</span>,      <span class="hl">"off"</span>: 0.30, <span class="hl">"starts"</span>: <span class="hl">"2026-11-24"</span>, <span class="hl">"ends"</span>: <span class="hl">"2026-12-02"</span>, <span class="hl">"applies"</span>: <span class="hl">"yearly"</span>,  <span class="hl">"emoji"</span>: <span class="hl">"🛍️"</span>, <span class="hl">"name"</span>: <span class="hl">"Black Friday"</span> },
+    { <span class="hl">"code"</span>: <span class="hl">"XMAS25"</span>,    <span class="hl">"off"</span>: 0.25, <span class="hl">"starts"</span>: <span class="hl">"2026-12-01"</span>, <span class="hl">"ends"</span>: <span class="hl">"2027-01-07"</span>, <span class="hl">"applies"</span>: <span class="hl">"yearly"</span>,  <span class="hl">"emoji"</span>: <span class="hl">"🎄"</span>, <span class="hl">"name"</span>: <span class="hl">"Christmas"</span> },
+    { <span class="hl">"code"</span>: <span class="hl">"NY20"</span>,      <span class="hl">"off"</span>: 0.20, <span class="hl">"starts"</span>: <span class="hl">"2027-01-01"</span>, <span class="hl">"ends"</span>: <span class="hl">"2027-01-16"</span>, <span class="hl">"applies"</span>: <span class="hl">"monthly"</span>, <span class="hl">"emoji"</span>: <span class="hl">"🎆"</span>, <span class="hl">"name"</span>: <span class="hl">"New Year"</span> }
+  ],
+  <span class="hl">"currenciesSupported"</span>: [<span class="hl">"EUR"</span>,<span class="hl">"USD"</span>,<span class="hl">"GBP"</span>,<span class="hl">"CHF"</span>,<span class="hl">"CAD"</span>,<span class="hl">"AUD"</span>,<span class="hl">"SEK"</span>,<span class="hl">"NOK"</span>,<span class="hl">"DKK"</span>,<span class="hl">"PLN"</span>,<span class="hl">"AED"</span>,<span class="hl">"JPY"</span>],
+  <span class="hl">"languagesSupported"</span>: [<span class="hl">"el"</span>,<span class="hl">"en"</span>,<span class="hl">"es"</span>,<span class="hl">"pt"</span>,<span class="hl">"fr"</span>,<span class="hl">"de"</span>,<span class="hl">"ar"</span>],
+  <span class="hl">"featuresOnEveryPlan"</span>: [
+    <span class="hl">"Bookings synced to your calendar (cal.com at launch, Google Calendar next)"</span>,
+    <span class="hl">"Weekly performance email"</span>,
+    <span class="hl">"Call recordings on demand"</span>,
+    <span class="hl">"All 7 supported languages"</span>
+  ]
+}</div>
+      <p class="muted" style="font-size: 9pt; margin-top: 4px">
+        If you need the non-EUR price tables (local round numbers for GBP / USD / JPY / etc.),
+        tell us and we'll attach a <span class="mono">currencies.json</span>. Don't FX-convert
+        at runtime — we hand-round for local psychology (£159 / $199, not £154.23).
+      </p>
+    </section>
+
+    <section class="avoid-break">
+      <h2>Integration spec</h2>
+      <h3>ElevenLabs widget (for the "Try it live" section)</h3>
+      <div class="claude-block"><span class="c">&lt;!-- Drop once on the page; widget self-mounts. --&gt;</span>
+&lt;script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"&gt;&lt;/script&gt;
+&lt;elevenlabs-convai agent-id="<span class="hl">agent_8701kn7p69jaf0frvsvwd6g2sq4e</span>"&gt;&lt;/elevenlabs-convai&gt;</div>
+
+      <h3>Checkout / billing (not wired yet — placeholder links OK)</h3>
+      <p style="font-size: 9pt">
+        Stripe Checkout with Stripe Tax is on our side. Each tier CTA should <span class="mono">&lt;a
+        href="#"&gt;</span> for now — we'll send you 8 live URLs (4 tiers × 2 cycles) once the
+        Stripe products exist. Use <span class="mono">data-plan="light|standard|busy|heavy"</span>
+        and <span class="mono">data-cycle="monthly|yearly"</span> on each button so we can wire
+        them in a single pass.
+      </p>
+
+      <h3>Analytics events to emit (if your stack has it)</h3>
+      <ul class="tight" style="font-size: 9pt">
+        <li><span class="mono">pricing_view</span> — when the pricing section enters viewport.</li>
+        <li><span class="mono">pricing_cycle_toggle</span> — <span class="mono">{ cycle: "monthly" | "yearly" }</span>.</li>
+        <li><span class="mono">pricing_cta_click</span> — <span class="mono">{ plan, cycle }</span>.</li>
+        <li><span class="mono">widget_open</span> — the ElevenLabs widget is launched.</li>
+      </ul>
+    </section>
+
+    <section class="avoid-break">
+      <h2>Paste this into your landing-page repo's CLAUDE.md</h2>
+      <div class="claude-block"><span class="c"># Kostas — pricing constraints</span>
+
+<span class="c"># Canonical source (DO NOT fork these numbers):</span>
+<span class="c">#   https://dashboard-sooty-seven-64.vercel.app/dashboard → Settings → Subscription</span>
+<span class="c">#   Ask the Kostas repo owner for an updated pricing-handoff.pdf when promos change.</span>
+
+- 4 tiers: Light €99 / Standard €179 / Busy €299 / Heavy €499 (monthly, EUR).
+- Yearly = flat 20% off. Show both cycles behind a toggle, default to Monthly.
+- Minutes: 100 / 250 / 500 / 1,000 per month respectively. Hard cap — no overage.
+- Badges: Standard = "Most popular", Heavy = "Best value". No badge on Light/Busy.
+- Show prices ex-VAT with microcopy "+ tax calculated at checkout".
+- DO NOT write "unlimited locations" or "up to X minutes" anywhere.
+- DO NOT invent discounts — only the codes in PRICING_JSON.promos.
+- The ElevenLabs widget agent id is <span class="hl">agent_8701kn7p69jaf0frvsvwd6g2sq4e</span>.
+- If pricing here ever disagrees with the live dashboard, THE DASHBOARD WINS.
+  Flag the drift and request an updated handoff.</div>
+    </section>
+
+    <section class="avoid-break">
+      <h2>What we still owe you</h2>
+      <ul class="tight">
+        <li>Wordmark + favicon (placeholder OK until then).</li>
+        <li>A 30-second demo recording of Kostas (Greek booking + English booking).</li>
+        <li>8 Stripe Checkout URLs (4 tiers × 2 cycles) once Stripe products are live.</li>
+        <li>Testimonial quote from <i>Greek Barber Festival</i> after the 4-week pilot.</li>
+        <li>Optional: <span class="mono">currencies.json</span> (hand-rounded prices for all 12 currencies) if you want geo-swap.</li>
+      </ul>
+    </section>
+
+    <div class="footer">
+      Our side: <span class="pill mono">dashboard/lib/pricing.ts</span> · <span class="pill mono">dashboard/lib/currencies.ts</span> · <span class="pill mono">dashboard/lib/vat.ts</span> · app auto-deploys on push to <span class="mono">main</span>.<br />
+      Questions: reply on the shared thread and we'll regenerate this PDF with any edits. The
+      HTML source is checked in at <span class="mono">agent/docs/pricing-handoff.html</span> —
+      fully Claude-editable.
+    </div>
+  </body>
+</html>
