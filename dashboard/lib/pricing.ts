@@ -100,7 +100,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#3D7A50",
     monthly: 99,
     minutesPerMonth: 100,
-    features: ["100 min/month", "Bookings sync to your calendar", "Weekly performance email", "Email support"],
+    features: ["100 min/month"],
   },
   {
     id: "standard",
@@ -108,7 +108,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#1B5EBE",
     monthly: 179,
     minutesPerMonth: 250,
-    features: ["250 min/month", "Bookings sync to your calendar", "Weekly performance email", "Priority support"],
+    features: ["250 min/month"],
     badge: "Most popular",
   },
   {
@@ -117,7 +117,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#4F46E5",
     monthly: 299,
     minutesPerMonth: 500,
-    features: ["500 min/month", "Bookings sync to your calendar", "Weekly performance email", "Priority support"],
+    features: ["500 min/month"],
   },
   {
     id: "heavy",
@@ -125,12 +125,7 @@ export const SUBSCRIPTION_TIERS: TierPricing[] = [
     color: "#6747C7",
     monthly: 499,
     minutesPerMonth: 1000,
-    features: [
-      "1,000 min/month",
-      "Bookings sync to your calendar",
-      "Weekly performance email",
-      "Dedicated success manager",
-    ],
+    features: ["1,000 min/month"],
     badge: "Best value",
   },
 ];
