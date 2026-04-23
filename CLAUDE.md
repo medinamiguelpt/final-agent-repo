@@ -189,19 +189,28 @@ Never conflate `processing` with `in-progress`.
 
 **Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-Set to maintain ≥80% operating margin **per tier** at modelled production costs. The minute ladder is tuned so every upgrade is clearly better value per minute. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Three tiers, named by usage volume so a barbershop owner can self-match to their call load. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
 
 | Tier | Monthly | Yearly (−20%) | Minutes | Overage | € / included min |
 |---|---:|---:|---:|---:|---:|
-| Starter | €229/mo | €2,199/yr (€184/mo equiv.) | 200 min/mo | €0.60/min | €1.145 |
-| Professional ★ | €429/mo | €4,119/yr (€344/mo equiv.) | 600 min/mo | €0.50/min | €0.715 |
-| Enterprise | €859/mo | €8,249/yr (€688/mo equiv.) | 1,600 min/mo | €0.40/min | €0.537 |
+| Light | €99/mo | €949/yr (€79/mo equiv.) | 100 min/mo | €0.60/min | €0.990 |
+| Standard ★ | €329/mo | €3,159/yr (€263/mo equiv.) | 600 min/mo | €0.50/min | €0.548 |
+| Heavy | €799/mo | €7,669/yr (€639/mo equiv.) | 1,600 min/mo | €0.40/min | €0.499 |
 
-★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), real-time transcripts, and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
+★ Most popular · All plans include unlimited locations (shared minutes pool across all shops), bookings sync to the customer's calendar, weekly performance email, listen to any call on demand (ElevenLabs-hosted conversation pages), and all 7 supported languages. We do NOT charge per location — one subscription covers as many shops as the customer runs, and every minute comes out of the same pool.
 
-Upgrade economics (incremental cost per marginal minute):
-- Starter → Professional: +€200/mo buys +400 min → **€0.50/min incremental**
-- Professional → Enterprise: +€430/mo buys +1,000 min → **€0.43/min incremental**
+Typical shop profiles (for self-selection at sales time):
+- **Light** — quieter shop, ~3 calls/day
+- **Standard** — busy shop, ~20 calls/day
+- **Heavy** — multi-shop or high volume, ~55 calls/day
+
+Upgrade economics (incremental cost per marginal minute — each upgrade beats its own overage):
+- Light → Standard: +€230/mo buys +500 min → **€0.46/min incremental**
+- Standard → Heavy: +€470/mo buys +1,000 min → **€0.47/min incremental**
+
+Breakeven (when the next tier becomes cheaper than staying put + overage):
+- Light vs Standard: Standard wins past **~483 min/mo** (~16 min/day)
+- Standard vs Heavy: Heavy wins past **~1,540 min/mo** (~51 min/day)
 
 **Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
 
