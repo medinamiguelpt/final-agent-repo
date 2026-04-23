@@ -189,7 +189,9 @@ Never conflate `processing` with `in-progress`.
 
 **Pricing tiers (source of truth — mirrors `dashboard/lib/pricing.ts`)**
 
-Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Four tiers, named by usage volume so a barbershop owner can self-match to their call load. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.10/min blended voice cost. When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+Agent-only product — no dashboard. Bookings sync to the customer's calendar (cal.com on launch, Google Calendar fast-follow) and a weekly performance email replaces the live dashboard surface. Four tiers, named by usage volume so a barbershop owner can self-match to their call load. Set to maintain ≥80% gross margin **per tier** at the modelled ~€0.08/min blended voice cost (ElevenLabs ConvAI annual Business $0.08/min − silent-period discount + GPT-4o-mini pass-through @ ~€0.001/min w/ prompt caching, plus buffer). When changing prices, re-validate margins and update both this table and `lib/pricing.ts` in the same commit.
+
+**No-code MVP stack** — the pricing below is calibrated for a stack assembled entirely from ready-made tools (ElevenLabs ConvAI with native WhatsApp + managed phone number, customer's own cal.com, shared Airtable workspace via ElevenLabs MCP, Stripe Billing + Tax, Resend for email). Custom code lives only in this dashboard repo (internal admin + future customer portal). Fixed OpEx per customer is **~€20/mo**: phone DID ~€4, Airtable shared ~€5, Stripe fees ~€5, Stripe Tax ~€1, email + monitoring ~€1, legal/accounting/domain amortized ~€4. Customer owns their cal.com + WhatsApp Business Account (Meta bills them directly) → those vendor costs are on them. If we migrate off the no-code stack to custom Supabase/Vercel infra in v2, OpEx floats to ~€30 and margins compress accordingly — re-run this table if so.
 
 **Hard-cap model — no overage, no top-ups.** A customer gets exactly the minutes they bought. When the bucket is spent, the agent stops taking new calls and incoming calls route to voicemail until the next billing cycle or an upgrade. Bill is flat and predictable — no surprise charges, no telco-style overage guilt. The trade-off: a shop that misjudges usage loses booking capacity mid-month, so **mid-month usage alerts** and **one-click upgrade from the weekly email** are load-bearing UX (see planned work below).
 
@@ -217,14 +219,16 @@ Self-select by expected monthly minutes: **<100 → Light · 100–250 → Stand
 - **90% used** — amber alert with upgrade CTA ("~10 min left this cycle — upgrade to Standard for ×2.5 the capacity at €0.716/min")
 - **100% used** — red alert + agent stops answering; calls route to carrier voicemail until next cycle or upgrade (one-click upgrade in the email, prorated to the remainder of the cycle)
 
-Unit economics at full bucket utilisation (voice cost €0.10/min + €30.70/mo fixed OpEx per customer):
+Unit economics at full bucket utilisation (voice cost €0.08/min + €20/mo fixed OpEx per customer):
 
 | Tier | Voice cost | Gross | Gross % | OpEx | Net | Net % |
 |---|---:|---:|---:|---:|---:|---:|
-| Light | €10 | €89 | 89.9% | €30.70 | €58.30 | 58.9% |
-| Standard | €25 | €154 | 86.0% | €30.70 | €123.30 | 68.9% |
-| Busy | €50 | €249 | 83.3% | €30.70 | €218.30 | 73.0% |
-| Heavy | €100 | €399 | 80.0% | €30.70 | €368.30 | 73.8% |
+| Light | €8 | €91 | 91.9% | €20 | €71 | 71.7% |
+| Standard | €20 | €159 | 88.8% | €20 | €139 | 77.7% |
+| Busy | €40 | €259 | 86.6% | €20 | €239 | 79.9% |
+| Heavy | €80 | €419 | 84.0% | €20 | €399 | 80.0% |
+
+Every tier clears ≥80% gross and ≥70% net. OpEx dilutes hardest on Light (20% of revenue) and least on Heavy (4% of revenue) — which is why upselling Light → Standard roughly doubles net contribution (+€68/customer/mo for +€80 in revenue). Pricing is held (not cut) despite the improved margin vs. earlier custom-build estimates, to (a) absorb ElevenLabs LLM pass-through when it lands, (b) preserve runway, and (c) avoid price-cutting before market validation.
 
 **Yearly billing** — flat 20% discount vs paying monthly (`YEARLY_DISCOUNT` in `lib/pricing.ts`).
 

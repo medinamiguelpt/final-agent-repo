@@ -2,9 +2,21 @@
  * Pricing — single source of truth for subscription tiers, yearly packages,
  * and seasonal holiday promotions.
  *
- * Tier prices are set to preserve ≥80% operating margin **per tier** at the
- * modelled production cost base (fixed OpEx ~€30.70 / customer / mo + variable
- * voice-minute cost). Any price change here should re-validate that margin.
+ * Tier prices are set to preserve ≥80% gross margin **per tier** at the
+ * modelled production cost base:
+ *
+ *   - Variable voice cost: ~€0.08/min blended (ElevenLabs ConvAI annual
+ *     Business @ $0.08/min, minus ~15% × 95% silent-period discount, plus
+ *     GPT-4o-mini pass-through at ~€0.001/min w/ prompt caching, plus buffer)
+ *   - Fixed OpEx: ~€20/customer/mo (no-code MVP stack — phone DID, Airtable
+ *     shared workspace, Stripe fees + tax, email, monitoring, legal/accounting
+ *     amortized over ~30 customers). Customer brings their own cal.com and
+ *     WhatsApp Business Account → those vendor costs are on them.
+ *
+ * Any price change here should re-validate margin against those figures.
+ * When ElevenLabs stops absorbing LLM cost (currently bundled in the $0.08
+ * voice rate), GPT-4o-mini pass-through is ~€0.001/min — negligible but the
+ * €0.08/min figure has buffer baked in.
  *
  * Yearly billing applies a flat discount (YEARLY_DISCOUNT). Holiday promos
  * stack on top of the already-discounted price with `stacking: "multiply"`
@@ -65,11 +77,20 @@ export const YEARLY_DISCOUNT = 0.2;
  *   Busy     —  high-volume / small multi-shop   (500   min/mo)
  *   Heavy    —  multi-shop or very high volume   (1,000 min/mo)
  *
- * Gross margin at modelled ~€0.10/min blended voice cost (ConvAI + TTS + ASR):
- *   Light €99     → cost 100   × €0.10 = €10   → 89.9% margin
- *   Standard €179 → cost 250   × €0.10 = €25   → 86.0% margin
- *   Busy €299     → cost 500   × €0.10 = €50   → 83.3% margin
- *   Heavy €499    → cost 1,000 × €0.10 = €100  → 80.0% margin
+ * Gross margin at modelled ~€0.08/min blended voice cost (ConvAI + TTS + ASR
+ * + GPT-4o-mini pass-through w/ prompt caching):
+ *   Light €99     → cost 100   × €0.08 = €8   → 91.9% gross
+ *   Standard €179 → cost 250   × €0.08 = €20  → 88.8% gross
+ *   Busy €299     → cost 500   × €0.08 = €40  → 86.6% gross
+ *   Heavy €499    → cost 1,000 × €0.08 = €80  → 84.0% gross
+ *
+ * Net margin at full bucket utilization (after €20 fixed OpEx):
+ *   Light    → €71  net (71.7%)
+ *   Standard → €139 net (77.7%)
+ *   Busy     → €239 net (79.9%)
+ *   Heavy    → €399 net (80.0%)
+ * Fixed OpEx dilutes hardest on Light, so upselling Light→Standard roughly
+ * doubles net contribution (+€68/customer/mo for +€80 in revenue).
  *
  * Per-included-minute (list):
  *   Light €0.990 · Standard €0.716 · Busy €0.598 · Heavy €0.499
