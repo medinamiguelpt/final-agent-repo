@@ -436,8 +436,8 @@ const PALETTES: Record<PaletteKey, { name: string; swatch: string; light: Colors
       bg: "#0D0714",
       surface: "#16102A",
       surfaceAlt: "#1E1535",
-      border: "#2D1F4E",
-      borderFaint: "#1E1535",
+      border: "#3A2960",
+      borderFaint: "#261B42",
       accent: "#A78BFA",
       accentMid: "#7C3AED",
       accentLight: "#2D1F4E",
@@ -3006,11 +3006,11 @@ function SettingsPanel({
         return (
           <div
             style={{
-              border: `1px solid ${C.borderFaint}`,
+              border: `1px solid ${C.border}`,
               borderRadius: 14,
               padding: 12,
               background: C.surfaceAlt,
-              marginBottom: 12,
+              marginBottom: 14,
               display: "flex",
               flexDirection: "column",
               gap: 10,
