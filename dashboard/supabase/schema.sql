@@ -28,6 +28,10 @@ create table if not exists public.businesses (
   plan              text        not null default 'demo',
   logo_url          text,
   timezone          text,
+  -- Per-business profile blob (ownerName, size, postcode, twoFactorEnabled, agentId).
+  -- The other fields (name, phone, email, address, city, country, hours, barbers,
+  -- website) already exist as dedicated columns and are kept in sync.
+  profile           jsonb       not null default '{}'::jsonb,
   created_at        timestamptz not null default now(),
   updated_at        timestamptz not null default now()
 );

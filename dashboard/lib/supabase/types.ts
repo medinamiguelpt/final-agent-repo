@@ -185,6 +185,7 @@ export type Database = {
           owner_id: string | null;
           phone: string | null;
           plan: string;
+          profile: Json;
           slug: string;
           timezone: string;
           updated_at: string;
@@ -209,6 +210,7 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           plan?: string;
+          profile?: Json;
           slug: string;
           timezone?: string;
           updated_at?: string;
@@ -233,6 +235,7 @@ export type Database = {
           owner_id?: string | null;
           phone?: string | null;
           plan?: string;
+          profile?: Json;
           slug?: string;
           timezone?: string;
           updated_at?: string;

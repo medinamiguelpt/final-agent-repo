@@ -498,14 +498,54 @@ function loadSettings(): Settings {
     return DEFAULT_SETTINGS;
   }
 }
-function loadProfile(): BusinessProfile {
-  if (typeof window === "undefined") return DEFAULT_PROFILE;
+// Profile used to live in localStorage under "gbf-business-profile" as a single
+// global blob. That was buggy: deleting a shop never cleared it, so the team
+// list (and other fields) stuck around after the shop was gone. We now store
+// the profile per business in businesses.profile (jsonb). This helper is kept
+// only to drop the old localStorage key once, so returning users don't see
+// stale data leaking through.
+function clearLegacyProfileStorage(): void {
+  if (typeof window === "undefined") return;
   try {
-    const s = localStorage.getItem("gbf-business-profile");
-    return s ? { ...DEFAULT_PROFILE, ...JSON.parse(s) } : DEFAULT_PROFILE;
+    localStorage.removeItem("gbf-business-profile");
   } catch {
-    return DEFAULT_PROFILE;
+    // no-op
   }
+}
+
+/**
+ * Map a Supabase businesses row to a BusinessProfile. The row's jsonb `profile`
+ * blob overrides any values that also exist as dedicated columns — this lets
+ * the dashboard edit fields (like `size` or `ownerName`) that don't have a
+ * column while still falling back to the columns for fields that do.
+ */
+interface BusinessRow {
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
+  website?: string | null;
+  hours?: string | null;
+  barbers?: string | null;
+  profile?: unknown;
+}
+function profileFromBusinessRow(row: BusinessRow): BusinessProfile {
+  const stored = (row.profile ?? {}) as Partial<BusinessProfile>;
+  return {
+    ...DEFAULT_PROFILE,
+    businessName: row.name ?? DEFAULT_PROFILE.businessName,
+    email: row.email ?? DEFAULT_PROFILE.email,
+    phone: row.phone ?? DEFAULT_PROFILE.phone,
+    address: row.address ?? DEFAULT_PROFILE.address,
+    city: row.city ?? DEFAULT_PROFILE.city,
+    country: row.country ?? DEFAULT_PROFILE.country,
+    website: row.website ?? DEFAULT_PROFILE.website,
+    hours: row.hours ?? DEFAULT_PROFILE.hours,
+    barbers: row.barbers ?? DEFAULT_PROFILE.barbers,
+    ...stored,
+  };
 }
 function loadLangSettings(): LangSettings {
   if (typeof window === "undefined") return DEFAULT_LANG;
@@ -8548,13 +8588,14 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!authReady) return;
     const s = loadSettings();
-    const p = loadProfile();
     const l = loadLangSettings();
     setSettings(s);
-    setProfile(p);
     setLangSettings(l);
     setTab("hub");
     setC(getColors(s));
+    // One-time cleanup of the old global profile blob. Profile now lives in
+    // businesses.profile (jsonb), loaded below whenever `currentBiz` changes.
+    clearLegacyProfileStorage();
   }, [authReady]);
 
   useEffect(() => {
@@ -8577,13 +8618,41 @@ export default function DashboardPage() {
     });
   }, []);
 
-  const updateProfile = useCallback((patch: Partial<BusinessProfile>) => {
-    setProfile((prev) => {
-      const next = { ...prev, ...patch };
-      localStorage.setItem("gbf-business-profile", JSON.stringify(next));
-      return next;
-    });
-  }, []);
+  // Profile is scoped per-business in Supabase (businesses.profile jsonb +
+  // a few dedicated columns kept in sync). Writes are fire-and-forget so
+  // typing stays snappy; the row-level realtime channel picks up changes
+  // for other tabs.
+  const updateProfile = useCallback(
+    (patch: Partial<BusinessProfile>) => {
+      setProfile((prev) => {
+        const next = { ...prev, ...patch };
+        if (currentBiz) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const sb = supabase as any;
+          void sb
+            .from("businesses")
+            .update({
+              profile: next,
+              name: next.businessName,
+              email: next.email,
+              phone: next.phone,
+              address: next.address,
+              city: next.city,
+              country: next.country,
+              website: next.website,
+              hours: next.hours,
+              barbers: next.barbers,
+            })
+            .eq("id", currentBiz.id)
+            .then(({ error }: { error: unknown }) => {
+              if (error) console.error("updateProfile failed:", error);
+            });
+        }
+        return next;
+      });
+    },
+    [currentBiz],
+  );
 
   const updateLangSettings = useCallback((patch: Partial<LangSettings>) => {
     setLangSettings((prev) => {
@@ -8651,6 +8720,34 @@ export default function DashboardPage() {
     if (!authReady) return;
     loadBusinesses();
   }, [authReady, loadBusinesses]);
+
+  // ── Load profile for the currently-selected business ──
+  // When there's no business selected (fresh user / demo mode) fall back to
+  // DEFAULT_PROFILE so the dashboard still renders with sensible values.
+  useEffect(() => {
+    if (!authReady) return;
+    if (!currentBiz) {
+      setProfile(DEFAULT_PROFILE);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("businesses")
+        .select("name, email, phone, address, city, country, website, hours, barbers, profile")
+        .eq("id", currentBiz.id)
+        .single();
+      if (cancelled) return;
+      if (error || !data) {
+        setProfile(DEFAULT_PROFILE);
+        return;
+      }
+      setProfile(profileFromBusinessRow(data as BusinessRow));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authReady, currentBiz]);
 
   const fetchDashboardData = useCallback(async () => {
     try {
