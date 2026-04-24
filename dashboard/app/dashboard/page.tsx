@@ -1718,7 +1718,6 @@ const RESPONSIVE_CSS = `
   .gbf-header        { padding:0 32px; }
   .gbf-header-inner  { height:64px; }
   .gbf-header-date   { display:block; }
-  .gbf-header-live-text { display:inline; }
   .gbf-tabs-inner    { padding:0 32px; }
   .gbf-tab-btn       { padding:16px 24px; font-size:14px; white-space:nowrap; }
   .gbf-tab-full      { display:inline; }
@@ -1806,7 +1805,6 @@ const RESPONSIVE_CSS = `
     .gbf-header           { padding:0 16px; }
     .gbf-header-inner     { height:56px; }
     .gbf-header-date      { display:none; }
-    .gbf-header-live-text { display:none; }
     .gbf-header-right     { gap:6px!important; }
     .gbf-tabs-inner       { padding:0; overflow-x:auto; scrollbar-width:none; }
     .gbf-tabs-inner::-webkit-scrollbar{ display:none; }
@@ -1893,7 +1891,6 @@ const RESPONSIVE_CSS = `
     .gbf-stat-grid    { gap:7px; }
     .gbf-header-inner { height:52px; }
     .gbf-header-right { gap:3px!important; }
-    .gbf-header-live  { display:none; }
     .gbf-header-right .gbf-icon-btn  { width:32px!important; height:32px!important; border-radius:8px!important; }
     .gbf-header-right .gbf-action-btn{ height:32px!important; padding:0 6px!important; border-radius:8px!important; }
     .gbf-services-grid{ grid-template-columns:1fr; }
@@ -9624,41 +9621,6 @@ export default function DashboardPage() {
                 <span className="gbf-header-date" style={{ fontSize: 13, color: C.textMuted }}>
                   {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
                 </span>
-                <div
-                  className="gbf-header-live"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    background: loading ? C.borderFaint : C.greenLight,
-                    padding: "6px 11px",
-                    borderRadius: 99,
-                    transition: "background .3s",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 7,
-                      height: 7,
-                      borderRadius: "50%",
-                      background: loading ? C.textFaint : C.green,
-                      display: "inline-block",
-                      animation: loading ? "none" : "gbf-pulse 2s infinite",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span
-                    className="gbf-header-live-text"
-                    style={{
-                      fontSize: 11,
-                      color: loading ? C.textMuted : C.green,
-                      fontWeight: 700,
-                      letterSpacing: "0.04em",
-                    }}
-                  >
-                    {loading ? t("loading") : t("live")}
-                  </span>
-                </div>
                 {/* Dark / light mode toggle */}
                 <button
                   onClick={() => updateSettings({ mode: resolveMode(settings.mode) === "dark" ? "light" : "dark" })}
@@ -9969,47 +9931,30 @@ export default function DashboardPage() {
                   );
                 })()}
 
-                {/* User + logout */}
+                {/* Logout — email text removed from the bar; identity is
+                    visible inside the Settings panel which is one tap away. */}
                 {userEmail && (
-                  <div
-                    className="gbf-header-user"
-                    style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+                  <button
+                    onClick={handleLogout}
+                    title={`Sign out (${userEmail})`}
+                    className="gbf-btn gbf-icon-btn"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      border: `1px solid ${C.border}`,
+                      background: C.surfaceAlt,
+                      color: C.textMuted,
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      transition: "all .15s",
+                    }}
                   >
-                    <span
-                      className="gbf-header-date"
-                      style={{
-                        fontSize: 12,
-                        color: C.textFaint,
-                        maxWidth: 120,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {userEmail}
-                    </span>
-                    <button
-                      onClick={handleLogout}
-                      title="Sign out"
-                      className="gbf-btn gbf-icon-btn"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 36,
-                        height: 36,
-                        borderRadius: 10,
-                        border: `1px solid ${C.border}`,
-                        background: C.surfaceAlt,
-                        color: C.textMuted,
-                        cursor: "pointer",
-                        flexShrink: 0,
-                        transition: "all .15s",
-                      }}
-                    >
-                      <LogOut size={15} strokeWidth={2} />
-                    </button>
-                  </div>
+                    <LogOut size={15} strokeWidth={2} />
+                  </button>
                 )}
 
                 <button
