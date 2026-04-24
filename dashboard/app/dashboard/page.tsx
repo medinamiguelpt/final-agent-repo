@@ -514,6 +514,67 @@ function clearLegacyProfileStorage(): void {
 }
 
 /**
+ * AddShopModal writes `hours` as a stringified JSON object like
+ *   {"mon":{"closed":true},"tue":{"open":"10:00","close":"20:00"}, ...}
+ * but the dashboard wants a short human-readable summary such as
+ * "Tue–Sat · 10:00–20:00". This normalizes either input shape to a
+ * friendly string. If parsing fails it returns the input untouched —
+ * the profile edit UI accepts freeform text.
+ */
+const DAY_ORDER = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+const DAY_LABEL: Record<(typeof DAY_ORDER)[number], string> = {
+  mon: "Mon",
+  tue: "Tue",
+  wed: "Wed",
+  thu: "Thu",
+  fri: "Fri",
+  sat: "Sat",
+  sun: "Sun",
+};
+interface DayHoursEntry {
+  open?: string;
+  close?: string;
+  closed?: boolean;
+}
+function formatHours(raw: unknown): string {
+  if (typeof raw !== "string" || !raw.trim()) return "";
+  const trimmed = raw.trim();
+  // Only try to parse if it looks like a JSON object — plain strings
+  // ("Tue–Sat · 10:00–20:00") must pass through untouched.
+  if (!trimmed.startsWith("{")) return trimmed;
+  let parsed: Record<string, DayHoursEntry>;
+  try {
+    parsed = JSON.parse(trimmed) as Record<string, DayHoursEntry>;
+  } catch {
+    return trimmed;
+  }
+  // Collapse runs of consecutive days with identical open/close into
+  // "Tue–Sat · 10:00–20:00". Non-contiguous or multi-schedule shops fall
+  // back to a comma-separated listing.
+  type Group = { days: string[]; open: string; close: string };
+  const groups: Group[] = [];
+  for (const key of DAY_ORDER) {
+    const entry = parsed[key];
+    if (!entry || entry.closed || !entry.open || !entry.close) continue;
+    const last = groups[groups.length - 1];
+    if (last && last.open === entry.open && last.close === entry.close) {
+      last.days.push(key);
+    } else {
+      groups.push({ days: [key], open: entry.open, close: entry.close });
+    }
+  }
+  if (groups.length === 0) return "Closed";
+  return groups
+    .map((g) => {
+      const first = DAY_LABEL[g.days[0] as keyof typeof DAY_LABEL];
+      const last = DAY_LABEL[g.days[g.days.length - 1] as keyof typeof DAY_LABEL];
+      const range = g.days.length === 1 ? first : `${first}–${last}`;
+      return `${range} · ${g.open}–${g.close}`;
+    })
+    .join(", ");
+}
+
+/**
  * Map a Supabase businesses row to a BusinessProfile. The row's jsonb `profile`
  * blob overrides any values that also exist as dedicated columns — this lets
  * the dashboard edit fields (like `size` or `ownerName`) that don't have a
@@ -542,7 +603,7 @@ function profileFromBusinessRow(row: BusinessRow): BusinessProfile {
     city: row.city ?? DEFAULT_PROFILE.city,
     country: row.country ?? DEFAULT_PROFILE.country,
     website: row.website ?? DEFAULT_PROFILE.website,
-    hours: row.hours ?? DEFAULT_PROFILE.hours,
+    hours: formatHours(row.hours) || DEFAULT_PROFILE.hours,
     barbers: row.barbers ?? DEFAULT_PROFILE.barbers,
     ...stored,
   };
