@@ -626,6 +626,13 @@ function getColors(settings: Settings): Colors {
   return p[typeof window !== "undefined" ? resolveMode(settings.mode) : "light"];
 }
 
+/** Sort comparator — newest-first by start_time_unix_secs. Entries missing a
+ * timestamp sort last. Shared by the HubTab feed and the LedgerTab so demo
+ * entries (injected client-side, out of order) end up in the same order in
+ * both places. */
+const byStartTimeDesc = (a: { start_time_unix_secs?: number }, b: { start_time_unix_secs?: number }) =>
+  (b.start_time_unix_secs ?? 0) - (a.start_time_unix_secs ?? 0);
+
 // ── Static data ───────────────────────────────────────────────────────────────
 const TODAY = new Date();
 const fmt = (d: Date) => d.toLocaleDateString("el-GR", { day: "2-digit", month: "2-digit" });
@@ -4759,53 +4766,49 @@ function HubTab({
   const barbers = parseBarberNames(profile.barbers);
   const agentName = agent?.name?.split(/\s*[\u2014—]\s*/)[0] ?? "Kostas";
 
-  // Categorise each booking for the feed.
-  // Sort newest-first by start_time so the feed matches the Ledger's ordering —
-  // otherwise demo bookings appended after the API response appear below older
-  // real calls even when their timestamps are more recent.
+  // Sort newest-first so demo entries injected client-side end up in the same
+  // order as the Ledger — otherwise more-recent demos land below older real calls.
   type FeedEntry = AiBooking & { feedType: string; feedColor: string; feedBg: string };
-  const allFeedEntries: FeedEntry[] = [...aiBookings]
-    .sort((a, b) => (b.start_time_unix_secs ?? 0) - (a.start_time_unix_secs ?? 0))
-    .map((b) => {
-      const sum = b.summary.toLowerCase();
-      let feedType = "CALL";
-      let feedColor = C.accent;
-      let feedBg = C.accentLight;
-      if (b.call_status === "in-progress") {
-        feedType = "LIVE";
-        feedColor = C.red;
-        feedBg = C.redLight;
-      } else if (b.message_count === 0) {
-        feedType = "NO ANSWER";
-        feedColor = C.textFaint;
-        feedBg = C.borderFaint;
-      } else if (b.status === "failed" && (b.message_count ?? 0) <= 1 && (b.duration_secs ?? 0) < 20) {
-        feedType = "DROPPED";
-        feedColor = C.amber;
-        feedBg = C.amberLight;
-      } else if (b.call_status === "error") {
-        feedType = "MISSED";
-        feedColor = C.textFaint;
-        feedBg = C.borderFaint;
-      } else if (b.status === "cancelled" || /\bcancel/i.test(sum)) {
-        feedType = "CANCEL";
-        feedColor = C.amber;
-        feedBg = C.amberLight;
-      } else if (/reschedul/i.test(sum)) {
-        feedType = "RESCHEDULE";
-        feedColor = C.accentMid;
-        feedBg = C.accentLight;
-      } else if (b.status === "pending") {
-        feedType = "PENDING";
-        feedColor = C.amber;
-        feedBg = C.amberLight;
-      } else if (b.status === "confirmed" || (b.service && b.service !== "—")) {
-        feedType = "BOOKED";
-        feedColor = C.green;
-        feedBg = C.greenLight;
-      }
-      return { ...b, feedType, feedColor, feedBg };
-    });
+  const allFeedEntries: FeedEntry[] = [...aiBookings].sort(byStartTimeDesc).map((b) => {
+    const sum = b.summary.toLowerCase();
+    let feedType = "CALL";
+    let feedColor = C.accent;
+    let feedBg = C.accentLight;
+    if (b.call_status === "in-progress") {
+      feedType = "LIVE";
+      feedColor = C.red;
+      feedBg = C.redLight;
+    } else if (b.message_count === 0) {
+      feedType = "NO ANSWER";
+      feedColor = C.textFaint;
+      feedBg = C.borderFaint;
+    } else if (b.status === "failed" && (b.message_count ?? 0) <= 1 && (b.duration_secs ?? 0) < 20) {
+      feedType = "DROPPED";
+      feedColor = C.amber;
+      feedBg = C.amberLight;
+    } else if (b.call_status === "error") {
+      feedType = "MISSED";
+      feedColor = C.textFaint;
+      feedBg = C.borderFaint;
+    } else if (b.status === "cancelled" || /\bcancel/i.test(sum)) {
+      feedType = "CANCEL";
+      feedColor = C.amber;
+      feedBg = C.amberLight;
+    } else if (/reschedul/i.test(sum)) {
+      feedType = "RESCHEDULE";
+      feedColor = C.accentMid;
+      feedBg = C.accentLight;
+    } else if (b.status === "pending") {
+      feedType = "PENDING";
+      feedColor = C.amber;
+      feedBg = C.amberLight;
+    } else if (b.status === "confirmed" || (b.service && b.service !== "—")) {
+      feedType = "BOOKED";
+      feedColor = C.green;
+      feedBg = C.greenLight;
+    }
+    return { ...b, feedType, feedColor, feedBg };
+  });
   const noAnswerCount = allFeedEntries.filter((e) => e.feedType === "NO ANSWER" || e.feedType === "DROPPED").length;
   const feedEntries = hideNoAnswer
     ? allFeedEntries.filter((e) => e.feedType !== "NO ANSWER" && e.feedType !== "DROPPED")
@@ -6124,7 +6127,7 @@ function LedgerTab({
   }));
 
   // Combine — AI entries first (most recent first), then demo
-  const aiSorted = [...aiEntries].sort((a, b) => (b.start_time_unix_secs ?? 0) - (a.start_time_unix_secs ?? 0));
+  const aiSorted = [...aiEntries].sort(byStartTimeDesc);
   const allEntries: UnifiedEntry[] = [...aiSorted, ...demoEntries];
 
   // Dates for filter: combine both sources
