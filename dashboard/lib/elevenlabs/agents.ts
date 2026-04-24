@@ -32,8 +32,13 @@ export interface AgentConfig {
 //   Uncomment and fill in the entries below. Set active: false to disable
 //   an agent without removing it from the registry.
 // ─────────────────────────────────────────────────────────────────────────────
-const envAgentId = process.env.ELEVENLABS_AGENT_ID;
-const envAgentName = process.env.ELEVENLABS_AGENT_NAME ?? "AI Barber";
+// Defensive trim: Vercel's `env pull` command has historically serialised
+// values containing newlines as quoted strings with `\n` escapes (e.g.
+// `"agent_abc\n"`), which Next.js's dotenv parser re-expands into a real
+// trailing newline. A newline-tainted agent ID silently breaks every
+// ElevenLabs call (document_not_found → catch-and-ignore → empty feed).
+const envAgentId = process.env.ELEVENLABS_AGENT_ID?.trim();
+const envAgentName = process.env.ELEVENLABS_AGENT_NAME?.trim() || "AI Barber";
 
 export const AGENTS: Record<string, AgentConfig> = {};
 
