@@ -1870,9 +1870,10 @@ const RESPONSIVE_CSS = `
     .gbf-lang-label      { display:none; }
     .gbf-header-right .gbf-icon-btn  { width:34px!important; height:34px!important; }
     .gbf-header-right .gbf-action-btn{ height:34px!important; padding:0 8px!important; }
-    /* Drop the "N barbershops" subtitle under the shop name — the Store
-       icon + name already identify the picker. */
+    /* Collapse the shop switcher to icon + chevron only — the name takes
+       too much room on narrow phones. */
     .gbf-header-bizsub   { display:none!important; }
+    .gbf-header-bizname  { display:none!important; }
     /* Filter selects: 2-column grid at narrow phones */
     .gbf-filter-selects  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     /* Ledger cards: always column, never the IVI row wrap */
@@ -9360,7 +9361,7 @@ export default function DashboardPage() {
                       }}
                     >
                       <Store size={14} style={{ color: C.accent, flexShrink: 0 }} />
-                      <div style={{ minWidth: 0, overflow: "hidden" }}>
+                      <div className="gbf-header-bizname" style={{ minWidth: 0, overflow: "hidden" }}>
                         <div
                           style={{
                             fontFamily: "var(--gbf-font-display)",
