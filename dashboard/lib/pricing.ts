@@ -238,26 +238,6 @@ export const HOLIDAY_PROMOS: HolidayPromo[] = [
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Round up to the nearest €1, then subtract 1 — e.g. 2198.40 → 2199. */
-function prettyEuro(value: number): number {
-  return Math.ceil(value) - (Math.ceil(value) % 1 === 0 ? 1 : 0);
-}
-
-/** Monthly-equivalent price when billed yearly (before any promo). */
-export function yearlyMonthlyEquivalent(tier: TierPricing): number {
-  return Math.round(tier.monthly * (1 - YEARLY_DISCOUNT));
-}
-
-/** Annual total before any holiday promo. */
-export function yearlyTotal(tier: TierPricing): number {
-  return prettyEuro(tier.monthly * 12 * (1 - YEARLY_DISCOUNT));
-}
-
-/** Annual savings vs paying monthly. */
-export function yearlySavings(tier: TierPricing): number {
-  return tier.monthly * 12 - yearlyTotal(tier);
-}
-
 /** Pick the first active promo for a given date, scoped to a billing cycle. */
 export function activeHolidayPromo(cycle: BillingCycle, now: Date = new Date()): HolidayPromo | null {
   const today = now.toISOString().slice(0, 10);
@@ -267,44 +247,6 @@ export function activeHolidayPromo(cycle: BillingCycle, now: Date = new Date()):
     return promo;
   }
   return null;
-}
-
-/**
- * Final price shown to the customer for a tier + cycle, after stacking the
- * yearly discount and any active holiday promo.
- *
- * Returns both the effective price and the pre-promo baseline so the UI can
- * strike the original through.
- */
-export interface DisplayPrice {
-  /** Price shown big — already includes yearly + holiday discounts */
-  effective: number;
-  /** Undiscounted monthly × cycle length */
-  baseline: number;
-  /** Pre-holiday, post-yearly price (used to compute the extra savings) */
-  preHolidayBaseline: number;
-  /** "month" or "year" */
-  per: "month" | "year";
-  /** Active promo, if any */
-  promo: HolidayPromo | null;
-}
-
-export function displayPrice(tier: TierPricing, cycle: BillingCycle, now: Date = new Date()): DisplayPrice {
-  const promo = activeHolidayPromo(cycle, now);
-  if (cycle === "monthly") {
-    const base = tier.monthly;
-    const effective = promo ? prettyEuro(base * (1 - promo.discount)) : base;
-    return { effective, baseline: base, preHolidayBaseline: base, per: "month", promo };
-  }
-  // yearly
-  const preHoliday = yearlyTotal(tier);
-  const effective = promo ? prettyEuro(preHoliday * (1 - promo.discount)) : preHoliday;
-  return { effective, baseline: tier.monthly * 12, preHolidayBaseline: preHoliday, per: "year", promo };
-}
-
-/** Format an integer EUR amount — "€229", "€2,199". */
-export function formatEuro(n: number): string {
-  return `€${n.toLocaleString("en-US")}`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

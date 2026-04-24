@@ -480,13 +480,6 @@ export function computeVat({
   };
 }
 
-/** True if the VAT ID looks plausible for the given country (pattern match). */
-export function isPlausibleVatId(country: Country, id: string): boolean {
-  if (!country.vatIdPattern) return false;
-  const normalised = id.replace(/\s+/g, "").toUpperCase();
-  return country.vatIdPattern.test(normalised);
-}
-
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }

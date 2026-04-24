@@ -85,8 +85,6 @@ export const CURRENCIES: Record<CurrencyCode, Currency> = {
   },
 };
 
-export const CURRENCY_ORDER: CurrencyCode[] = ["EUR", "SEK", "DKK", "PLN"];
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────────────────
