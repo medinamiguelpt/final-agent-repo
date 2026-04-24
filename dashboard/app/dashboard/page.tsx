@@ -1790,6 +1790,9 @@ const RESPONSIVE_CSS = `
     .gbf-tabs-inner{ padding:0 20px; }
     .gbf-header-date{ display:none; }
     .gbf-header-right{ gap:8px!important; }
+    /* "← Website" is redundant once we're tight on space — the footer and
+       Settings panel both link back to the marketing site. */
+    .gbf-header-web { display:none!important; }
   }
 
   /* ────────────────────────────────────────────────────────────────────────────
@@ -1869,6 +1872,12 @@ const RESPONSIVE_CSS = `
     .gbf-lang-label      { display:none; }
     .gbf-header-right .gbf-icon-btn  { width:34px!important; height:34px!important; }
     .gbf-header-right .gbf-action-btn{ height:34px!important; padding:0 8px!important; }
+    /* Dark-mode toggle also lives in Settings — drop the header shortcut
+       below 480px so we keep enough room for biz switcher + core actions. */
+    .gbf-header-mode     { display:none!important; }
+    /* Drop the "N barbershops" subtitle under the shop name — the Store
+       icon + name already identify the picker. */
+    .gbf-header-bizsub   { display:none!important; }
     /* Filter selects: 2-column grid at narrow phones */
     .gbf-filter-selects  { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     /* Ledger cards: always column, never the IVI row wrap */
@@ -9368,7 +9377,10 @@ export default function DashboardPage() {
                         >
                           {currentBiz?.name ?? "All shops"}
                         </div>
-                        <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: "0.04em", fontWeight: 500 }}>
+                        <div
+                          className="gbf-header-bizsub"
+                          style={{ fontSize: 10, color: C.textMuted, letterSpacing: "0.04em", fontWeight: 500 }}
+                        >
                           {businesses.length} barbershop{businesses.length !== 1 ? "s" : ""}
                         </div>
                       </div>
@@ -9582,6 +9594,7 @@ export default function DashboardPage() {
               >
                 <a
                   href="https://timebookingpro.com"
+                  className="gbf-header-web"
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -9649,7 +9662,7 @@ export default function DashboardPage() {
                 {/* Dark / light mode toggle */}
                 <button
                   onClick={() => updateSettings({ mode: resolveMode(settings.mode) === "dark" ? "light" : "dark" })}
-                  className="gbf-btn gbf-icon-btn"
+                  className="gbf-btn gbf-icon-btn gbf-header-mode"
                   title={resolveMode(settings.mode) === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                   style={{
                     display: "flex",
@@ -9958,7 +9971,10 @@ export default function DashboardPage() {
 
                 {/* User + logout */}
                 {userEmail && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                  <div
+                    className="gbf-header-user"
+                    style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+                  >
                     <span
                       className="gbf-header-date"
                       style={{
