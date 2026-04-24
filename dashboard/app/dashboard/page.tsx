@@ -1870,9 +1870,6 @@ const RESPONSIVE_CSS = `
     .gbf-lang-label      { display:none; }
     .gbf-header-right .gbf-icon-btn  { width:34px!important; height:34px!important; }
     .gbf-header-right .gbf-action-btn{ height:34px!important; padding:0 8px!important; }
-    /* Dark-mode toggle also lives in Settings — drop the header shortcut
-       below 480px so we keep enough room for biz switcher + core actions. */
-    .gbf-header-mode     { display:none!important; }
     /* Drop the "N barbershops" subtitle under the shop name — the Store
        icon + name already identify the picker. */
     .gbf-header-bizsub   { display:none!important; }
@@ -8586,11 +8583,12 @@ export default function DashboardPage() {
   const [businesses, setBusinesses] = useState<{ id: string; name: string; plan?: string }[]>([]);
   const [currentBiz, setCurrentBiz] = useState<{ id: string; name: string; plan?: string } | null>(null);
   // Single menu state — only one header dropdown open at a time
-  type HeaderMenu = "biz" | "lang" | "credits" | null;
+  type HeaderMenu = "biz" | "lang" | "credits" | "user" | null;
   const [openMenu, setOpenMenu] = useState<HeaderMenu>(null);
   const bizOpen = openMenu === "biz";
   const langOpen = openMenu === "lang";
   const creditsOpen = openMenu === "credits";
+  const userOpen = openMenu === "user";
   const setBizOpen = (v: boolean | ((prev: boolean) => boolean)) => {
     const val = typeof v === "function" ? v(openMenu === "biz") : v;
     setOpenMenu(val ? "biz" : null);
@@ -8602,6 +8600,10 @@ export default function DashboardPage() {
   const setCreditsOpen = (v: boolean | ((prev: boolean) => boolean)) => {
     const val = typeof v === "function" ? v(openMenu === "credits") : v;
     setOpenMenu(val ? "credits" : null);
+  };
+  const setUserOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const val = typeof v === "function" ? v(openMenu === "user") : v;
+    setOpenMenu(val ? "user" : null);
   };
   const [walkinOpen, setWalkinOpen] = useState(false);
   const TOTAL_CREDITS = 10000; // 10,000 minutes (demo)
@@ -8617,7 +8619,7 @@ export default function DashboardPage() {
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [bizOpen, langOpen, creditsOpen]);
+  }, [bizOpen, langOpen, creditsOpen, userOpen]);
 
   // Scroll-to-top visibility
   useEffect(() => {
@@ -9618,136 +9620,7 @@ export default function DashboardPage() {
                 >
                   ← Website
                 </a>
-                <span className="gbf-header-date" style={{ fontSize: 13, color: C.textMuted }}>
-                  {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
-                </span>
-                {/* Dark / light mode toggle */}
-                <button
-                  onClick={() => updateSettings({ mode: resolveMode(settings.mode) === "dark" ? "light" : "dark" })}
-                  className="gbf-btn gbf-icon-btn gbf-header-mode"
-                  title={resolveMode(settings.mode) === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 40,
-                    height: 40,
-                    borderRadius: 10,
-                    border: `1px solid ${C.border}`,
-                    background: C.surfaceAlt,
-                    cursor: "pointer",
-                    color: C.textMuted,
-                    flexShrink: 0,
-                    transition: "all .15s",
-                  }}
-                >
-                  {resolveMode(settings.mode) === "dark" ? (
-                    <Sun size={15} strokeWidth={2} />
-                  ) : (
-                    <Moon size={15} strokeWidth={2} />
-                  )}
-                </button>
-                {/* Language picker */}
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <button
-                    onClick={() => setLangOpen((v) => !v)}
-                    className="gbf-btn gbf-icon-btn"
-                    title="Language"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 5,
-                      padding: "0 10px",
-                      height: 40,
-                      borderRadius: 10,
-                      border: `1px solid ${C.border}`,
-                      background: langOpen ? C.accentLight : C.surfaceAlt,
-                      cursor: "pointer",
-                      fontFamily: "inherit",
-                      color: C.text,
-                      transition: "all .15s",
-                    }}
-                  >
-                    <span style={{ fontSize: 16 }}>{LANG_META[langSettings.lang].flag}</span>
-                    <span
-                      className="gbf-lang-label"
-                      style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: C.textMuted }}
-                    >
-                      {langSettings.lang.toUpperCase()}
-                    </span>
-                  </button>
-                  {langOpen && (
-                    <>
-                      {createPortal(
-                        <div onClick={() => setLangOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 25 }} />,
-                        document.body,
-                      )}
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "calc(100% + 8px)",
-                          right: isRTL ? "auto" : 0,
-                          left: isRTL ? 0 : "auto",
-                          zIndex: 201,
-                          background: C.surface,
-                          border: `1px solid ${C.border}`,
-                          borderRadius: 14,
-                          boxShadow: "0 8px 32px rgba(0,0,0,.18)",
-                          padding: 8,
-                          minWidth: 190,
-                        }}
-                      >
-                        {(Object.entries(LANG_META) as [LanguageKey, (typeof LANG_META)[LanguageKey]][]).map(
-                          ([key, meta]) => {
-                            const active = langSettings.lang === key;
-                            return (
-                              <button
-                                key={key}
-                                onClick={() => {
-                                  updateLangSettings({ lang: key });
-                                  setLangOpen(false);
-                                }}
-                                className="gbf-btn gbf-menu-item"
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 10,
-                                  width: "100%",
-                                  padding: "9px 12px",
-                                  borderRadius: 10,
-                                  border: "none",
-                                  background: active ? C.accentLight : "transparent",
-                                  cursor: "pointer",
-                                  fontFamily: "inherit",
-                                  textAlign: "left",
-                                  transition: "background .1s",
-                                }}
-                              >
-                                <span style={{ fontSize: 18, flexShrink: 0 }}>{meta.flag}</span>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div
-                                    style={{
-                                      fontSize: 13,
-                                      fontWeight: active ? 700 : 500,
-                                      color: active ? C.accent : C.text,
-                                    }}
-                                  >
-                                    {meta.native}
-                                  </div>
-                                </div>
-                                {active && (
-                                  <Check size={14} style={{ color: C.accent, flexShrink: 0 }} strokeWidth={2.5} />
-                                )}
-                              </button>
-                            );
-                          },
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Walk-in quick entry */}
+                {/* Walk-in quick entry — the primary action, leads the cluster */}
                 <button
                   onClick={() => setWalkinOpen(true)}
                   title="Register walk-in"
@@ -9931,30 +9804,253 @@ export default function DashboardPage() {
                   );
                 })()}
 
-                {/* Logout — email text removed from the bar; identity is
-                    visible inside the Settings panel which is one tap away. */}
-                {userEmail && (
+                {/* Language picker */}
+                <div style={{ position: "relative", flexShrink: 0 }}>
                   <button
-                    onClick={handleLogout}
-                    title={`Sign out (${userEmail})`}
+                    onClick={() => setLangOpen((v) => !v)}
                     className="gbf-btn gbf-icon-btn"
+                    title="Language"
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      width: 36,
-                      height: 36,
+                      gap: 5,
+                      padding: "0 10px",
+                      height: 40,
                       borderRadius: 10,
                       border: `1px solid ${C.border}`,
-                      background: C.surfaceAlt,
-                      color: C.textMuted,
+                      background: langOpen ? C.accentLight : C.surfaceAlt,
                       cursor: "pointer",
-                      flexShrink: 0,
+                      fontFamily: "inherit",
+                      color: C.text,
                       transition: "all .15s",
                     }}
                   >
-                    <LogOut size={15} strokeWidth={2} />
+                    <span style={{ fontSize: 16 }}>{LANG_META[langSettings.lang].flag}</span>
+                    <span
+                      className="gbf-lang-label"
+                      style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", color: C.textMuted }}
+                    >
+                      {langSettings.lang.toUpperCase()}
+                    </span>
                   </button>
+                  {langOpen && (
+                    <>
+                      {createPortal(
+                        <div onClick={() => setLangOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 25 }} />,
+                        document.body,
+                      )}
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "calc(100% + 8px)",
+                          right: isRTL ? "auto" : 0,
+                          left: isRTL ? 0 : "auto",
+                          zIndex: 201,
+                          background: C.surface,
+                          border: `1px solid ${C.border}`,
+                          borderRadius: 14,
+                          boxShadow: "0 8px 32px rgba(0,0,0,.18)",
+                          padding: 8,
+                          minWidth: 190,
+                        }}
+                      >
+                        {(Object.entries(LANG_META) as [LanguageKey, (typeof LANG_META)[LanguageKey]][]).map(
+                          ([key, meta]) => {
+                            const active = langSettings.lang === key;
+                            return (
+                              <button
+                                key={key}
+                                onClick={() => {
+                                  updateLangSettings({ lang: key });
+                                  setLangOpen(false);
+                                }}
+                                className="gbf-btn gbf-menu-item"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 10,
+                                  width: "100%",
+                                  padding: "9px 12px",
+                                  borderRadius: 10,
+                                  border: "none",
+                                  background: active ? C.accentLight : "transparent",
+                                  cursor: "pointer",
+                                  fontFamily: "inherit",
+                                  textAlign: "left",
+                                  transition: "background .1s",
+                                }}
+                              >
+                                <span style={{ fontSize: 18, flexShrink: 0 }}>{meta.flag}</span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div
+                                    style={{
+                                      fontSize: 13,
+                                      fontWeight: active ? 700 : 500,
+                                      color: active ? C.accent : C.text,
+                                    }}
+                                  >
+                                    {meta.native}
+                                  </div>
+                                </div>
+                                {active && (
+                                  <Check size={14} style={{ color: C.accent, flexShrink: 0 }} strokeWidth={2.5} />
+                                )}
+                              </button>
+                            );
+                          },
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* User menu — identity · theme toggle · sign out.
+                    Replaces the standalone mode toggle + logout button: both
+                    are low-frequency actions that don't need top-level real
+                    estate, and the email has nowhere else to surface in the
+                    header (we removed the text span). */}
+                {userEmail && (
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <button
+                      onClick={() => setUserOpen((v) => !v)}
+                      title={userEmail}
+                      className="gbf-btn gbf-icon-btn"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        border: `1px solid ${userOpen ? C.accent : C.border}`,
+                        background: userOpen ? C.accentLight : C.surfaceAlt,
+                        color: userOpen ? C.accent : C.textMuted,
+                        cursor: "pointer",
+                        flexShrink: 0,
+                        transition: "all .15s",
+                        fontFamily: "inherit",
+                        fontWeight: 700,
+                        fontSize: 12,
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      {userEmail.slice(0, 2).toUpperCase()}
+                    </button>
+                    {userOpen && (
+                      <>
+                        {createPortal(
+                          <div
+                            onClick={() => setUserOpen(false)}
+                            style={{ position: "fixed", inset: 0, zIndex: 25 }}
+                          />,
+                          document.body,
+                        )}
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "calc(100% + 8px)",
+                            right: isRTL ? "auto" : 0,
+                            left: isRTL ? 0 : "auto",
+                            zIndex: 201,
+                            background: C.surface,
+                            border: `1px solid ${C.border}`,
+                            borderRadius: 14,
+                            boxShadow: "0 8px 32px rgba(0,0,0,.18)",
+                            padding: 8,
+                            minWidth: 240,
+                          }}
+                        >
+                          {/* Identity row */}
+                          <div
+                            style={{
+                              padding: "8px 12px 10px",
+                              borderBottom: `1px solid ${C.borderFaint}`,
+                              marginBottom: 4,
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: 10,
+                                fontWeight: 700,
+                                color: C.textFaint,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.08em",
+                                marginBottom: 2,
+                              }}
+                            >
+                              Signed in as
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 13,
+                                fontWeight: 600,
+                                color: C.text,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {userEmail}
+                            </div>
+                          </div>
+                          {/* Theme toggle row */}
+                          <button
+                            onClick={() => {
+                              updateSettings({ mode: resolveMode(settings.mode) === "dark" ? "light" : "dark" });
+                              setUserOpen(false);
+                            }}
+                            className="gbf-btn gbf-menu-item"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              width: "100%",
+                              padding: "9px 12px",
+                              borderRadius: 10,
+                              border: "none",
+                              background: "transparent",
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                              textAlign: "left",
+                            }}
+                          >
+                            {resolveMode(settings.mode) === "dark" ? (
+                              <Sun size={14} style={{ color: C.textMuted, flexShrink: 0 }} strokeWidth={2} />
+                            ) : (
+                              <Moon size={14} style={{ color: C.textMuted, flexShrink: 0 }} strokeWidth={2} />
+                            )}
+                            <span style={{ fontSize: 13, fontWeight: 500, color: C.text }}>
+                              {resolveMode(settings.mode) === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                            </span>
+                          </button>
+                          {/* Sign out row */}
+                          <button
+                            onClick={() => {
+                              setUserOpen(false);
+                              handleLogout();
+                            }}
+                            className="gbf-btn gbf-menu-item"
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 10,
+                              width: "100%",
+                              padding: "9px 12px",
+                              borderRadius: 10,
+                              border: "none",
+                              background: "transparent",
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                              textAlign: "left",
+                            }}
+                          >
+                            <LogOut size={14} style={{ color: C.textMuted, flexShrink: 0 }} strokeWidth={2} />
+                            <span style={{ fontSize: 13, fontWeight: 500, color: C.text }}>Sign out</span>
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
 
                 <button
