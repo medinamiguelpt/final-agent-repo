@@ -8793,10 +8793,17 @@ export default function DashboardPage() {
 
     const { data: bizData } = await supabase.from("businesses").select("id, name, plan").in("id", ids);
 
-    const list = (bizData ?? []) as { id: string; name: string; plan?: string }[];
+    // The webhook (api/elevenlabs/webhook) writes orphan calls under a
+    // placeholder business id when it can't resolve the agent. That row exists
+    // in the table but isn't a real user-facing shop — filter it out so it
+    // never becomes currentBiz (zod rejects it as "Invalid UUID" anyway).
+    const PLACEHOLDER_BIZ_ID = "00000000-0000-0000-0000-000000000001";
+    const list = ((bizData ?? []) as { id: string; name: string; plan?: string }[]).filter(
+      (b) => b.id !== PLACEHOLDER_BIZ_ID,
+    );
     if (list.length > 0) {
       setBusinesses(list);
-      setCurrentBiz((prev) => prev ?? list[0]);
+      setCurrentBiz((prev) => (prev && prev.id !== PLACEHOLDER_BIZ_ID ? prev : list[0]));
     }
   }, []);
 
