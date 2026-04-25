@@ -2073,6 +2073,20 @@ function SettingsPanel({
     };
   }, []);
 
+  // When opened directly on the Account section (e.g. via the credits
+  // popover's "Upgrade" button), scroll the Subscription heading into view
+  // so the user lands on the plan picker rather than the top of Account.
+  useEffect(() => {
+    if (initialSection !== "account") return;
+    // Two rAFs: one for the section to mount, one for layout to settle.
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById("settings-subscription")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [initialSection]);
+
   const handleNavClick = (id: SettingsSection) => {
     setActiveSection(id);
     setMobContent(true);
@@ -2087,8 +2101,11 @@ function SettingsPanel({
   };
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const section = (title: string, desc?: string) => (
-    <div style={{ marginBottom: 18, marginTop: 28, paddingBottom: 10, borderBottom: `1px solid ${C.borderFaint}` }}>
+  const section = (title: string, desc?: string, id?: string) => (
+    <div
+      id={id}
+      style={{ marginBottom: 18, marginTop: 28, paddingBottom: 10, borderBottom: `1px solid ${C.borderFaint}` }}
+    >
       <div
         style={{
           fontSize: 15,
@@ -3062,7 +3079,7 @@ function SettingsPanel({
         </button>
       </div>
 
-      {section("Subscription")}
+      {section("Subscription", undefined, "settings-subscription")}
 
       {/* Demo (current) card */}
       <div
