@@ -60,6 +60,15 @@ export async function POST(req: Request) {
     "-" +
     Date.now().toString(36);
 
+  // Barbers arrive as an array of names — persist as a comma-separated string
+  // (matches the `barbers` text column the dashboard reads from).
+  const barbersList = Array.isArray(body.barbers)
+    ? body.barbers
+        .map((b: unknown) => (typeof b === "string" ? b.trim() : ""))
+        .filter(Boolean)
+        .join(", ")
+    : null;
+
   // ── Insert business ─────────────────────────────────────────────────────────
   const { data: biz, error: bizErr } = await db
     .from("businesses")
@@ -74,6 +83,7 @@ export async function POST(req: Request) {
       website: body.website ?? null,
       description: body.description ?? null,
       hours: body.hours ? JSON.stringify(body.hours) : null,
+      barbers: barbersList,
       timezone,
       owner_id: user.id,
       approved: true,

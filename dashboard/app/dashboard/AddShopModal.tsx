@@ -464,6 +464,14 @@ export default function AddShopModal({ open, onClose, onCreated, C }: Props) {
       }
       const token = session.access_token;
 
+      const finalBarberData: BarberDraft[] = barbers
+        .filter((b) => b.name.trim())
+        .map(({ name, services }) => ({
+          name: name.trim(),
+          services: services.map(({ name: n, price }) => ({ name: n, price })),
+        }));
+      const finalBarbers = finalBarberData.map((b) => b.name);
+
       const res = await fetch("/api/businesses", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -479,6 +487,7 @@ export default function AddShopModal({ open, onClose, onCreated, C }: Props) {
           hours,
           timezone: form.timezone || "Europe/Athens",
           plan: "demo",
+          barbers: finalBarbers.length ? finalBarbers : undefined,
           // Agent links
           agent_id: SHARED_AGENT_ID,
           agent_name: SHARED_AGENT_NAME,
@@ -500,14 +509,6 @@ export default function AddShopModal({ open, onClose, onCreated, C }: Props) {
         setError("Business creation failed unexpectedly.");
         return;
       }
-
-      const finalBarberData: BarberDraft[] = barbers
-        .filter((b) => b.name.trim())
-        .map(({ name, services }) => ({
-          name: name.trim(),
-          services: services.map(({ name: n, price }) => ({ name: n, price })),
-        }));
-      const finalBarbers = finalBarberData.map((b) => b.name);
 
       // Demo mode: generate bookings via server-side route
       if (mode === "demo") {

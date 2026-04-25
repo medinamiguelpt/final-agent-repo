@@ -9099,10 +9099,11 @@ export default function DashboardPage() {
               if (prev.some((b) => b.id === newBiz.id)) return prev;
               return [...prev, newBiz];
             });
+            // Barbers are persisted server-side at insert time. Switching
+            // currentBiz triggers the load-profile effect, which reads the
+            // row back from Supabase. No client-side write needed (and would
+            // race against the wrong currentBiz closure).
             setCurrentBiz(newBiz);
-            if (biz.barbers && biz.barbers.length > 0) {
-              updateProfile({ barbers: biz.barbers.join(", ") });
-            }
             loadBusinesses();
           }}
           C={C}
