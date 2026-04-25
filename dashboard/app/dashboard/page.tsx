@@ -9325,7 +9325,10 @@ export default function DashboardPage() {
             >
               {/* Logo + shop switcher */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flexShrink: 1 }}>
-                <div
+                <button
+                  type="button"
+                  onClick={() => setTab("hub")}
+                  aria-label="Go to Hub"
                   style={{
                     width: 36,
                     height: 36,
@@ -9336,6 +9339,10 @@ export default function DashboardPage() {
                     justifyContent: "center",
                     flexShrink: 0,
                     boxShadow: `0 0 0 1px ${C.border}`,
+                    padding: 0,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
                   }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -9346,7 +9353,7 @@ export default function DashboardPage() {
                     height={36}
                     style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                   />
-                </div>
+                </button>
                 {businesses.length >= 1 ? (
                   <div style={{ position: "relative", minWidth: 0 }}>
                     <button
