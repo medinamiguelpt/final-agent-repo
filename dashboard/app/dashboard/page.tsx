@@ -2031,6 +2031,7 @@ function SettingsPanel({
   currentBiz,
   onSwitchBiz,
   onDeleteBiz,
+  initialSection,
 }: {
   settings: Settings;
   onUpdate: (p: Partial<Settings>) => void;
@@ -2046,10 +2047,14 @@ function SettingsPanel({
   currentBiz?: { id: string; name: string; plan?: string } | null;
   onSwitchBiz?: (biz: { id: string; name: string; plan?: string }) => void;
   onDeleteBiz?: (id: string) => Promise<void>;
+  initialSection?: SettingsSection;
 }) {
   const t = useT();
-  const [activeSection, setActiveSection] = useState<SettingsSection>("profile");
-  const [mobContent, setMobContent] = useState(false); // mobile: false=list, true=content
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection ?? "profile");
+  // Skip the mobile nav list when a specific section was requested by the
+  // caller (e.g. clicking "Upgrade" in the credits popover should land on
+  // Account, not the settings index).
+  const [mobContent, setMobContent] = useState(!!initialSection);
   const [profileDraft, setProfileDraft] = useState<BusinessProfile>(profile);
   const [profileSaved, setProfileSaved] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -8595,6 +8600,7 @@ export default function DashboardPage() {
   const [agent, setAgent] = useState<AgentData | null>(null);
   const [loading, setLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsInitialSection, setSettingsInitialSection] = useState<SettingsSection | undefined>(undefined);
   const [C, setC] = useState<Colors>(PALETTES.cream.light);
   const [tab, setTab] = useState<"hub" | "ledger" | "analytics">("hub");
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
@@ -9282,7 +9288,10 @@ export default function DashboardPage() {
             onUpdate={updateSettings}
             profile={profile}
             onProfileUpdate={updateProfile}
-            onClose={() => setSettingsOpen(false)}
+            onClose={() => {
+              setSettingsOpen(false);
+              setSettingsInitialSection(undefined);
+            }}
             onLogout={handleLogout}
             C={C}
             langSettings={langSettings}
@@ -9293,8 +9302,10 @@ export default function DashboardPage() {
             onSwitchBiz={(biz) => {
               setCurrentBiz(biz);
               setSettingsOpen(false);
+              setSettingsInitialSection(undefined);
             }}
             onDeleteBiz={handleDeleteBiz}
+            initialSection={settingsInitialSection}
           />
         )}
 
@@ -9827,6 +9838,11 @@ export default function DashboardPage() {
                               </div>
                             </div>
                             <button
+                              onClick={() => {
+                                setCreditsOpen(false);
+                                setSettingsInitialSection("account");
+                                setSettingsOpen(true);
+                              }}
                               className="gbf-btn"
                               style={{
                                 width: "100%",
