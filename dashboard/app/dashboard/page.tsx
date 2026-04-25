@@ -4376,6 +4376,16 @@ function WalkInModal({
       setErr("Client name is required.");
       return;
     }
+    // Defensive UUID guard — the API uses zod v4's strict .uuid() which
+    // rejects the nil UUID and other non-versioned shapes. Catch it here
+    // with a clear message instead of letting the POST 400 with a generic
+    // "Validation failed".
+    const v4Like = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!businessId || !v4Like.test(businessId)) {
+      console.warn("[WalkInModal] refusing to submit — bad business_id:", JSON.stringify(businessId));
+      setErr("No barbershop selected. Pick a shop from the switcher and try again.");
+      return;
+    }
     setSaving(true);
     setErr("");
     try {
