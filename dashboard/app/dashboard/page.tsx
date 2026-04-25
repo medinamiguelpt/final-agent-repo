@@ -4413,7 +4413,17 @@ function WalkInModal({
       });
       const data = await res.json();
       if (!res.ok) {
-        setErr(data.error ?? "Failed to save");
+        // Surface zod issues so "Validation failed" isn't a black box —
+        // the API returns `issues: [{ path, message }]` for 400s.
+        const issues = Array.isArray(data.issues) ? data.issues : [];
+        const detail = issues
+          .map((i: { path?: unknown; message?: string }) => {
+            const p = Array.isArray(i.path) ? i.path.join(".") : "";
+            return p ? `${p}: ${i.message}` : i.message;
+          })
+          .filter(Boolean)
+          .join("; ");
+        setErr(detail ? `${data.error ?? "Failed to save"} — ${detail}` : (data.error ?? "Failed to save"));
         setSaving(false);
         return;
       }
@@ -9279,11 +9289,11 @@ export default function DashboardPage() {
           />
         )}
 
-        {walkinOpen && (
+        {walkinOpen && (currentBiz?.id ?? businesses[0]?.id) && (
           <WalkInModal
             C={C}
             barbers={parseBarberNames(profile.barbers)}
-            businessId={currentBiz?.id ?? businesses[0]?.id ?? "00000000-0000-0000-0000-000000000001"}
+            businessId={(currentBiz?.id ?? businesses[0]?.id)!}
             onClose={() => setWalkinOpen(false)}
             onSaved={() => {
               fetchDashboardData();
@@ -9639,32 +9649,41 @@ export default function DashboardPage() {
                 >
                   ← Website
                 </a>
-                {/* Walk-in quick entry — the primary action, leads the cluster */}
-                <button
-                  onClick={() => setWalkinOpen(true)}
-                  title="Register walk-in"
-                  className="gbf-btn gbf-action-btn"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    height: 40,
-                    padding: "0 14px",
-                    borderRadius: 10,
-                    border: `1px solid ${C.accent}44`,
-                    background: C.accentLight,
-                    color: C.accent,
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    fontWeight: 700,
-                    fontSize: 13,
-                    flexShrink: 0,
-                    transition: "all .15s",
-                  }}
-                >
-                  <Plus size={15} strokeWidth={2.5} />
-                  <span className="gbf-header-date">Walk-in</span>
-                </button>
+                {/* Walk-in quick entry — the primary action, leads the cluster.
+                    Disabled until we have a real business id, otherwise the
+                    submit hits zod with a placeholder UUID and 400s. */}
+                {(() => {
+                  const hasBiz = !!(currentBiz?.id ?? businesses[0]?.id);
+                  return (
+                    <button
+                      onClick={() => hasBiz && setWalkinOpen(true)}
+                      disabled={!hasBiz}
+                      title={hasBiz ? "Register walk-in" : "Add a barbershop first"}
+                      className="gbf-btn gbf-action-btn"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        height: 40,
+                        padding: "0 14px",
+                        borderRadius: 10,
+                        border: `1px solid ${C.accent}44`,
+                        background: C.accentLight,
+                        color: C.accent,
+                        cursor: hasBiz ? "pointer" : "not-allowed",
+                        opacity: hasBiz ? 1 : 0.5,
+                        fontFamily: "inherit",
+                        fontWeight: 700,
+                        fontSize: 13,
+                        flexShrink: 0,
+                        transition: "all .15s",
+                      }}
+                    >
+                      <Plus size={15} strokeWidth={2.5} />
+                      <span className="gbf-header-date">Walk-in</span>
+                    </button>
+                  );
+                })()}
 
                 {/* Credits / balance */}
                 {(() => {
