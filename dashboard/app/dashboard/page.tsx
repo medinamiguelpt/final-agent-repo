@@ -4376,12 +4376,11 @@ function WalkInModal({
       setErr("Client name is required.");
       return;
     }
-    // Defensive UUID guard — the API uses zod v4's strict .uuid() which
-    // rejects the nil UUID and other non-versioned shapes. Catch it here
-    // with a clear message instead of letting the POST 400 with a generic
-    // "Validation failed".
-    const v4Like = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!businessId || !v4Like.test(businessId)) {
+    // Loose UUID guard — match what Postgres accepts (any 32-hex-digit
+    // UUID, including the nil/all-zeros variant we use as a webhook
+    // fallback). The API enforces the same regex.
+    const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!businessId || !uuidLike.test(businessId)) {
       console.warn("[WalkInModal] refusing to submit — bad business_id:", JSON.stringify(businessId));
       setErr("No barbershop selected. Pick a shop from the switcher and try again.");
       return;
@@ -8793,17 +8792,10 @@ export default function DashboardPage() {
 
     const { data: bizData } = await supabase.from("businesses").select("id, name, plan").in("id", ids);
 
-    // The webhook (api/elevenlabs/webhook) writes orphan calls under a
-    // placeholder business id when it can't resolve the agent. That row exists
-    // in the table but isn't a real user-facing shop — filter it out so it
-    // never becomes currentBiz (zod rejects it as "Invalid UUID" anyway).
-    const PLACEHOLDER_BIZ_ID = "00000000-0000-0000-0000-000000000001";
-    const list = ((bizData ?? []) as { id: string; name: string; plan?: string }[]).filter(
-      (b) => b.id !== PLACEHOLDER_BIZ_ID,
-    );
+    const list = (bizData ?? []) as { id: string; name: string; plan?: string }[];
     if (list.length > 0) {
       setBusinesses(list);
-      setCurrentBiz((prev) => (prev && prev.id !== PLACEHOLDER_BIZ_ID ? prev : list[0]));
+      setCurrentBiz((prev) => prev ?? list[0]);
     }
   }, []);
 

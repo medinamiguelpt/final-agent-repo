@@ -25,7 +25,14 @@ import { z, type ZodType } from "zod";
 // Shared primitives
 // ───────────────────────────────────────────────────────────────────────────────
 
-export const UuidSchema = z.string().uuid();
+// Accepts any RFC 4122–shaped UUID, including the nil UUID and other
+// non-versioned variants. Zod v4's `.uuid()` is stricter than Postgres'
+// `uuid` type — it demands a v1–v8 version digit — and rejects values
+// like the webhook fallback "00000000-0000-0000-0000-000000000001"
+// even though Postgres stores it fine. Match the database's tolerance.
+export const UuidSchema = z
+  .string()
+  .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid UUID");
 
 /** DD/MM/YYYY → normalised to YYYY-MM-DD for Postgres `date` columns. */
 export const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD");
