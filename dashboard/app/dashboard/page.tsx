@@ -604,8 +604,10 @@ function profileFromBusinessRow(row: BusinessRow): BusinessProfile {
     country: row.country ?? DEFAULT_PROFILE.country,
     website: row.website ?? DEFAULT_PROFILE.website,
     hours: formatHours(row.hours) || DEFAULT_PROFILE.hours,
-    barbers: row.barbers ?? DEFAULT_PROFILE.barbers,
     ...stored,
+    // Demo: force the same team across every shop, regardless of what's in
+    // the DB. Keep this last so it overrides any stored value.
+    barbers: DEFAULT_PROFILE.barbers,
   };
 }
 function loadLangSettings(): LangSettings {
